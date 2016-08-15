@@ -24,6 +24,7 @@ const static float2 neg_max_velocity = { -20.0f, -20.0f };
 void Integrate1(uint3 id : SV_DispatchThreadID)
 {
 	uint i = id.x;
+	forces[i] = 0;
 	if (properties[i].alive) {
 		velocities[i] += (0.5 * timeStep * forces[i]);
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);

@@ -4,17 +4,16 @@ using System.Collections.Generic;
 
 public class ParticleManager : MonoBehaviour {
 
-    public Vector2 boundariesLow = new Vector2(-10,-10);
-    public Vector2 boundariesHigh = new Vector2(10, 10);
     public float timeStep = 0.01f;
     public float particleDiameter = 1.0f;
 
     public List<Compute> computes;
 
+    private GameObject world;
     public ComputeShader integrateShader;
     public Material particleMaterial;
 
-    private int _maxParticleNumber = 100000;
+    private int _maxParticleNumber = 2500;
     public int maxParticleNumber
     {
         get { return _maxParticleNumber; }
@@ -35,14 +34,39 @@ public class ParticleManager : MonoBehaviour {
     //handles for calling kernels
     private int _integrate1Handle;
     private int _integrate2Handle;
- 
+
+    private Vector2 boundariesLow;
+    private Vector2 boundariesHigh;
 
     // Use this for initialization
+    private void updateBoundary()
+    {
+        Vector3 bounds_min = world.GetComponent<Collider>().bounds.min;
+        Vector3 bounds_max = world.GetComponent<Collider>().bounds.max;
+        boundariesLow = new Vector2(bounds_min.x, bounds_min.y);
+        boundariesHigh = new Vector2(bounds_max.x, bounds_max.y);
+
+        integrateShader.SetFloats("boundaryLow", new float[] { boundariesLow.x, boundariesLow.y });
+        integrateShader.SetFloats("boundaryHigh", new float[] { boundariesHigh.x, boundariesHigh.y });
+    }
+
+    public IEnumerator slowUpdates()
+    {
+        for (;;)
+        {
+            updateBoundary();
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
     void Start() {
 
+        if (world == null)
+            world = GameObject.Find("World");
+
         computes = new List<Compute>();
-        computes.Add((Compute) GameObject.Find("ParticleManager/ComputeDispersion").GetComponent( typeof(Compute) ));
-        computes.Add((Compute)GameObject.Find("ParticleManager/ComputeSpawn").GetComponent(typeof(Compute)));
+        foreach (Compute c in this.GetComponentsInChildren<Compute>())
+            computes.Add(c);
 
         //set handles
         _integrate1Handle = integrateShader.FindKernel("Integrate1");
@@ -99,8 +123,6 @@ public class ParticleManager : MonoBehaviour {
 
         //set constants
         integrateShader.SetFloat("timeStep", timeStep);
-        integrateShader.SetFloats("boundaryLow", new float[] { boundariesLow.x, boundariesLow.y });
-        integrateShader.SetFloats("boundaryHigh", new float[] { boundariesHigh.x, boundariesHigh.y });
 
         //set-up our geometry for drawing.
         _quadPoints = new ComputeBuffer(6, ShaderConstants.QUAD_STRIDE);
@@ -121,6 +143,13 @@ public class ParticleManager : MonoBehaviour {
 
         foreach (Compute c in computes)
             c.setupShader(this);
+
+        StartCoroutine(slowUpdates());
+    }
+
+    public void addAttractor(Vector2 location)
+    {
+
     }
 
     private void OnDestroy()

@@ -9,15 +9,15 @@ public class ComputeDispersion : Compute {
 
     public override void setupShader(ParticleManager pm)
     {
+        _forceHandle = dispersionShader.FindKernel("ApplyForces");
 
         dispersionShader.SetBuffer(_forceHandle, "positions", pm._positions);
         dispersionShader.SetBuffer(_forceHandle, "forces", pm._forces);
         dispersionShader.SetBuffer(_forceHandle, "properties", pm._properties);
 
-        dispersionShader.SetFloat("epsilon", 10.0f);
-        dispersionShader.SetFloat("sigma", 1.0f);
+        dispersionShader.SetFloat("epsilon", 50.0f);
+        dispersionShader.SetFloat("sigma", 0.5f);
 
-        _forceHandle = dispersionShader.FindKernel("ApplyForces");
     }
 
     public override void updateForces(int nx)

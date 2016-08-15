@@ -9,6 +9,7 @@ public static class ShaderConstants
     public const int UINT_STRIDE = 4;
     public const int SOURCE_STRIDE = 2 * 3 * FLOAT_STRIDE + FLOAT_STRIDE + 2 * UINT_STRIDE;
     public const int PROP_STRIDE = UINT_STRIDE + FLOAT_STRIDE;
+    public const int ATTRACTOR_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
     public const int SPAWN_BLOCKSIZE_X = 4;
     public const int SPAWN_BLOCKSIZE_Y = 128;
     public const int PARTICLE_BLOCK_SIZE = 256;
@@ -29,5 +30,17 @@ public static class ShaderConstants
     {
         public uint alive;
         public float life;
+    }
+
+    public struct Attractor
+    {
+        public Vector2 position;
+        public float magnitude;
+
+        public Attractor(Vector2 position, float magnitude) : this()
+        {
+            this.position = position;
+            this.magnitude = magnitude;
+        }
     }
 }

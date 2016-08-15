@@ -28,7 +28,6 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 	deno = 1.0 / s2;
 	
 	if (properties[i].alive  && properties[i].life > 0) {
-		forces[i] = 0;
 
 		for (uint j = i - 1; j < N; j++) {
 			r = positions[j] - positions[i];

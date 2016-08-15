@@ -1,0 +1,30 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+
+#include "DataTypes.cginc"
+
+#define BLOCKSIZE	256
+
+RWStructuredBuffer<Attractor> attractors;
+RWStructuredBuffer<float2> positions;
+RWStructuredBuffer<float2> forces;
+RWStructuredBuffer<ParticleProperties> properties;
+
+
+#pragma kernel ApplyForces
+[numthreads(BLOCKSIZE, 1, 1)]
+void ApplyForces(uint3 id : SV_DispatchThreadID)
+{
+	uint i = id.x;
+	uint N, _;
+	float2 r;
+	float r2;
+	attractors.GetDimensions(N, _);
+
+	if (properties[i].alive) {
+		for (uint j = 0; j < N; j++) {
+			r = attractors[j].position - positions[i];
+			r2 = dot(r, r);
+			forces[i] += 1.0 / r2 * attractors[j].magnitude * r;
+		}
+	}
+}

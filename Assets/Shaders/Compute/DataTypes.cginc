@@ -15,3 +15,8 @@ struct Source {
 	uint spawn_period;
 	uint spawn_amount;
 };
+
+struct Attractor {
+	float2 position;
+	float magnitude;
+};

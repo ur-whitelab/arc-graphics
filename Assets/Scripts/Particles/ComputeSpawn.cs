@@ -33,7 +33,7 @@ public class ComputeSpawn : Compute {
         sources[0].velocity_2.x = 1f;
         sources[0].velocity_1.y = -2f;
         sources[0].velocity_2.y = -2f;
-        sources[0].life_start = -4f;
+        sources[0].life_start = -5f;
         _sources.SetData(sources);
 
         uint[] izeros = new uint[_maxSourceNumber];
