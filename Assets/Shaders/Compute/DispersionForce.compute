@@ -1,0 +1,46 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+
+#include "DataTypes.cginc"
+
+#define BLOCKSIZE	256
+
+RWStructuredBuffer<float2> positions;
+RWStructuredBuffer<float2> forces;
+RWStructuredBuffer<ParticleProperties> properties;
+
+float sigma;
+float epsilon;
+const static float PI = 3.14159254f;
+
+
+#pragma kernel ApplyForces
+[numthreads(BLOCKSIZE,1,1)]
+void ApplyForces(uint3 id : SV_DispatchThreadID)
+{
+	uint i = id.x;
+	uint N, _;
+	positions.GetDimensions(N, _);
+	float r2, s2, deno;
+	float2 r;
+
+	
+	s2 = sigma * sigma;
+	deno = 1.0 / s2;
+	
+	if (properties[i].alive  && properties[i].life > 0) {
+		forces[i] = 0;
+
+		for (uint j = i - 1; j < N; j++) {
+			r = positions[j] - positions[i];
+			r2 = dot(r, r);
+			if(r2 < s2)
+				forces[i] -= epsilon * cos(PI / 2 * r2 * deno) * r * properties[j].alive;
+		}
+		for (j = i + 1; j < N; j++) {
+			r = positions[j] - positions[i];
+			r2 = dot(r, r);
+			if (r2 < s2)
+				forces[i] -= epsilon * cos(PI / 2 * r2 * deno) * r * properties[j].alive;
+		}
+	}
+}
