@@ -1,0 +1,82 @@
+﻿
+#include "DataTypes.cginc"
+
+#pragma kernel Walls
+
+RWStructuredBuffer<float2> positions;
+RWStructuredBuffer<float2> velocities;
+StructuredBuffer<float2> lastPositions;
+StructuredBuffer<Wall> walls;
+RWStructuredBuffer<ParticleProperties> properties;
+
+float timeStep;
+
+[numthreads(PARTICLE_BLOCKSIZE, 1, 1)]
+void Walls (uint3 id : SV_DispatchThreadID)
+{
+	uint i = id.x;
+
+	if (!properties[i].alive)
+		return;
+
+	uint N, _;
+	float t;
+	float2 wvector1, wvector2, pvector1, pvector2;
+	int vsign1, vsign2;
+
+	walls.GetDimensions(N, _);
+
+	for (uint j = 1; j < N; j++) {
+		//a norm of 0 indicates it is a separation point
+		if (!any(walls[j].norm))
+			continue;
+
+		//find out if we COULD have crossed line segment based on last position
+		pvector1 = lastPositions[i] - walls[j - 1].position;
+		pvector2 = lastPositions[i] - walls[j].position;
+		wvector2 = walls[j].position - walls[j - 1].position;
+		t = dot(pvector1, pvector2);
+
+		if (t > 0 || t > dot(wvector2, wvector2))
+			continue;	
+
+		properties[i].color = float4(1, 0, 1, 1);
+
+
+		//find out which side of the line we're on to determine if we crossed
+
+		//+1, -1 indicates which side of the line we're on
+		//http://stackoverflow.com/questions/1560492/how-to-tell-whether-a-point-is-to-the-right-or-left-side-of-a-line
+		pvector1 = positions[i] - walls[j].position;
+		pvector2 = lastPositions[i] - walls[j].position;
+
+		vsign1 = sign(wvector2[0] * pvector1[1] - wvector2[1] * pvector1[0]);
+		vsign2 = sign(wvector2[0] * pvector2[1] - wvector2[1] * pvector2[0]);
+
+		//check if we crossed
+		if (vsign1 != vsign2) {
+			properties[i].color = float4(1, 0, 0, 1);
+			//we have to rewind the particle to be on the other side.
+			// @ intersection wvector x (pvector + delta t * velocity) == 0
+			//so delta t = w x p / p x v
+			//This could be undefined when a particle has a velocity parallel to the line and crossed it. That
+			//means in the next step it would be moving inside the line-segment. I'm Ok with this
+			//being undefined because it will be cleaned up in the boundary check in the integrate step.
+			//Just have to make sure that this precedes the integrate.
+			t = (wvector2[0] * pvector2[1] - wvector2[1] * pvector2[0]) / (wvector2[1] * velocities[i][0] - wvector2[0] * velocities[i][1]);
+
+			//now rewind. t is negative
+			positions[i] += velocities[i] * -t;
+
+			//now flip
+			//velocities[i] -= 2 * dot(velocities[i], walls[j].norm) * walls[j].norm;
+			velocities[i] = reflect(velocities[i], walls[j].norm);
+
+			//now integrate
+			//note that velocities have already been integrated from last step, so we don't need to do forces/velocities
+			positions[i] += (timeStep - t) * velocities[i];
+		}
+
+	}
+
+}

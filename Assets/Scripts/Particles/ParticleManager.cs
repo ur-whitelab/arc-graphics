@@ -4,17 +4,17 @@ using System.Collections.Generic;
 
 public class ParticleManager : MonoBehaviour {
 
-    public float timeStep = 0.01f;
-    public float particleDiameter = 1.0f;
+    public float TimeStep = 0.01f;
+    private float ParticleDiameter = 1.0f;
 
-    public List<Compute> computes;
+    private List<Compute> computes;
 
     private World world;
     public ComputeShader integrateShader;
     public Material particleMaterial;
 
     private int _maxParticleNumber = 1000000;
-    public int maxParticleNumber
+    public int MaxParticleNumber
     {
         get { return _maxParticleNumber; }
         set {
@@ -23,17 +23,18 @@ public class ParticleManager : MonoBehaviour {
     }
 
     //compute buffers for particle information
-    public ComputeBuffer _positions;
-    public ComputeBuffer _velocities;
-    public ComputeBuffer _forces;
-    public ComputeBuffer _properties;
+    public ComputeBuffer positions;
+    public ComputeBuffer lastPositions;
+    public ComputeBuffer velocities;
+    public ComputeBuffer forces;
+    public ComputeBuffer properties;
 
     //buffer that contains geometry
-    private ComputeBuffer _quadPoints;
+    private ComputeBuffer quadPoints;
 
     //handles for calling kernels
-    private int _integrate1Handle;
-    private int _integrate2Handle;
+    private int integrate1Handle;
+    private int integrate2Handle;
 
     // Use this for initialization
     private void updateBoundary()
@@ -62,32 +63,34 @@ public class ParticleManager : MonoBehaviour {
             computes.Add(c);
 
         //set handles
-        _integrate1Handle = integrateShader.FindKernel("Integrate1");
-        _integrate2Handle = integrateShader.FindKernel("Integrate2");
+        integrate1Handle = integrateShader.FindKernel("Integrate1");
+        integrate2Handle = integrateShader.FindKernel("Integrate2");
 
 
         //cerate empty buffers
-        _positions = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
-        _velocities = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
-        _forces = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
-        _properties = new ComputeBuffer(_maxParticleNumber, ShaderConstants.PROP_STRIDE);
+        positions = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
+        lastPositions = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
+        velocities = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
+        forces = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
+        properties = new ComputeBuffer(_maxParticleNumber, ShaderConstants.PROP_STRIDE);
 
 
         //initialize the per-particle data
         Vector2[] zeros = new Vector2[_maxParticleNumber]; //create a bunch of zero vectors
-        _positions.SetData(zeros);
-        _velocities.SetData(zeros);
-        _forces.SetData(zeros);
+        positions.SetData(zeros);
+        lastPositions.SetData(zeros);
+        velocities.SetData(zeros);
+        forces.SetData(zeros);
 
         //make positions interesting
         for (int i = 0; i < _maxParticleNumber; i++)
             zeros[i].Set(Random.Range(-10f, 10f), Random.Range(-10f, 10f));
-        _positions.SetData(zeros);
+        positions.SetData(zeros);
 
         //make velocities interesting
         for (int i = 0; i < _maxParticleNumber; i++)
             zeros[i].Set(Random.Range(-1f,1f), Random.Range(-1f,1f));
-        _velocities.SetData(zeros);
+        velocities.SetData(zeros);
 
         //make forces interesting
         
@@ -98,41 +101,46 @@ public class ParticleManager : MonoBehaviour {
 
         ShaderConstants.Prop[] props = new ShaderConstants.Prop[_maxParticleNumber];
         for (int i = 0; i < _maxParticleNumber; i++)
-           props[i].alive = 0;
-        _properties.SetData(props);
+        {
+            props[i].alive = 0;
+            props[i].color = new Vector4(1f, 1f, 1f, 1f);
+        }
+           
+        properties.SetData(props);
 
        
 
         //set buffers
-        integrateShader.SetBuffer(_integrate1Handle, "positions", _positions);
-        integrateShader.SetBuffer(_integrate1Handle, "velocities", _velocities);
-        integrateShader.SetBuffer(_integrate1Handle, "forces", _forces);
-        integrateShader.SetBuffer(_integrate1Handle, "properties", _properties);
+        integrateShader.SetBuffer(integrate1Handle, "positions", positions);
+        integrateShader.SetBuffer(integrate1Handle, "lastPositions", lastPositions);
+        integrateShader.SetBuffer(integrate1Handle, "velocities", velocities);
+        integrateShader.SetBuffer(integrate1Handle, "forces", forces);
+        integrateShader.SetBuffer(integrate1Handle, "properties", properties);
 
-        integrateShader.SetBuffer(_integrate2Handle, "properties", _properties);
-        integrateShader.SetBuffer(_integrate2Handle, "positions", _positions);
-        integrateShader.SetBuffer(_integrate2Handle, "velocities", _velocities);
-        integrateShader.SetBuffer(_integrate2Handle, "forces", _forces);
+        integrateShader.SetBuffer(integrate2Handle, "properties", properties);
+        integrateShader.SetBuffer(integrate2Handle, "positions", positions);
+        integrateShader.SetBuffer(integrate2Handle, "velocities", velocities);
+        integrateShader.SetBuffer(integrate2Handle, "forces", forces);
 
         //set constants
-        integrateShader.SetFloat("timeStep", timeStep);
+        integrateShader.SetFloat("timeStep", TimeStep);
 
         //set-up our geometry for drawing.
-        _quadPoints = new ComputeBuffer(6, ShaderConstants.QUAD_STRIDE);
-        _quadPoints.SetData(new[]
+        quadPoints = new ComputeBuffer(6, ShaderConstants.QUAD_STRIDE);
+        quadPoints.SetData(new[]
         {
-            new Vector3(-particleDiameter / 2, particleDiameter / 2),
-            new Vector3(particleDiameter / 2, particleDiameter / 2),
-            new Vector3(particleDiameter / 2, -particleDiameter / 2),
-            new Vector3(particleDiameter / 2, -particleDiameter / 2),
-            new Vector3(-particleDiameter / 2, -particleDiameter / 2),
-            new Vector3(-particleDiameter / 2, particleDiameter / 2),
+            new Vector3(-ParticleDiameter / 2, ParticleDiameter / 2),
+            new Vector3(ParticleDiameter / 2, ParticleDiameter / 2),
+            new Vector3(ParticleDiameter / 2, -ParticleDiameter / 2),
+            new Vector3(ParticleDiameter / 2, -ParticleDiameter / 2),
+            new Vector3(-ParticleDiameter / 2, -ParticleDiameter / 2),
+            new Vector3(-ParticleDiameter / 2, ParticleDiameter / 2),
         });
 
         // bind resources to material
-        particleMaterial.SetBuffer("positions", _positions);
-        particleMaterial.SetBuffer("properties", _properties);
-        particleMaterial.SetBuffer("quadPoints", _quadPoints);
+        particleMaterial.SetBuffer("positions", positions);
+        particleMaterial.SetBuffer("properties", properties);
+        particleMaterial.SetBuffer("quadPoints", quadPoints);
 
         foreach (Compute c in computes)
             c.SetupShader(this);
@@ -147,10 +155,11 @@ public class ParticleManager : MonoBehaviour {
 
     private void OnDestroy()
     {
-        _positions.Release();
-        _velocities.Release();
-        _forces.Release();
-        _properties.Release();
+        positions.Release();
+        velocities.Release();
+        forces.Release();
+        properties.Release();
+        lastPositions.Release();
 
         foreach (Compute c in computes)
             c.ReleaseBuffers();
@@ -168,12 +177,12 @@ public class ParticleManager : MonoBehaviour {
         foreach (Compute c in computes)
             c.UpdatePreIntegrate(nx);
 
-        integrateShader.Dispatch(_integrate1Handle, nx, 1, 1);
+        integrateShader.Dispatch(integrate1Handle, nx, 1, 1);
 
         foreach (Compute c in computes)
             c.UpdateForces(nx);
 
-        integrateShader.Dispatch(_integrate2Handle, nx, 1, 1);
+        integrateShader.Dispatch(integrate2Handle, nx, 1, 1);
 
         foreach (Compute c in computes)
             c.UpdatePostIntegrate(nx);

@@ -11,9 +11,9 @@ public class ComputeDispersion : Compute {
     {
         _forceHandle = dispersionShader.FindKernel("ApplyForces");
 
-        dispersionShader.SetBuffer(_forceHandle, "positions", pm._positions);
-        dispersionShader.SetBuffer(_forceHandle, "forces", pm._forces);
-        dispersionShader.SetBuffer(_forceHandle, "properties", pm._properties);
+        dispersionShader.SetBuffer(_forceHandle, "positions", pm.positions);
+        dispersionShader.SetBuffer(_forceHandle, "forces", pm.forces);
+        dispersionShader.SetBuffer(_forceHandle, "properties", pm.properties);
 
         dispersionShader.SetFloat("epsilon", 50.0f);
         dispersionShader.SetFloat("sigma", 0.5f);

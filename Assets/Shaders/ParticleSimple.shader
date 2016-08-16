@@ -60,7 +60,7 @@
 				o.uv = quadPoints[id] + 0.5f;
 
 				//for now we don't do any fancy color stuff
-				o.color = _Color;
+				o.color = properties[inst].color;
 
 				return o;
 			}

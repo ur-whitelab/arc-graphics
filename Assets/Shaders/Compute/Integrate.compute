@@ -1,8 +1,7 @@
 ﻿#include "DataTypes.cginc"
 
-
-
 RWStructuredBuffer<float2> positions;
+RWStructuredBuffer<float2> lastPositions;
 RWStructuredBuffer<float2> velocities;
 RWStructuredBuffer<float2> forces;
 RWStructuredBuffer<ParticleProperties> properties;
@@ -22,15 +21,18 @@ void Integrate1(uint3 id : SV_DispatchThreadID)
 {
 	uint i = id.x;
 	forces[i] = 0;
+
 	if (properties[i].alive) {
+		lastPositions[i] = positions[i];
 		velocities[i] += (0.5 * timeStep * forces[i]);
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);
-		positions[i] += (0.5 * timeStep * velocities[i]);
+		positions[i] += (0.5 * timeStep * velocities[i]);	
+
 
 		//Check if the particle is stationary or out of bounds
 		uint in_bounds = (uint) all(step(positions[i], boundaryHigh)) & all(step(boundaryLow, positions[i]));
 		uint is_mobile = (uint) any(step(moving_delta, abs(velocities[i])));
-		properties[i].alive = in_bounds;// &is_mobile;
+		properties[i].alive = in_bounds & is_mobile;
 	}
 	
 }
@@ -43,6 +45,7 @@ void Integrate2(uint3 id : SV_DispatchThreadID)
 	if (properties[i].alive) {
 		velocities[i] += (0.5 * timeStep * forces[i]);
 		properties[i].life += timeStep;
+		//properties[i].color = lerp(float4(1, 0, 0, 1), float4(0, 1, 0, 1), float4(properties[i].life / 10, properties[i].life / 10, properties[i].life / 10, 0));
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);
 	}
 }

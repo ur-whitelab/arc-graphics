@@ -11,7 +11,7 @@ public class StructurePlacer : MonoBehaviour {
     private Structure placingScript;
 
     public float inputPeriod = 0.05f;
-    public float inputPostDelay = 0.5f;
+    public float inputPostDelay = 0.05f;
 
     protected enum States {Sleeping, Ready, PlacingInvalid, PlacingValid};
     private States state;
@@ -43,6 +43,15 @@ public class StructurePlacer : MonoBehaviour {
     {
         for (;;)
         {
+
+            if (state == States.Sleeping && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
+                state = States.Ready;
+                if (placing == null)
+                    StartPlacement();
+                else
+                    state = States.PlacingInvalid;
+            }
+
             if(state == States.PlacingValid || state == States.PlacingInvalid)
             {                
                 state = placingScript.CanPlace() ? States.PlacingValid : States.PlacingInvalid;
@@ -55,7 +64,6 @@ public class StructurePlacer : MonoBehaviour {
 
                     state = States.Sleeping;
                     yield return new WaitForSeconds(inputPostDelay);
-                    state = States.Ready;
                 }
 
                 //left-click for place
@@ -63,13 +71,10 @@ public class StructurePlacer : MonoBehaviour {
                 {
                     //we try to place
                     if (placingScript.Place())
-                    {
                         finishPlace();
 
-                        state = States.Sleeping;
-                        yield return new WaitForSeconds(inputPostDelay);
-                        state = States.Ready;
-                    }
+                    state = States.Sleeping;
+                    yield return new WaitForSeconds(inputPostDelay);
                 }                    
             }
             

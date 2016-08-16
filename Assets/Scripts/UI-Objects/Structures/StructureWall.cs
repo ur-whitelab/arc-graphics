@@ -3,12 +3,13 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
-public class Wall : Structure {
+public class StructureWall : Structure {
 
     public float PlacementRadius = 1f;
     public int MaxPoints = 10;
     private LineRenderer lr;
     private List<Vector3> positions;
+    private ComputeWalls cw;
 
     // Use this for initialization
     void Awake()
@@ -18,6 +19,8 @@ public class Wall : Structure {
         positions.Add(transform.position);
         lr.SetVertexCount(positions.Count);
         lr.SetPositions(positions.ToArray());
+
+        cw = GameObject.Find("ComputeWalls").GetComponent<ComputeWalls>();
     }
 
     public override bool CanPlace()
@@ -39,7 +42,7 @@ public class Wall : Structure {
         }
 
         //we can place another, so get it ready
-        positions.Add(transform.position);
+        positions.Add((positions[positions.Count - 1]));
         lr.SetVertexCount(positions.Count);
         lr.SetPositions(positions.ToArray());
 
@@ -56,7 +59,9 @@ public class Wall : Structure {
             lr.SetVertexCount(positions.Count);
             lr.SetPositions(positions.ToArray());
         }
-        //TODO: Load into buffer
+
+        //now add to compute
+        cw.AddWall(positions.ToArray());
     }
 
     public override void SetPosition(Vector3 p)

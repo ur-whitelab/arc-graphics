@@ -6,11 +6,11 @@
 
 RWStructuredBuffer<float2> positions;
 RWStructuredBuffer<float2> velocities;
-RWStructuredBuffer<uint> spawnTimers;
+RWStructuredBuffer<int> spawnTimers;
 StructuredBuffer<Source> sources;
 RWStructuredBuffer<ParticleProperties> properties;
 
-RWStructuredBuffer<uint> sourceCount; //Should be SPAWN_BLOCKSIZE_X dimension
+groupshared int source_count;
 
 
 #pragma kernel Spawn	
@@ -25,78 +25,79 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 	spawnTimers.GetDimensions(ns, _);
 	properties.GetDimensions(np, _);
 
-	if (id.x < ns) {
-		//update timers
-
-		if (id.y == 0)
-			spawnTimers[id.x] += 1;
-
-		GroupMemoryBarrierWithGroupSync();
-		//source count should be set to 0 before we start
-
-		//check if we need to spawn
-		if (spawnTimers[id.x] % sources[id.x].spawn_period == 0) {
-
-			//we are going to spawn
-			//search particles along y thread id. This partitions the particles amongst the y threads
-			uint can_add = 0;
-			uint stride = ceil(((float)np) / SPAWN_BLOCKSIZE_Y);
-
-			for (uint i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
-				//only can add if the particle is not in use.
-				can_add += !properties[i].alive;
-			}
-
-			//announce we're going to add as many as we can.
-			uint count;
-			InterlockedAdd(sourceCount[id.x], can_add, count);
-
-			//now, add as many as we need
-
-			int to_add = can_add;
-			//if we would add too many, remove them
-			to_add -= max(0, (count + can_add) - sources[id.x].spawn_amount);
-
-			//debug code for making sure we got a good number added
-			//update what I'm going to add now
-			//to_add = max(to_add, 0);
-			//InterlockedAdd(sourceCount[id.x], -((int) can_add - to_add), count);
-
-			if (to_add > 0) {
-				float lerp_s;
-				for (i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
-
-					//go ahead and add now
-					if (to_add > 0 && !properties[i].alive) {
-						to_add -= 1;
-
-						positions[i] = sources[id.x].position;
-						
-						lerp_s = (float) (count + to_add) / sources[id.x].spawn_amount;
-						velocities[i] = lerp(sources[id.x].velocity_1, sources[id.x].velocity_2, float2(lerp_s, lerp_s));
-						//velocities[i] = sources[id.x].velocity_1;
-						
-						properties[i].alive = 1;
-						properties[i].life = sources[id.x].life_start;
-					}
-				}
-			}
-
-			//reset the sources count
-			GroupMemoryBarrierWithGroupSync();
-			/*Debug code for indicating if we got the correct number added.
-			if (id.y == 5 && sources[id.x].spawn_amount != sourceCount[id.x]) {
-			positions[0] = float2(-5, 10);
-			velocities[0] = float2(1, 1);
-			properties[0].alive = 1;
-			}
-			*/
-
-			if (id.y == 0) {
-				sourceCount[id.x] = 0;
-				spawnTimers[id.x] = 0;
-			}
-		}
+	if (id.y == 0) {
+		source_count = 0;
+		spawnTimers[id.x] += 1;
 	}
 
+	GroupMemoryBarrierWithGroupSync();
+
+	//check if we need to spawn
+	if (spawnTimers[id.x] % sources[id.x].spawn_period == 0) {
+
+		//we are going to spawn
+		//search particles along y thread id. This partitions the particles amongst the y threads
+		int can_add = 0;
+		int stride = ceil(((float)np) / SPAWN_BLOCKSIZE_Y);
+
+		for (uint i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
+			//only can add if the particle is not in use.
+			can_add += !properties[i].alive;
+		}
+
+		//announce we're going to add as many as we can.
+		int count;
+		InterlockedAdd(source_count, can_add, count);
+		//now, add as many as we need
+		int to_add = can_add;
+		//if we would add too many, remove them
+		to_add -= max(0, (count + can_add) - sources[id.x].spawn_amount);
+
+		//debug code for making sure we got a good number added
+		//update what I'm going to add now
+		//to_add = max(to_add, 0);
+		//InterlockedAdd(source_count, -(can_add - to_add));
+
+		if (to_add > 10 && count < 0) {
+			positions[0] = float2(-5, 3);
+			velocities[0] = float2(1, 1);
+			properties[0].alive = 1;
+		}
+
+		if (to_add > 0) {
+			float lerp_s;
+			for (i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
+
+				//go ahead and add now
+				if (to_add > 0 && !properties[i].alive) {
+					to_add -= 1;
+
+					positions[i] = sources[id.x].position;
+
+					lerp_s = (float)(count + to_add) / sources[id.x].spawn_amount;
+					velocities[i] = lerp(sources[id.x].velocity_1, sources[id.x].velocity_2, float2(lerp_s, lerp_s));
+					properties[i].alive = 1;
+					properties[i].life = sources[id.x].life_start;
+					properties[i].color = float4(0, 0, 1, 1);
+				}
+			}
+		}
+
+		//reset the sources count
+
+
+		if (id.y == 0) {
+			spawnTimers[id.x] = 0;
+		}	
+	}
+
+	/*
+	GroupMemoryBarrierWithGroupSync();
+	//Debug code for indicating if we got the correct number added.
+	if (id.y == 5 && spawnTimers[id.x] % sources[id.x].spawn_period == 0 && sources[id.x].spawn_amount != source_count) {
+		positions[0] = float2(-5, 10);
+		velocities[0] = float2(1, 1);
+		properties[0].alive = 1;
+	}
+	*/
 }

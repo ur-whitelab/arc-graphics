@@ -3,66 +3,58 @@ using System.Collections;
 
 public class ComputeSpawn : Compute {
 
-    private int _spawnHandle;
+    private int spawnHandle;
     public ComputeShader spawnShader;
-    private int _maxSourceNumber = 1;
+    private int maxSourceNumber = 4; //MUST BE MULTIPLE OF BLOCKSIZE!
 
     //compute buffers for spawning particles
-    private ComputeBuffer _spawnTimers;
-    private ComputeBuffer _sources;
-
-    //bookkeeping buffers
-    private ComputeBuffer _sourceCount; //Should be SPAWN_BLOCKSIZE_X dimension
+    private ComputeBuffer spawnTimers;
+    private ComputeBuffer sources;
 
     public override void SetupShader(ParticleManager pm)
     {
 
-        _spawnHandle = spawnShader.FindKernel("Spawn");
+        spawnHandle = spawnShader.FindKernel("Spawn");
 
-        _spawnTimers = new ComputeBuffer(_maxSourceNumber, ShaderConstants.UINT_STRIDE);
-        _sourceCount = new ComputeBuffer(ShaderConstants.SPAWN_BLOCKSIZE_X, ShaderConstants.UINT_STRIDE);
-        _sources = new ComputeBuffer(_maxSourceNumber, ShaderConstants.SOURCE_STRIDE);
+        spawnTimers = new ComputeBuffer(maxSourceNumber, ShaderConstants.UINT_STRIDE);
+        sources = new ComputeBuffer(maxSourceNumber, ShaderConstants.SOURCE_STRIDE);
 
         //initialize source data
-        ShaderConstants.Source[] sources = new ShaderConstants.Source[_maxSourceNumber];
-        for (int i = 0; i < _maxSourceNumber; i++)
-            sources[i].spawn_period = 0x7FFFFFFF;
-        sources[0].spawn_period = 25;
-        sources[0].spawn_amount = 10;
-        sources[0].velocity_1.x = -2f;
-        sources[0].velocity_2.x = 2f;
-        sources[0].velocity_1.y = -3f;
-        sources[0].velocity_2.y = -3f;
-        sources[0].life_start = -5f;
-        _sources.SetData(sources);
+        ShaderConstants.Source[] initial_sources = new ShaderConstants.Source[maxSourceNumber];
+        for (int i = 0; i < maxSourceNumber; i++)
+            initial_sources[i].spawn_period = 0x7FFFFFFF;
+        initial_sources[0].position = new Vector2(2, -3);
+        initial_sources[0].spawn_period = 100;
+        initial_sources[0].spawn_amount = 3;
+        initial_sources[0].velocity_1.x = -2f;
+        initial_sources[0].velocity_2.x = 2f;
+        initial_sources[0].velocity_1.y = -3f;
+        initial_sources[0].velocity_2.y = -3f;
+        initial_sources[0].life_start = -5f;
+        sources.SetData(initial_sources);
 
-        uint[] izeros = new uint[_maxSourceNumber];
-        _spawnTimers.SetData(izeros);
-
-
-        izeros = new uint[ShaderConstants.SPAWN_BLOCKSIZE_X];
-        _sourceCount.SetData(izeros);
+        int[] izeros = new int[maxSourceNumber];
+        spawnTimers.SetData(izeros);
 
 
-        spawnShader.SetBuffer(_spawnHandle, "positions", pm._positions);
-        spawnShader.SetBuffer(_spawnHandle, "velocities", pm._velocities);
-        spawnShader.SetBuffer(_spawnHandle, "properties", pm._properties);
+        spawnShader.SetBuffer(spawnHandle, "positions", pm.positions);
+        spawnShader.SetBuffer(spawnHandle, "velocities", pm.velocities);
+        spawnShader.SetBuffer(spawnHandle, "properties", pm.properties);
 
-        spawnShader.SetBuffer(_spawnHandle, "sources", _sources);
-        spawnShader.SetBuffer(_spawnHandle, "spawnTimers", _spawnTimers);
-        spawnShader.SetBuffer(_spawnHandle, "sourceCount", _sourceCount);
+        spawnShader.SetBuffer(spawnHandle, "sources", sources);
+        spawnShader.SetBuffer(spawnHandle, "spawnTimers", spawnTimers);
     }
 
     public override void UpdatePostIntegrate(int nx)
     {
-        nx = Mathf.CeilToInt((float)_maxSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);
-        spawnShader.Dispatch(_spawnHandle, nx, 1, 1);
+        int ns = Mathf.CeilToInt((float)maxSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);
+        //only have 1 group for y, because the SPAWN_BLOCKSIZE_Y will spread out over particles
+        spawnShader.Dispatch(spawnHandle, ns, 1, 1);
     }
 
     public override void ReleaseBuffers()
     {
-        _sources.Release();
-        _spawnTimers.Release();
-        _sourceCount.Release();
+        sources.Release();
+        spawnTimers.Release();
     }
 }

@@ -21,9 +21,9 @@ public class ComputeAttractors : Compute
 
         _forceHandle = AttractorShader.FindKernel("ApplyForces");
 
-        AttractorShader.SetBuffer(_forceHandle, "positions", pm._positions);
-        AttractorShader.SetBuffer(_forceHandle, "forces", pm._forces);
-        AttractorShader.SetBuffer(_forceHandle, "properties", pm._properties);
+        AttractorShader.SetBuffer(_forceHandle, "positions", pm.positions);
+        AttractorShader.SetBuffer(_forceHandle, "forces", pm.forces);
+        AttractorShader.SetBuffer(_forceHandle, "properties", pm.properties);
 
         _attractors = new ComputeBuffer(1, ShaderConstants.ATTRACTOR_STRIDE);
         ShaderConstants.Attractor[] dummy = new ShaderConstants.Attractor[1];
