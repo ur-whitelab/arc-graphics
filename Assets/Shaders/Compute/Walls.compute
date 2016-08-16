@@ -40,7 +40,6 @@ void Walls (uint3 id : SV_DispatchThreadID)
 		if (t > 0 || t > dot(wvector2, wvector2))
 			continue;	
 
-		properties[i].color = float4(1, 0, 1, 1);
 
 
 		//find out which side of the line we're on to determine if we crossed
@@ -55,7 +54,6 @@ void Walls (uint3 id : SV_DispatchThreadID)
 
 		//check if we crossed
 		if (vsign1 != vsign2) {
-			properties[i].color = float4(1, 0, 0, 1);
 			//we have to rewind the particle to be on the other side.
 			// @ intersection wvector x (pvector + delta t * velocity) == 0
 			//so delta t = w x p / p x v

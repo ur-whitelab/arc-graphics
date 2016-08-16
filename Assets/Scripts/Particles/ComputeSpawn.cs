@@ -24,12 +24,12 @@ public class ComputeSpawn : Compute {
         for (int i = 0; i < maxSourceNumber; i++)
             initial_sources[i].spawn_period = 0x7FFFFFFF;
         initial_sources[0].position = new Vector2(2, -3);
-        initial_sources[0].spawn_period = 100;
-        initial_sources[0].spawn_amount = 3;
+        initial_sources[0].spawn_period = 20;
+        initial_sources[0].spawn_amount = 8;
         initial_sources[0].velocity_1.x = -2f;
         initial_sources[0].velocity_2.x = 2f;
-        initial_sources[0].velocity_1.y = -3f;
-        initial_sources[0].velocity_2.y = -3f;
+        initial_sources[0].velocity_1.y = -4f;
+        initial_sources[0].velocity_2.y = -4f;
         initial_sources[0].life_start = -5f;
         sources.SetData(initial_sources);
 

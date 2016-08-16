@@ -25,7 +25,7 @@ public class StructurePlacer : MonoBehaviour {
         }
 
         state = States.Ready;
-        StartPlacement();
+        //StartPlacement();
         StartCoroutine(SlowUpdate());
 	}
 
@@ -46,9 +46,7 @@ public class StructurePlacer : MonoBehaviour {
 
             if (state == States.Sleeping && !Input.GetMouseButton(0) && !Input.GetMouseButton(1)) {
                 state = States.Ready;
-                if (placing == null)
-                    StartPlacement();
-                else
+                if (placing != null)
                     state = States.PlacingInvalid;
             }
 

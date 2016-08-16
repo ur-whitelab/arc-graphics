@@ -45,7 +45,7 @@ void Integrate2(uint3 id : SV_DispatchThreadID)
 	if (properties[i].alive) {
 		velocities[i] += (0.5 * timeStep * forces[i]);
 		properties[i].life += timeStep;
-		//properties[i].color = lerp(float4(1, 0, 0, 1), float4(0, 1, 0, 1), float4(properties[i].life / 10, properties[i].life / 10, properties[i].life / 10, 0));
+		properties[i].color = lerp(float4(1, 0, 0, 1), float4(0, 1, 0, 1), float4(properties[i].life / 10, properties[i].life / 10, properties[i].life / 10, 0));
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);
 	}
 }

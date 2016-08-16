@@ -13,7 +13,16 @@ public class CameraControls : MonoBehaviour {
 
     private Vector2 clampLow;
     private Vector2 clampHigh;
-    private float maxZoom;
+    private float maxZoom = 0;
+
+    public float MaxZoom
+    {
+        get {
+            if (maxZoom == 0)
+                Start();
+            return maxZoom; }
+
+    }
 
     // Use this for initialization
     void Start () {
