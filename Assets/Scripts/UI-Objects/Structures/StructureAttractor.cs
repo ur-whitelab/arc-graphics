@@ -6,14 +6,20 @@ public class StructureAttractor : Structure {
 
     private ComputeAttractors ca;
 
-    public override bool CanEnableInteractions()
+    public override void CancelPlace()
+    {
+        Destroy(this);
+    }
+
+    public override bool CanPlace()
     {
         return ca.ValidLocation(new Vector2(transform.position.x, transform.position.y));
     }
 
-    public override void EnableInteractions()
+    public override bool Place()
     {
         ca.AddAttractor(new Vector2(this.transform.localPosition.x, this.transform.localPosition.y));
+        return true;
     }
 
     void Awake () {

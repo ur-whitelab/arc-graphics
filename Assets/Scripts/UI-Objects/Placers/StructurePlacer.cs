@@ -32,8 +32,10 @@ public class StructurePlacer : MonoBehaviour {
     public void Update() //rapid updates go here
     {
         if (state == States.PlacingValid || state == States.PlacingInvalid)
-        {         
-            placing.transform.position = world.GetMousePosition();
+        {
+            Vector3 p = world.GetMousePosition();
+            if(p != Vector3.zero)
+                placingScript.SetPosition(world.GetMousePosition());
         }
     }
     
@@ -43,22 +45,32 @@ public class StructurePlacer : MonoBehaviour {
         {
             if(state == States.PlacingValid || state == States.PlacingInvalid)
             {                
-                state = placingScript.CanEnableInteractions() ? States.PlacingValid : States.PlacingInvalid;
+                state = placingScript.CanPlace() ? States.PlacingValid : States.PlacingInvalid;
 
-                if (state == States.PlacingValid && Input.GetMouseButton(0))
+                //right-click for cancel
+                if(Input.GetMouseButton(1))
                 {
-                    placingScript.EnableInteractions();
-                    Cursor.visible = true;
-
-                    placing = null;
-                    placingScript = null;
+                    placingScript.CancelPlace();
+                    finishPlace();
 
                     state = States.Sleeping;
                     yield return new WaitForSeconds(inputPostDelay);
                     state = States.Ready;
-                    StartPlacement();
                 }
-                    
+
+                //left-click for place
+                if (state == States.PlacingValid && Input.GetMouseButton(0))
+                {
+                    //we try to place
+                    if (placingScript.Place())
+                    {
+                        finishPlace();
+
+                        state = States.Sleeping;
+                        yield return new WaitForSeconds(inputPostDelay);
+                        state = States.Ready;
+                    }
+                }                    
             }
             
             yield return new WaitForSeconds(inputPeriod);
@@ -73,5 +85,13 @@ public class StructurePlacer : MonoBehaviour {
         Vector3 location = world.GetMousePosition();
         placing = (GameObject) GameObject.Instantiate(placedPrefab, location, new Quaternion());
         placingScript = placing.GetComponent<Structure>();
+    }
+
+    private void finishPlace()
+    {
+        Cursor.visible = true;
+
+        placing = null;
+        placingScript = null;
     }
 }

@@ -27,12 +27,12 @@ public class ComputeSpawn : Compute {
         ShaderConstants.Source[] sources = new ShaderConstants.Source[_maxSourceNumber];
         for (int i = 0; i < _maxSourceNumber; i++)
             sources[i].spawn_period = 0x7FFFFFFF;
-        sources[0].spawn_period = 60;
+        sources[0].spawn_period = 25;
         sources[0].spawn_amount = 10;
-        sources[0].velocity_1.x = -1f;
-        sources[0].velocity_2.x = 1f;
-        sources[0].velocity_1.y = -2f;
-        sources[0].velocity_2.y = -2f;
+        sources[0].velocity_1.x = -2f;
+        sources[0].velocity_2.x = 2f;
+        sources[0].velocity_1.y = -3f;
+        sources[0].velocity_2.y = -3f;
         sources[0].life_start = -5f;
         _sources.SetData(sources);
 

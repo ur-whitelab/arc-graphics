@@ -3,7 +3,17 @@ using System.Collections;
 
 public abstract class Structure : MonoBehaviour {
 
-    public abstract void EnableInteractions();
+    /*
+     * Returns true if placement was successful/finished. Returns false if more place calls are needed. 
+     */
+    public abstract bool Place();
 
-    public abstract bool CanEnableInteractions();
+    public abstract bool CanPlace();
+
+    public abstract void CancelPlace();
+
+    public virtual void SetPosition(Vector3 p)
+    {
+        transform.position = p;
+    }
 }

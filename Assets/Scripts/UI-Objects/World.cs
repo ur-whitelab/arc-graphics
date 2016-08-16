@@ -22,6 +22,9 @@ public class World : MonoBehaviour {
         collider = GetComponent<Collider>();
     }
 
+    /*
+     * Returns the mouse position or zero if it can't find it.
+     */
     public Vector3 GetMousePosition()
     {
         RaycastHit hit;
@@ -36,7 +39,7 @@ public class World : MonoBehaviour {
             return hit.point;
         }
 
-        return new Vector3(0f, 0f, 0f);
+        return Vector3.zero;
     }
 	
 }
