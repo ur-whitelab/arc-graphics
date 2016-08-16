@@ -1,6 +1,7 @@
 //we layout positions, velocity, and properties separately to 
 //improve coalesced reads. 
 
+#define PARTICLE_BLOCKSIZE 128
 
 struct ParticleProperties {
 	uint alive;
@@ -19,4 +20,9 @@ struct Source {
 struct Attractor {
 	float2 position;
 	float magnitude;
+};
+
+struct Wall {
+	float2 position;
+	float2 norm;
 };

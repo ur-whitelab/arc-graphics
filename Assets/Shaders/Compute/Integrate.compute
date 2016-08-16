@@ -1,8 +1,5 @@
 ﻿#include "DataTypes.cginc"
 
-#define BLOCKSIZE	256
-#define SPAWN_BLOCKSIZE_X 4
-#define SPAWN_BLOCKSIZE_Y 128
 
 
 RWStructuredBuffer<float2> positions;
@@ -20,7 +17,7 @@ const static float2 neg_max_velocity = { -20.0f, -20.0f };
 
 
 #pragma kernel Integrate1
-[numthreads(BLOCKSIZE,1,1)]
+[numthreads(PARTICLE_BLOCKSIZE,1,1)]
 void Integrate1(uint3 id : SV_DispatchThreadID)
 {
 	uint i = id.x;
@@ -39,7 +36,7 @@ void Integrate1(uint3 id : SV_DispatchThreadID)
 }
 
 #pragma kernel Integrate2
-[numthreads(BLOCKSIZE, 1, 1)]
+[numthreads(PARTICLE_BLOCKSIZE, 1, 1)]
 void Integrate2(uint3 id : SV_DispatchThreadID)
 {
 	uint i = id.x;
