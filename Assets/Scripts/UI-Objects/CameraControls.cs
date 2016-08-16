@@ -21,10 +21,10 @@ public class CameraControls : MonoBehaviour {
         lastPosition = startPosition;
         worldCamera = GetComponent<Camera>();
         updateCameraClamp();
-
     }
+
 	
-	void Update () {
+    public void Update () {
         if (Input.GetMouseButtonDown(0))//mouse is first pressed
         {
             lastPosition = Input.mousePosition;

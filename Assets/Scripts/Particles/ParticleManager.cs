@@ -13,7 +13,7 @@ public class ParticleManager : MonoBehaviour {
     public ComputeShader integrateShader;
     public Material particleMaterial;
 
-    private int _maxParticleNumber = 2500;
+    private int _maxParticleNumber = 1000000;
     public int maxParticleNumber
     {
         get { return _maxParticleNumber; }
