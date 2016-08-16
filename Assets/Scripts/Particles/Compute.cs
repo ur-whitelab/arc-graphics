@@ -4,28 +4,28 @@ using System.Collections;
 public abstract class Compute : MonoBehaviour
 {
 
-    public abstract void setupShader(ParticleManager pm);
+    public abstract void SetupShader(ParticleManager pm);
 
     /*
     * The methods below only differ in when they are called. The nx is an optimal threadgroup number if 
     * working on a per-particle quantity. It doesn't have to be the thread number used. 
     */
-    public virtual void updatePreIntegrate(int nx)
+    public virtual void UpdatePreIntegrate(int nx)
     {
         return;
     }
 
-    public virtual void updateForces(int nx)
+    public virtual void UpdateForces(int nx)
     {
         return;
     }
 
-    public virtual void updatePostIntegrate(int nx)
+    public virtual void UpdatePostIntegrate(int nx)
     {
         return;
     }
 
-    public virtual void releaseBuffers()
+    public virtual void ReleaseBuffers()
     {
         return;
     }

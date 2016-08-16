@@ -4,7 +4,7 @@ using System.Collections;
 public class CameraControls : MonoBehaviour {
 
     public Vector3 startPosition;
-    public float mouseSensitivity = 0.01f;
+    public float mouseSensitivity = 0.05f;
     public float zoomSensitivity = 0.2f;
 
     private World world;
@@ -25,16 +25,17 @@ public class CameraControls : MonoBehaviour {
 
 	
     public void Update () {
-        if (Input.GetMouseButtonDown(0))//mouse is first pressed
+        if (Input.GetMouseButtonDown(2))//mouse is first pressed
         {
             lastPosition = Input.mousePosition;
         }
         
-        if (Input.GetMouseButton(0)) //mouse is pressed
+        if (Input.GetMouseButton(2)) //mouse is pressed
         {
             Vector3 new_position = -(Input.mousePosition - lastPosition);
             new_position.z = 0;
-            new_position =  new_position * mouseSensitivity + transform.position;
+            //we divide by size so when we zoom in the steps are smaller.
+            new_position =  new_position * mouseSensitivity / worldCamera.orthographicSize + transform.position;
             new_position.x = Mathf.Clamp(new_position.x, clampLow.x, clampHigh.x);
             new_position.y = Mathf.Clamp(new_position.y, clampLow.y, clampHigh.y);
             transform.position = new_position;
@@ -72,6 +73,5 @@ public class CameraControls : MonoBehaviour {
         clampLow = new Vector2(world.boundariesLow.x + vextent * 2, world.boundariesLow.y + hextent * 2);
         clampHigh = new Vector2(world.boundariesHigh.x - vextent * 2, world.boundariesHigh.y - hextent * 2);
         maxZoom = Mathf.Min(world.size.x, world.size.y) / 4;
-        Debug.Log(maxZoom);
     }
 }

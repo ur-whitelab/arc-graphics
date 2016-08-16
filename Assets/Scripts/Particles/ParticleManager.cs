@@ -135,7 +135,7 @@ public class ParticleManager : MonoBehaviour {
         particleMaterial.SetBuffer("quadPoints", _quadPoints);
 
         foreach (Compute c in computes)
-            c.setupShader(this);
+            c.SetupShader(this);
 
         StartCoroutine(slowUpdates());
     }
@@ -153,7 +153,7 @@ public class ParticleManager : MonoBehaviour {
         _properties.Release();
 
         foreach (Compute c in computes)
-            c.releaseBuffers();
+            c.ReleaseBuffers();
 
     }
     private void updateBuffers(int i)
@@ -166,17 +166,17 @@ public class ParticleManager : MonoBehaviour {
         int nx = Mathf.CeilToInt((float) _maxParticleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE);
 
         foreach (Compute c in computes)
-            c.updatePreIntegrate(nx);
+            c.UpdatePreIntegrate(nx);
 
         integrateShader.Dispatch(_integrate1Handle, nx, 1, 1);
 
         foreach (Compute c in computes)
-            c.updateForces(nx);
+            c.UpdateForces(nx);
 
         integrateShader.Dispatch(_integrate2Handle, nx, 1, 1);
 
         foreach (Compute c in computes)
-            c.updatePostIntegrate(nx);
+            c.UpdatePostIntegrate(nx);
 
     }
 

@@ -14,7 +14,7 @@ public class ComputeSpawn : Compute {
     //bookkeeping buffers
     private ComputeBuffer _sourceCount; //Should be SPAWN_BLOCKSIZE_X dimension
 
-    public override void setupShader(ParticleManager pm)
+    public override void SetupShader(ParticleManager pm)
     {
 
         _spawnHandle = spawnShader.FindKernel("Spawn");
@@ -53,13 +53,13 @@ public class ComputeSpawn : Compute {
         spawnShader.SetBuffer(_spawnHandle, "sourceCount", _sourceCount);
     }
 
-    public override void updatePostIntegrate(int nx)
+    public override void UpdatePostIntegrate(int nx)
     {
         nx = Mathf.CeilToInt((float)_maxSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);
         spawnShader.Dispatch(_spawnHandle, nx, 1, 1);
     }
 
-    public override void releaseBuffers()
+    public override void ReleaseBuffers()
     {
         _sources.Release();
         _spawnTimers.Release();

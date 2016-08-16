@@ -7,7 +7,7 @@ public class ComputeDispersion : Compute {
     public ComputeShader dispersionShader;
 
 
-    public override void setupShader(ParticleManager pm)
+    public override void SetupShader(ParticleManager pm)
     {
         _forceHandle = dispersionShader.FindKernel("ApplyForces");
 
@@ -20,7 +20,7 @@ public class ComputeDispersion : Compute {
 
     }
 
-    public override void updateForces(int nx)
+    public override void UpdateForces(int nx)
     {
         dispersionShader.Dispatch(_forceHandle, nx, 1, 1);
     }
