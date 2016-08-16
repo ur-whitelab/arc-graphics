@@ -9,7 +9,7 @@ public class ParticleManager : MonoBehaviour {
 
     public List<Compute> computes;
 
-    private GameObject world;
+    private World world;
     public ComputeShader integrateShader;
     public Material particleMaterial;
 
@@ -35,19 +35,12 @@ public class ParticleManager : MonoBehaviour {
     private int _integrate1Handle;
     private int _integrate2Handle;
 
-    private Vector2 boundariesLow;
-    private Vector2 boundariesHigh;
-
     // Use this for initialization
     private void updateBoundary()
     {
-        Vector3 bounds_min = world.GetComponent<Collider>().bounds.min;
-        Vector3 bounds_max = world.GetComponent<Collider>().bounds.max;
-        boundariesLow = new Vector2(bounds_min.x, bounds_min.y);
-        boundariesHigh = new Vector2(bounds_max.x, bounds_max.y);
 
-        integrateShader.SetFloats("boundaryLow", new float[] { boundariesLow.x, boundariesLow.y });
-        integrateShader.SetFloats("boundaryHigh", new float[] { boundariesHigh.x, boundariesHigh.y });
+        integrateShader.SetFloats("boundaryLow", new float[] { world.boundariesLow.x, world.boundariesLow.y });
+        integrateShader.SetFloats("boundaryHigh", new float[] { world.boundariesHigh.x, world.boundariesHigh.y });
     }
 
     public IEnumerator slowUpdates()
@@ -62,7 +55,7 @@ public class ParticleManager : MonoBehaviour {
     void Start() {
 
         if (world == null)
-            world = GameObject.Find("World");
+            world = GameObject.Find("World").GetComponent<World>();
 
         computes = new List<Compute>();
         foreach (Compute c in this.GetComponentsInChildren<Compute>())
@@ -184,7 +177,7 @@ public class ParticleManager : MonoBehaviour {
 
         foreach (Compute c in computes)
             c.updatePostIntegrate(nx);
-        
+
     }
 
     private void OnRenderObject()
