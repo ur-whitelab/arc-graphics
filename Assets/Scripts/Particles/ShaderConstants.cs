@@ -21,11 +21,11 @@ public static class ShaderConstants
     public struct Source
     {
         public Vector2 position;
-        public Vector2 velocity_1;
-        public Vector2 velocity_2;
-        public float life_start;
-        public uint spawn_period;
-        public int spawn_amount;
+        public Vector2 velocity1;
+        public Vector2 velocity2;
+        public float lifeStart;
+        public uint spawnPeriod;
+        public int spawnAmount;
 
     }
 
