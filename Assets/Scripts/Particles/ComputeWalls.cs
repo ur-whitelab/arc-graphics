@@ -11,15 +11,25 @@ public class ComputeWalls : Compute
     private ComputeBuffer walls;
     private List<ShaderConstants.Wall> cpu_walls;
 
+    public void Awake()
+    {
+        cpu_walls = new List<ShaderConstants.Wall>();
+    }
+
     public override void SetupShader(ParticleManager pm)
     {
         wallHandle = wallShader.FindKernel("Walls");
 
-        ShaderConstants.Wall[] dummy = new ShaderConstants.Wall[1];
-        walls = new ComputeBuffer(1, ShaderConstants.WALL_STRIDE);
-        walls.SetData(dummy);
+        if (cpu_walls.Count == 0)
+        {
+            ShaderConstants.Wall[] dummy = new ShaderConstants.Wall[1];
+            walls = new ComputeBuffer(1, ShaderConstants.WALL_STRIDE);
+            walls.SetData(dummy);
+        } else
+        {
+            walls.SetData(cpu_walls.ToArray());
+        }
 
-        cpu_walls = new List<ShaderConstants.Wall>();
 
         wallShader.SetBuffer(wallHandle, "positions", pm.positions);
         wallShader.SetBuffer(wallHandle, "velocities", pm.velocities);
@@ -39,7 +49,7 @@ public class ComputeWalls : Compute
 
     public void AddWall(Vector3[] points)
     {
-        //need to add zero norm, to indicate that the this one is not in use (it's a gap)
+        //need to add zero norm, to indicate that the this one is not in use (it's a gap)        
         cpu_walls.Add(new ShaderConstants.Wall(points[0], Vector2.zero));
         for(int i = 1; i < points.Length; i++)
         {
@@ -55,7 +65,8 @@ public class ComputeWalls : Compute
 
             cpu_walls.Add(new ShaderConstants.Wall(points[i], norm));
         }
-        walls.Release();
+        if(walls != null)
+            walls.Release();
         walls = new ComputeBuffer(cpu_walls.Count, ShaderConstants.WALL_STRIDE);
         walls.SetData(cpu_walls.ToArray());
         wallShader.SetBuffer(wallHandle, "walls", walls);

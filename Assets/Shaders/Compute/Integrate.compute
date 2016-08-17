@@ -6,7 +6,8 @@ RWStructuredBuffer<float2> velocities;
 RWStructuredBuffer<float2> forces;
 RWStructuredBuffer<ParticleProperties> properties;
 
-float timeStep = 0.01f;
+float timeStep;
+float lifeEnd;
 float2 boundaryLow;
 float2 boundaryHigh;
 
@@ -45,7 +46,8 @@ void Integrate2(uint3 id : SV_DispatchThreadID)
 	if (properties[i].alive) {
 		velocities[i] += (0.5 * timeStep * forces[i]);
 		properties[i].life += timeStep;
-		properties[i].color = lerp(float4(1, 0, 0, 1), float4(0, 1, 0, 1), float4(properties[i].life / 10, properties[i].life / 10, properties[i].life / 10, 0));
+		properties[i].alive = step(properties[i].life, lifeEnd);
+		properties[i].color = lerp(float4(1, 0, 0, 1), float4(0, 1, 0, 0), float4(properties[i].life / lifeEnd, properties[i].life / lifeEnd, properties[i].life / lifeEnd, properties[i].life / lifeEnd));
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);
 	}
 }

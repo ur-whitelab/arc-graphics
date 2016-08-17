@@ -58,11 +58,11 @@ void Walls (uint3 id : SV_DispatchThreadID)
 			// @ intersection wvector x (pvector + delta t * velocity) == 0
 			//so delta t = w x p / p x v
 			//This could be undefined when a particle has a velocity parallel to the line and crossed it. That
-			//means in the next step it would be moving inside the line-segment. I'm Ok with this
-			//being undefined because it will be cleaned up in the boundary check in the integrate step.
-			//Just have to make sure that this precedes the integrate.
-			t = (wvector2[0] * pvector2[1] - wvector2[1] * pvector2[0]) / (wvector2[1] * velocities[i][0] - wvector2[0] * velocities[i][1]);
-
+			//means in the next step it would be moving inside the line-segment.
+			t = (wvector2[0] * pvector2[1] - wvector2[1] * pvector2[0]) / (wvector2[1] * velocities[i][0] - wvector2[0] * velocities[i][1]);			
+			t = abs(t);
+			t = min(timeStep / 2, t);//should deal with nan
+			
 			//now rewind. t is negative
 			positions[i] += velocities[i] * -t;
 

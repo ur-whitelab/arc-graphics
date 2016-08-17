@@ -74,7 +74,7 @@
 				float4 partCol = i.color;
 
 				//blend them with alpha-blending
-				return float4 (1.0f - (1.0f - texCol.rgb) * (1.0f - partCol.rgb), texCol.a);
+				return float4 (1.0f - (1.0f - texCol.rgb) * (1.0f - partCol.rgb), texCol.a * i.color.a);
 			}
 			ENDCG
 		}

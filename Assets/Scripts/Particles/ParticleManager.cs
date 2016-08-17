@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class ParticleManager : MonoBehaviour {
 
     public float TimeStep = 0.01f;
+    public float ParticleLifeEnd = 25f;
     private float ParticleDiameter = 1.0f;
 
     private List<Compute> computes;
@@ -13,7 +14,7 @@ public class ParticleManager : MonoBehaviour {
     public ComputeShader integrateShader;
     public Material particleMaterial;
 
-    private int _maxParticleNumber = 1000000;
+    private int _maxParticleNumber = 500000;
     public int MaxParticleNumber
     {
         get { return _maxParticleNumber; }
@@ -124,6 +125,7 @@ public class ParticleManager : MonoBehaviour {
 
         //set constants
         integrateShader.SetFloat("timeStep", TimeStep);
+        integrateShader.SetFloat("lifeEnd", ParticleLifeEnd);
 
         //set-up our geometry for drawing.
         quadPoints = new ComputeBuffer(6, ShaderConstants.QUAD_STRIDE);

@@ -3,31 +3,62 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
+[ExecuteInEditMode]
 public class StructureWall : Structure {
 
     public float PlacementRadius = 1f;
     public int MaxPoints = 10;
     private LineRenderer lr;
-    private List<Vector3> positions;
+    [SerializeField]
+    public List<Vector3> Positions;
     private ComputeWalls cw;
 
-    // Use this for initialization
-    void Awake()
+    public void Awake()
     {
         lr = GetComponent<LineRenderer>();
-        positions = new List<Vector3>();
-        positions.Add(transform.position);
-        lr.SetVertexCount(positions.Count);
-        lr.SetPositions(positions.ToArray());
-
         cw = GameObject.Find("ComputeWalls").GetComponent<ComputeWalls>();
+
+        if (Positions.Count == 0)
+        {
+            Positions = new List<Vector3>();
+            Positions.Add(transform.position);
+        }
+
+        lr.SetVertexCount(Positions.Count);
+        lr.SetPositions(Positions.ToArray());
     }
+
+    public void Start()
+    {
+
+        if (cw != null && Positions.Count > 1)
+        {
+            //one was already set-up. Go ahead and place if we can find cw
+            cw.AddWall(Positions.ToArray());
+        }
+    }
+
+
+    public void AddPosition(Vector3 p)
+    {
+        p.z = 0;
+        Debug.Log("Adding " + p.x + " " + p.y);
+        Positions.Add(p);
+    }
+
+    public void DeletePosition()
+    {
+        Positions.RemoveAt(Positions.Count - 1);
+        lr.SetVertexCount(Positions.Count);
+        lr.SetPositions(Positions.ToArray());
+    }
+
 
     public override bool CanPlace()
     {
         //the last one is the one being considered for placement.
-        for(int i = 0; i < positions.Count - 1; i++)
-            if ((positions[i] - positions[positions.Count - 1]).sqrMagnitude < PlacementRadius * PlacementRadius)
+        for(int i = 0; i < Positions.Count - 1; i++)
+            if ((Positions[i] - Positions[Positions.Count - 1]).sqrMagnitude < PlacementRadius * PlacementRadius)
                 return false;
         return true;
     }
@@ -35,16 +66,16 @@ public class StructureWall : Structure {
     public override bool Place()
     {
         //The last position in array is one we're locking in.        
-        if (positions.Count == MaxPoints)
+        if (Positions.Count == MaxPoints)
         {
             CancelPlace();
             return true;
         }
 
         //we can place another, so get it ready
-        positions.Add((positions[positions.Count - 1]));
-        lr.SetVertexCount(positions.Count);
-        lr.SetPositions(positions.ToArray());
+        Positions.Add((Positions[Positions.Count - 1]));
+        lr.SetVertexCount(Positions.Count);
+        lr.SetPositions(Positions.ToArray());
 
         return false;
     }
@@ -53,21 +84,30 @@ public class StructureWall : Structure {
     public override void CancelPlace()
     {
         //remove last point unless we finished due to having enough points
-        if (positions.Count != MaxPoints)
+        if (Positions.Count != MaxPoints)
         {
-            positions.RemoveAt(positions.Count - 1);
-            lr.SetVertexCount(positions.Count);
-            lr.SetPositions(positions.ToArray());
+            Positions.RemoveAt(Positions.Count - 1);
+            lr.SetVertexCount(Positions.Count);
+            lr.SetPositions(Positions.ToArray());
         }
 
         //now add to compute
-        cw.AddWall(positions.ToArray());
+        if(Positions.Count > 1)
+            cw.AddWall(Positions.ToArray());
     }
 
     public override void SetPosition(Vector3 p)
     {
-        positions[positions.Count - 1] = p;
-        lr.SetVertexCount(positions.Count);
-        lr.SetPositions(positions.ToArray());
+        p.z = 0;
+        Positions[Positions.Count - 1] = p;
+        lr.SetVertexCount(Positions.Count);
+        lr.SetPositions(Positions.ToArray());
+        //Debug.Log("Setting to " + p.x + " " + p.y);
+    }
+
+
+    public Vector3 LastPosition()
+    {
+        return Positions[Positions.Count - 1];
     }
 }
