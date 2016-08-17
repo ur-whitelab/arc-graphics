@@ -27,19 +27,19 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 	s2 = sigma * sigma;
 	deno = 1.0 / s2;
 	
-	if (properties[i].alive  && properties[i].life > 0) {
+	if (properties[i].state == PARTICLE_STATE_ALIVE && properties[i].life > 0) {
 
 		for (uint j = i - 1; j < N; j++) {
 			r = positions[j] - positions[i];
 			r2 = dot(r, r);
 			if(r2 < s2)
-				forces[i] -= epsilon * cos(PI / 2 * r2 * deno) * r * properties[j].alive;
+				forces[i] -= epsilon * cos(PI / 2 * r2 * deno) * r * properties[j].state;
 		}
 		for (j = i + 1; j < N; j++) {
 			r = positions[j] - positions[i];
 			r2 = dot(r, r);
 			if (r2 < s2)
-				forces[i] -= epsilon * cos(PI / 2 * r2 * deno) * r * properties[j].alive;
+				forces[i] -= epsilon * cos(PI / 2 * r2 * deno) * r * properties[j].state;
 		}
 	}
 }

@@ -20,7 +20,7 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 	float r2;
 	attractors.GetDimensions(N, _);
 
-	if (properties[i].alive) {
+	if (properties[i].state == PARTICLE_STATE_ALIVE) {
 		for (uint j = 0; j < N; j++) {
 			r = attractors[j].position - positions[i];
 			r2 = dot(r, r);

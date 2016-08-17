@@ -53,7 +53,7 @@
 				o.pos = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, float4(worldPosition, 1.0f)) + float4(quadPoint, 0.0f));
 
 
-				if (!properties[inst].alive) {
+				if (properties[inst].state != PARTICLE_STATE_ALIVE) {
 					o.pos.w = 0; //bit of a hack. Causes the pixel value to be out of clip
 				}
 

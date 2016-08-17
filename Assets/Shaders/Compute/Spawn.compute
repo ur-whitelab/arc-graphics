@@ -42,7 +42,7 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 
 		for (uint i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
 			//only can add if the particle is not in use.
-			can_add += !properties[i].alive;
+			can_add += (properties[i].state == PARTICLE_STATE_DEAD);
 		}
 
 		//announce we're going to add as many as we can.
@@ -55,30 +55,32 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 
 		//debug code for making sure we got a good number added
 		//update what I'm going to add now
-		//to_add = max(to_add, 0);
-		//InterlockedAdd(source_count, -(can_add - to_add));
-
+		to_add = max(to_add, 0);
+		InterlockedAdd(source_count, -(can_add - to_add));
+		/*
 		if (to_add > 10 && count < 0) {
 			positions[0] = float2(-5, 3);
 			velocities[0] = float2(1, 1);
-			properties[0].alive = 1;
+			properties[0].state = 1;
 		}
-
+		*/
 		if (to_add > 0) {
 			float lerp_s;
 			for (i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
 
 				//go ahead and add now
-				if (to_add > 0 && !properties[i].alive) {
+				if (to_add > 0 && properties[i].state == PARTICLE_STATE_DEAD) {
 					to_add -= 1;
 
 					positions[i] = sources[id.x].position;
 
 					lerp_s = (float)(count + to_add) / sources[id.x].spawn_amount;
 					velocities[i] = lerp(sources[id.x].velocity_1, sources[id.x].velocity_2, float2(lerp_s, lerp_s));
-					properties[i].alive = 1;
+					properties[i].state = PARTICLE_STATE_ALIVE;
 					properties[i].life = sources[id.x].life_start;
 					properties[i].color = float4(0, 0, 1, 1);
+					properties[i].lastModifier = PARTICLE_MODIFIER_SPAWN;
+					properties[i].lastModifierIndex = id.x;
 				}
 			}
 		}
@@ -87,17 +89,19 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 
 
 		if (id.y == 0) {
-			spawnTimers[id.x] = 0;
+			//spawnTimers[id.x] = 0;
 		}	
 	}
 
-	/*
+	
 	GroupMemoryBarrierWithGroupSync();
 	//Debug code for indicating if we got the correct number added.
+	
 	if (id.y == 5 && spawnTimers[id.x] % sources[id.x].spawn_period == 0 && sources[id.x].spawn_amount != source_count) {
-		positions[0] = float2(-5, 10);
-		velocities[0] = float2(1, 1);
-		properties[0].alive = 1;
+		positions[0] = float2(25, 10);
+		velocities[0] = float2(10, 10);
+		properties[0].state = 1;
 	}
-	*/
+	
+	
 }

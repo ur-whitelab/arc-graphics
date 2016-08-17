@@ -6,8 +6,19 @@
 //Please make sure these are consistent with what is in the shader
 #define PARTICLE_BLOCKSIZE 256
 
+#define PARTICLE_STATE_DEAD 0
+#define PARTICLE_STATE_ALIVE 1
+#define PARTICLE_STATE_DYING 2
+
+#define PARTICLE_MODIFIER_SPAWN 0
+#define PARTICLE_MODIFIER_INTEGRATOR 1
+#define PARTICLE_MODIFIER_TARGET 2
+#define PARTICLE_MODIFIER_PARTICLE 3
+
 struct ParticleProperties {
-	uint alive;
+	uint state;
+	uint lastModifier;
+	uint lastModifierIndex;
 	float life;
 	float4 color;
 };

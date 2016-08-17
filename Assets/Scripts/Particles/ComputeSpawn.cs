@@ -78,7 +78,7 @@ public class ComputeSpawn : Compute {
         ShaderConstants.Source s = new ShaderConstants.Source();
         s.position = new Vector2(-30, 0);
         s.spawnPeriod = 5;
-        s.spawnAmount = 10;
+        s.spawnAmount = 100;
         s.velocity1.x = 4f;
         s.velocity2.x = 4f;
         s.velocity1.y = -4f;
@@ -129,7 +129,7 @@ public class ComputeSpawn : Compute {
 
     public override void UpdatePostIntegrate(int nx)
     {
-        int ns = Mathf.CeilToInt((float)maxSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);        
+        int ns = Mathf.CeilToInt((float)maxSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);
         spawnShader.Dispatch(spawnHandle, ns, 1, 1);
 
         //This code mimicks the GPU code

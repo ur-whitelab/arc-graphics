@@ -6,10 +6,12 @@ RWStructuredBuffer<float2> velocities;
 RWStructuredBuffer<float2> forces;
 RWStructuredBuffer<ParticleProperties> properties;
 
+
 float timeStep;
 float lifeEnd;
 float2 boundaryLow;
 float2 boundaryHigh;
+
 
 const static float2 moving_delta = { 0.0000001f, 0.0000001f };
 const static float2 max_velocity = { 20.0f, 20.0f };
@@ -23,7 +25,7 @@ void Integrate1(uint3 id : SV_DispatchThreadID)
 	uint i = id.x;
 	forces[i] = 0;
 
-	if (properties[i].alive) {
+	if (properties[i].state == PARTICLE_STATE_ALIVE) {
 		lastPositions[i] = positions[i];
 		velocities[i] += (0.5 * timeStep * forces[i]);
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);
@@ -33,7 +35,7 @@ void Integrate1(uint3 id : SV_DispatchThreadID)
 		//Check if the particle is stationary or out of bounds
 		uint in_bounds = (uint) all(step(positions[i], boundaryHigh)) & all(step(boundaryLow, positions[i]));
 		uint is_mobile = (uint) any(step(moving_delta, abs(velocities[i])));
-		properties[i].alive = in_bounds & is_mobile;
+		properties[i].state = in_bounds & is_mobile ? PARTICLE_STATE_ALIVE : PARTICLE_STATE_DEAD;
 	}
 	
 }
@@ -43,10 +45,10 @@ void Integrate1(uint3 id : SV_DispatchThreadID)
 void Integrate2(uint3 id : SV_DispatchThreadID)
 {
 	uint i = id.x;
-	if (properties[i].alive) {
+	if (properties[i].state == PARTICLE_STATE_ALIVE) {
 		velocities[i] += (0.5 * timeStep * forces[i]);
 		properties[i].life += timeStep;
-		properties[i].alive = step(properties[i].life, lifeEnd);
+		properties[i].state = step(properties[i].life, lifeEnd) ? PARTICLE_STATE_ALIVE : PARTICLE_STATE_DEAD;
 		properties[i].color = lerp(float4(1, 0, 0, 1), float4(0, 1, 0, 0), float4(properties[i].life / lifeEnd, properties[i].life / lifeEnd, properties[i].life / lifeEnd, properties[i].life / lifeEnd));
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);
 	}

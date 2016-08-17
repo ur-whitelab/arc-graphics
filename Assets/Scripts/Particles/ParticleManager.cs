@@ -14,14 +14,7 @@ public class ParticleManager : MonoBehaviour {
     public ComputeShader integrateShader;
     public Material particleMaterial;
 
-    private int _maxParticleNumber = 500000;
-    public int MaxParticleNumber
-    {
-        get { return _maxParticleNumber; }
-        set {
-            this.updateBuffers(value);
-        }
-    }
+    public const int ParticleNumber = 262144; //2^18. Must be multiple of 256 (2^8) due to particle reduction blocksize
 
     //compute buffers for particle information
     public ComputeBuffer positions;
@@ -69,41 +62,41 @@ public class ParticleManager : MonoBehaviour {
 
 
         //cerate empty buffers
-        positions = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
-        lastPositions = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
-        velocities = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
-        forces = new ComputeBuffer(_maxParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
-        properties = new ComputeBuffer(_maxParticleNumber, ShaderConstants.PROP_STRIDE);
+        positions = new ComputeBuffer(ParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
+        lastPositions = new ComputeBuffer(ParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
+        velocities = new ComputeBuffer(ParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
+        forces = new ComputeBuffer(ParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
+        properties = new ComputeBuffer(ParticleNumber, ShaderConstants.PROP_STRIDE);
 
 
         //initialize the per-particle data
-        Vector2[] zeros = new Vector2[_maxParticleNumber]; //create a bunch of zero vectors
+        Vector2[] zeros = new Vector2[ParticleNumber]; //create a bunch of zero vectors
         positions.SetData(zeros);
         lastPositions.SetData(zeros);
         velocities.SetData(zeros);
         forces.SetData(zeros);
 
         //make positions interesting
-        for (int i = 0; i < _maxParticleNumber; i++)
+        for (int i = 0; i < ParticleNumber; i++)
             zeros[i].Set(Random.Range(-10f, 10f), Random.Range(-10f, 10f));
         positions.SetData(zeros);
 
         //make velocities interesting
-        for (int i = 0; i < _maxParticleNumber; i++)
+        for (int i = 0; i < ParticleNumber; i++)
             zeros[i].Set(Random.Range(-1f,1f), Random.Range(-1f,1f));
         velocities.SetData(zeros);
 
         //make forces interesting
         
-        for (int i = 0; i < _maxParticleNumber; i++)
+        for (int i = 0; i < ParticleNumber; i++)
             zeros[i].Set(Random.Range(-10f, 10f), Random.Range(-10f, 10f));
         //_forces.SetData(zeros);
         
 
-        ShaderConstants.Prop[] props = new ShaderConstants.Prop[_maxParticleNumber];
-        for (int i = 0; i < _maxParticleNumber; i++)
+        ShaderConstants.Prop[] props = new ShaderConstants.Prop[ParticleNumber];
+        for (int i = 0; i < ParticleNumber; i++)
         {
-            props[i].alive = 0;
+            props[i].state = ShaderConstants.PARTICLE_STATE_DEAD;
             props[i].color = new Vector4(1f, 1f, 1f, 1f);
         }
            
@@ -150,10 +143,6 @@ public class ParticleManager : MonoBehaviour {
         StartCoroutine(slowUpdates());
     }
 
-    public void addAttractor(Vector2 location)
-    {
-
-    }
 
     private void OnDestroy()
     {
@@ -170,11 +159,11 @@ public class ParticleManager : MonoBehaviour {
     private void updateBuffers(int i)
     {
         return;
-    }
+    }    
 
 	// Update is called once per frame
 	void Update () {
-        int nx = Mathf.CeilToInt((float) _maxParticleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE);
+        int nx = Mathf.CeilToInt((float) ParticleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE);
 
         foreach (Compute c in computes)
             c.UpdatePreIntegrate(nx);
@@ -202,6 +191,6 @@ public class ParticleManager : MonoBehaviour {
         particleMaterial.SetPass(0);
 
         // draw
-        Graphics.DrawProcedural(MeshTopology.Triangles, 6, _maxParticleNumber);
+        Graphics.DrawProcedural(MeshTopology.Triangles, 6, ParticleNumber);
     }
 }
