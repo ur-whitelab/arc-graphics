@@ -7,8 +7,8 @@ public class StructureAttractor : Structure {
     private ComputeAttractors ca;
 
     public override void CancelPlace()
-    {
-        Destroy(this);
+    {        
+        Destroy(gameObject);
     }
 
     public override bool CanPlace()
@@ -23,7 +23,7 @@ public class StructureAttractor : Structure {
     }
 
     void Awake () {
-        ca = GameObject.Find("ComputeAttractors").GetComponent<ComputeAttractors>();
+        ca = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeAttractors>();
     }
 
 }

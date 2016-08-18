@@ -15,6 +15,7 @@ public static class ShaderConstants
     public const int PROP_STRIDE = 3 * UINT_STRIDE + FLOAT_STRIDE + 4 * FLOAT_STRIDE;
     public const int ATTRACTOR_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
     public const int WALL_STRIDE = 2 * 2 * FLOAT_STRIDE;
+    public const int TARGET_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
 
     public const int SPAWN_BLOCKSIZE_X = 4;
     public const int SPAWN_BLOCKSIZE_Y = 128;
@@ -42,6 +43,26 @@ public static class ShaderConstants
         public float lifeStart;
         public uint spawnPeriod;
         public int spawnAmount;
+
+        public Source(Vector2 position, Vector2 velocity1, Vector2 velocity2, float lifeStart = 0f, uint spawnPeriod = 60, int spawnAmount = 1)
+        {
+            this.position = position;
+            this.velocity1 = velocity1;
+            this.velocity2 = velocity2;
+            this.lifeStart = lifeStart;
+            this.spawnPeriod = spawnPeriod;
+            this.spawnAmount = spawnAmount;
+        }
+
+        public Source(Vector2 position, Vector2 velocity, float lifeStart = 0f, uint spawnPeriod = 60, int spawnAmount = 1)
+        {
+            this.position = position;
+            this.velocity1 = velocity;
+            this.velocity2 = velocity;
+            this.lifeStart = lifeStart;
+            this.spawnPeriod = spawnPeriod;
+            this.spawnAmount = spawnAmount;
+        }
 
     }
 
@@ -84,6 +105,18 @@ public static class ShaderConstants
         {
             this.position = position;
             this.magnitude = magnitude;
+        }
+    }
+
+    public struct Target
+    {
+        public Vector2 position;
+        public float radius;
+
+        public Target(Vector2 position, float radius)
+        {
+            this.position = position;
+            this.radius = radius;
         }
     }
 }

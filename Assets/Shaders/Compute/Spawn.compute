@@ -73,8 +73,8 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 					to_add -= 1;
 
 					positions[i] = sources[id.x].position;
-
-					lerp_s = (float)(count + to_add) / sources[id.x].spawn_amount;
+					//in theory, this should never need to be clamped. This code is so hard :(
+					lerp_s = clamp((float)(count + to_add) / sources[id.x].spawn_amount, 0, 1);
 					velocities[i] = lerp(sources[id.x].velocity_1, sources[id.x].velocity_2, float2(lerp_s, lerp_s));
 					properties[i].state = PARTICLE_STATE_ALIVE;
 					properties[i].life = sources[id.x].life_start;
@@ -89,19 +89,19 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 
 
 		if (id.y == 0) {
-			//spawnTimers[id.x] = 0;
+			spawnTimers[id.x] = 0;
 		}	
 	}
 
 	
-	GroupMemoryBarrierWithGroupSync();
+	//GroupMemoryBarrierWithGroupSync();
 	//Debug code for indicating if we got the correct number added.
-	
+	/*
 	if (id.y == 5 && spawnTimers[id.x] % sources[id.x].spawn_period == 0 && sources[id.x].spawn_amount != source_count) {
 		positions[0] = float2(25, 10);
 		velocities[0] = float2(10, 10);
 		properties[0].state = 1;
 	}
-	
+	*/
 	
 }

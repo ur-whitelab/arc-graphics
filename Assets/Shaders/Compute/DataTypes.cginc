@@ -41,3 +41,8 @@ struct Wall {
 	float2 position;
 	float2 norm;
 };
+
+struct Target {
+	float2 position;
+	float radius;
+};

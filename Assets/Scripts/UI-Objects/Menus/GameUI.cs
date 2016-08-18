@@ -9,20 +9,25 @@ public class GameUI : MonoBehaviour
 
     public float UpdateDelay = 0.05f;
 
-    private ComputeSpawn cs;
+    private ComputeSource cs;
     private ParticleStatistics ps;
 
-    public Text InstancedParticlesText;
+    public Text AvailableParticlesText;
     public Text AliveParticlesText;
+    public Text TargetParticlesText;
 
     void Start()
     {
-        cs = ParticleManager.GetComponentsInChildren<ComputeSpawn>()[0];
-        ps = ParticleManager.GetComponentsInChildren<ParticleStatistics>()[0];
+        cs = ParticleManager.GetComponentInChildren<ComputeSource>();
+        ps = ParticleManager.GetComponentInChildren<ParticleStatistics>();
 
         //Just use ananyomous event handlers
         ps.ComputeModifierStatistics(0, 0, (s, e) => {
             AliveParticlesText.text = ((ParticleStatisticsModifierEventArgs)e).sum[1].ToString();
+        });
+
+        ps.ComputeTargetStatistics(0, (s, e) => {
+            TargetParticlesText.text = ((ParticleStatisticsTargetEventArgs)e).sum.ToString();
         });
 
         StartCoroutine(SlowUpdate());
@@ -33,7 +38,7 @@ public class GameUI : MonoBehaviour
         for(;;)
         {
             yield return new WaitForSeconds(UpdateDelay);
-            InstancedParticlesText.text = cs.InstancedParticles.ToString();
+            AvailableParticlesText.text = Mathf.Max(0,cs.AvailableParticles).ToString();
         }
         
     }

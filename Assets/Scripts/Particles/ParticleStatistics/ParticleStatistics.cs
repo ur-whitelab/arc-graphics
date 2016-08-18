@@ -5,12 +5,54 @@ using System.Collections.Generic;
 
 public class ParticleStatistics : Compute
 {
-    public ComputeShader PSShader;
-    private event EventHandler statisticsCompleted;
+    public ComputeShader PSShader; 
     public float StatisticsPeriod = 0.2f;
 
+    //I had to pack up the handlers
+    //into structs so I can filter the events.
+    //not a great system, but I only want to calculate
+    //what I need so it's important to keep track of what the callers requested.
+    //I can't use structs because it interfers with the += on events
+    private class ModifierHandlers
+    {
+        public event EventHandler h;
+        public int modifierType;
+        public int modifierIndex;
 
+        
+        public ModifierHandlers(int modifierType, int modifierIndex, EventHandler h)
+        {
+            this.modifierType = modifierType;
+            this.modifierIndex = modifierIndex;
+            this.h = h;
+        }
+
+        public void call(object sender, EventArgs e)
+        {
+            h(sender, e);
+        }
+    }
+
+    private class TargetHandlers
+    {
+        public event EventHandler h;
+        public int index;
+
+        public TargetHandlers(int index, EventHandler h)
+        {
+            this.index = index;
+            this.h = h;
+        }
+        public void call(object sender, EventArgs e)
+        {
+            h(sender, e);
+        }
+    }
+
+
+    private int totalStatsNumber = 0;
     private float singleStatPeriod = 1f;
+    private bool doTargetStats = false;
 
     private int reduceSum1Handle;
     private int reduceSum2Handle;
@@ -19,11 +61,19 @@ public class ParticleStatistics : Compute
     private ComputeBuffer tempSum;
     private ComputeBuffer inputSum;
     private ComputeBuffer result;
+    
+    private ComputeTargets cTargets;
 
     private int particleNumber;
-    private List<int[]> modifiers = new List<int[]>();
+    private List<ModifierHandlers> modifiers = new List<ModifierHandlers>();
+    private List<TargetHandlers> targets = new List<TargetHandlers>();
+    private int[] lastTargetCounts = new int[1];
 
 
+    public void Awake ()
+    {
+        cTargets = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeTargets>();
+    }
 
     public override void SetupShader(ParticleManager pm)
     {
@@ -64,27 +114,58 @@ public class ParticleStatistics : Compute
 
     public void ComputeModifierStatistics(int modifierType, int modifierIndex, EventHandler h)
     {
-        statisticsCompleted += h;
 
         //make sure we aren't doing this one already
-        foreach (int[] i in modifiers)
-            if (i[0] == modifierType && i[1] == modifierIndex)
+        foreach (ModifierHandlers m in modifiers)
+        {
+            if (m.modifierType == modifierType && m.modifierIndex == modifierIndex)
+            {
+                m.h += h;
                 return;
-        modifiers.Add(new int[] { modifierType, modifierIndex });
+            }
+                
+        }
 
-        singleStatPeriod = StatisticsPeriod / modifiers.Count;
+        modifiers.Add(new ModifierHandlers( modifierType, modifierIndex, h));
+
+        totalStatsNumber++;
+        singleStatPeriod = StatisticsPeriod / totalStatsNumber;
+    }
+
+    public void ComputeTargetStatistics(int targetIndex, EventHandler h)
+    {
+        if(!doTargetStats)
+        {
+            doTargetStats = true;
+            totalStatsNumber++;
+            singleStatPeriod = StatisticsPeriod / totalStatsNumber;
+        }
+
+        foreach(TargetHandlers t in targets)
+        {
+            if(t.index == targetIndex)
+            {
+                t.h += h;
+                return;
+            }
+
+        }
+
+        targets.Add(new TargetHandlers(targetIndex, h));
+            
+
     }
 
     public IEnumerator ComputeStatistics()
     {
         for (;;)
         {
-            if(modifiers.Count == 0)
+            if(totalStatsNumber == 0)
                 yield return new WaitForSeconds(StatisticsPeriod);
-            foreach (int[] i in modifiers)
+            foreach (ModifierHandlers m in modifiers)
             {
                 //see the shader for details on this
-                PSShader.SetInts("modifier", i);
+                PSShader.SetInts("modifier", new int[] { m.modifierType, m.modifierIndex });
                 PSShader.Dispatch(prepareModifierSumHandle, Mathf.CeilToInt((float)particleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE), 1, 1);
                 PSShader.Dispatch(reduceSum1Handle, ShaderConstants.REDUCTION_BLOCKSIZE, 1, 1);
                 PSShader.Dispatch(reduceSum2Handle, 1, 1, 1);
@@ -97,10 +178,22 @@ public class ParticleStatistics : Compute
                 result.GetData(resultArray);
 
                 //no need to do a null check since we will have called computemodifierstatistics
-                statisticsCompleted(this, new ParticleStatisticsModifierEventArgs(i[0], i[1], resultArray));
+                m.call(this, new ParticleStatisticsModifierEventArgs(m.modifierType, m.modifierIndex, resultArray));
 
                 //wait the rest of the time
                 yield return new WaitForSeconds(singleStatPeriod / 2);
+            }
+            if(doTargetStats)
+            {
+                int[] counts = cTargets.GetTargetCounts();
+                for (int i = 0; i < targets.Count; i++)
+                {
+                    //only fire if we had a change
+                    if(counts[targets[i].index] != lastTargetCounts[targets[i].index])
+                        targets[i].call(this, new ParticleStatisticsTargetEventArgs(targets[i].index, counts[targets[i].index]));
+                }
+                lastTargetCounts = counts;
+                yield return new WaitForSeconds(singleStatPeriod);
             }
         }
     }

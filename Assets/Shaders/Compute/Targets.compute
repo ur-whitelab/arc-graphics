@@ -1,0 +1,30 @@
+﻿#include "DataTypes.cginc"
+
+#pragma kernel Targets
+
+StructuredBuffer<float2> positions;
+RWStructuredBuffer<ParticleProperties> properties;
+StructuredBuffer<Target> targets;
+RWStructuredBuffer<int> targetCounts;
+
+[numthreads(PARTICLE_BLOCKSIZE,1,1)]
+void Targets(uint3 id : SV_DispatchThreadID)
+{
+	uint i = id.x;
+	uint N, _;
+	targets.GetDimensions(N, _);
+
+	if (properties[i].state == PARTICLE_STATE_DEAD)
+		return;
+
+	float2 r;
+	for (uint j = 0; j < N; j++) {
+		r = targets[j].position - positions[i];
+		if (dot(r, r) < targets[j].radius * targets[j].radius) {
+			//process intersection
+			properties[i].state = PARTICLE_STATE_DEAD;
+			InterlockedAdd(targetCounts[j], 1);
+			break;
+		}
+	}
+}

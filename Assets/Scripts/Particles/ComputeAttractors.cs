@@ -5,13 +5,13 @@ using System.Collections.Generic;
 public class ComputeAttractors : Compute
 {
 
-    private int _forceHandle;
+    private int forceHandle;
 
     public ComputeShader AttractorShader;
     public float AttractorOverlapRadius = 5f;
 
-    private ComputeBuffer _attractors;
-    private List<ShaderConstants.Attractor> _cpu_attractors = null;
+    private ComputeBuffer attractors;
+    private List<ShaderConstants.Attractor> cpu_attractors = null;
 
     
 
@@ -19,43 +19,43 @@ public class ComputeAttractors : Compute
     public override void SetupShader(ParticleManager pm)
     {
 
-        _forceHandle = AttractorShader.FindKernel("ApplyForces");
+        forceHandle = AttractorShader.FindKernel("ApplyForces");
 
-        AttractorShader.SetBuffer(_forceHandle, "positions", pm.positions);
-        AttractorShader.SetBuffer(_forceHandle, "forces", pm.forces);
-        AttractorShader.SetBuffer(_forceHandle, "properties", pm.properties);
+        AttractorShader.SetBuffer(forceHandle, "positions", pm.positions);
+        AttractorShader.SetBuffer(forceHandle, "forces", pm.forces);
+        AttractorShader.SetBuffer(forceHandle, "properties", pm.properties);
 
-        _attractors = new ComputeBuffer(1, ShaderConstants.ATTRACTOR_STRIDE);
+        attractors = new ComputeBuffer(1, ShaderConstants.ATTRACTOR_STRIDE);
         ShaderConstants.Attractor[] dummy = new ShaderConstants.Attractor[1];
         //default values will have 0 mag
-        _attractors.SetData(dummy);
-        _cpu_attractors = new List<ShaderConstants.Attractor>();
+        attractors.SetData(dummy);
+        cpu_attractors = new List<ShaderConstants.Attractor>();
 
-        AttractorShader.SetBuffer(_forceHandle, "attractors", _attractors);
+        AttractorShader.SetBuffer(forceHandle, "attractors", attractors);
         
     }
 
     public override void UpdateForces(int nx)
     {
-        AttractorShader.Dispatch(_forceHandle, nx, 1, 1);
+        AttractorShader.Dispatch(forceHandle, nx, 1, 1);
     }
 
     public void AddAttractor(Vector2 location, float magnitude = 5f)
     {
-        _cpu_attractors.Add(new ShaderConstants.Attractor(location, magnitude));
-        _attractors.Release();
-        _attractors = new ComputeBuffer(_cpu_attractors.Count, ShaderConstants.ATTRACTOR_STRIDE);
-        _attractors.SetData(_cpu_attractors.ToArray());
-        AttractorShader.SetBuffer(_forceHandle, "attractors", _attractors);
+        cpu_attractors.Add(new ShaderConstants.Attractor(location, magnitude));
+        attractors.Release();
+        attractors = new ComputeBuffer(cpu_attractors.Count, ShaderConstants.ATTRACTOR_STRIDE);
+        attractors.SetData(cpu_attractors.ToArray());
+        AttractorShader.SetBuffer(forceHandle, "attractors", attractors);
     }
 
     public bool ValidLocation(Vector2 propLocation)
     {
         //this is being asked way too early
-        if (_cpu_attractors == null)
+        if (cpu_attractors == null)
             return false;
 
-        foreach (ShaderConstants.Attractor a in _cpu_attractors)
+        foreach (ShaderConstants.Attractor a in cpu_attractors)
             if ((propLocation - a.position).sqrMagnitude < AttractorOverlapRadius * AttractorOverlapRadius)
                 return false;
         return true;
