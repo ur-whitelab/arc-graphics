@@ -95,7 +95,7 @@ public class ComputeSource : Compute {
 
     }
 
-    public int AddSource(ShaderConstants.Source s)
+    public int AddSource(ShaderConstants.Source s, int availableParticles = 250000)
     {
 
         //Add the new source to cpu
@@ -103,7 +103,7 @@ public class ComputeSource : Compute {
         cpuSources.Add(s);
 
         //Start info
-        sourceInfo.Add(new SourceInfo(1000, Mathf.CeilToInt(pm.ParticleLifeEnd / pm.TimeStep)));
+        sourceInfo.Add(new SourceInfo(availableParticles, Mathf.CeilToInt(pm.ParticleLifeEnd / pm.TimeStep)));
 
         //keep track of statistics for updating available/unavailable particles
         //we use update in SourceInfo to get an estimate, but that only accounts for particle death from their lifetime.

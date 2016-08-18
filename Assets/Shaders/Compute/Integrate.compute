@@ -49,7 +49,10 @@ void Integrate2(uint3 id : SV_DispatchThreadID)
 		velocities[i] += (0.5 * timeStep * forces[i]);
 		properties[i].life += timeStep;
 		properties[i].state = step(properties[i].life, lifeEnd) ? PARTICLE_STATE_ALIVE : PARTICLE_STATE_DEAD;
-		properties[i].color = lerp(float4(1, 0, 0, 1), float4(0, 1, 0, 0), float4(properties[i].life / lifeEnd, properties[i].life / lifeEnd, properties[i].life / lifeEnd, properties[i].life / lifeEnd));
+		float life = properties[i].life / lifeEnd;
+		properties[i].color.a = lerp(1, 0, step(0.8, life) * (life - 0.8) / 0.20);
+		float forFun = dot(velocities[i], velocities[i]) / 10;
+		properties[i].color.rgb = lerp(float3(0, 0, 1), float3(1, 0, 0), float3(forFun, forFun, forFun));
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);
 	}
 }

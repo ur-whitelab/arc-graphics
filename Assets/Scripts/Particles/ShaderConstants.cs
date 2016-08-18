@@ -17,7 +17,7 @@ public static class ShaderConstants
     public const int WALL_STRIDE = 2 * 2 * FLOAT_STRIDE;
     public const int TARGET_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
 
-    public const int SPAWN_BLOCKSIZE_X = 4;
+    public const int SPAWN_BLOCKSIZE_X = 1;
     public const int SPAWN_BLOCKSIZE_Y = 128;
     public const int PARTICLE_BLOCK_SIZE = 256;
     public const int REDUCTION_BLOCKSIZE = 128;

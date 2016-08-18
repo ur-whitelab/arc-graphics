@@ -25,9 +25,8 @@ public class StructurePlacer : MonoBehaviour {
         }
 
         state = States.Ready;
-        //StartPlacement();
         StartCoroutine(SlowUpdate());
-	}
+    }
 
     public void Update() //rapid updates go here
     {
@@ -38,7 +37,7 @@ public class StructurePlacer : MonoBehaviour {
                 placingScript.SetPosition(world.GetMousePosition());
         }
     }
-    
+
     public IEnumerator SlowUpdate()
     {
         for (;;)
@@ -73,7 +72,7 @@ public class StructurePlacer : MonoBehaviour {
 
                     state = States.Sleeping;
                     yield return new WaitForSeconds(inputPostDelay);
-                }                    
+                }
             }
             
             yield return new WaitForSeconds(inputPeriod);

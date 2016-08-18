@@ -8,10 +8,10 @@ public class ComputeAttractors : Compute
     private int forceHandle;
 
     public ComputeShader AttractorShader;
-    public float AttractorOverlapRadius = 5f;
+    public float AttractorOverlapRadius = 2f;
 
     private ComputeBuffer attractors;
-    private List<ShaderConstants.Attractor> cpu_attractors = null;
+    private List<ShaderConstants.Attractor> cpu_attractors = new List<ShaderConstants.Attractor>();
 
     
 
@@ -24,26 +24,36 @@ public class ComputeAttractors : Compute
         AttractorShader.SetBuffer(forceHandle, "positions", pm.positions);
         AttractorShader.SetBuffer(forceHandle, "forces", pm.forces);
         AttractorShader.SetBuffer(forceHandle, "properties", pm.properties);
-
-        attractors = new ComputeBuffer(1, ShaderConstants.ATTRACTOR_STRIDE);
-        ShaderConstants.Attractor[] dummy = new ShaderConstants.Attractor[1];
-        //default values will have 0 mag
-        attractors.SetData(dummy);
-        cpu_attractors = new List<ShaderConstants.Attractor>();
-
-        AttractorShader.SetBuffer(forceHandle, "attractors", attractors);
         
     }
 
     public override void UpdateForces(int nx)
     {
-        AttractorShader.Dispatch(forceHandle, nx, 1, 1);
+        if (cpu_attractors.Count > 0)
+            AttractorShader.Dispatch(forceHandle, nx, 1, 1);
     }
 
-    public void AddAttractor(Vector2 location, float magnitude = 5f)
+    public int AddAttractor(Vector2 location, float magnitude = 5f)
     {
+        int index = cpu_attractors.Count;
         cpu_attractors.Add(new ShaderConstants.Attractor(location, magnitude));
-        attractors.Release();
+        syncBuffers();
+
+        return index;
+    }
+
+    public void UpdateAttractor(int index, Vector2 location, float magnitude = 0)
+    {
+        if (magnitude == 0)
+            magnitude = cpu_attractors[index].magnitude;
+        cpu_attractors[index] = new ShaderConstants.Attractor(location, magnitude);
+        syncBuffers();
+    }
+
+    private void syncBuffers()
+    {
+        if(attractors != null)
+            attractors.Release();
         attractors = new ComputeBuffer(cpu_attractors.Count, ShaderConstants.ATTRACTOR_STRIDE);
         attractors.SetData(cpu_attractors.ToArray());
         AttractorShader.SetBuffer(forceHandle, "attractors", attractors);

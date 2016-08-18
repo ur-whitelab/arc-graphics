@@ -162,8 +162,10 @@ public class ParticleStatistics : Compute
         {
             if(totalStatsNumber == 0)
                 yield return new WaitForSeconds(StatisticsPeriod);
-            foreach (ModifierHandlers m in modifiers)
+            ModifierHandlers m;
+            for (int i = 0; i <modifiers.Count; i++)
             {
+                m = modifiers[i];
                 //see the shader for details on this
                 PSShader.SetInts("modifier", new int[] { m.modifierType, m.modifierIndex });
                 PSShader.Dispatch(prepareModifierSumHandle, Mathf.CeilToInt((float)particleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE), 1, 1);

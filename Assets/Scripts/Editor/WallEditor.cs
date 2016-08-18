@@ -18,7 +18,7 @@ public class WallEditor : Editor {
         if (wall.Positions.Count == 0)
             wall.AddPosition(wall.transform.position);
 
-        Vector3 newPosition = CustomEditorHandles.DragHandle(wall.LastPosition(), 4, Handles.SphereCap, Color.red, out dhResult);
+        Vector3 newPosition = CustomEditorHandles.DragHandle(wall.LastPosition(), 2, Handles.SphereCap, Color.red, out dhResult);
 
 
 

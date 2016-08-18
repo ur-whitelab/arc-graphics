@@ -12,6 +12,11 @@ public abstract class Structure : MonoBehaviour {
 
     public abstract void CancelPlace();
 
+    public virtual void TryPreview()
+    {
+        //pass
+    }
+
     public virtual void SetPosition(Vector3 p)
     {
         transform.position = p;

@@ -1,6 +1,7 @@
 ﻿#include "DataTypes.cginc"
 
-#define SPAWN_BLOCKSIZE_X 4
+//has to be 1 to avoid concurrent particle modifications
+#define SPAWN_BLOCKSIZE_X 1
 #define SPAWN_BLOCKSIZE_Y 128
 
 
