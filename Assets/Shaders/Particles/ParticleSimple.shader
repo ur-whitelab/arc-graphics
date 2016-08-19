@@ -1,4 +1,7 @@
-﻿Shader "Particles/ParticleSimple"
+﻿//TODO: Use a geomtry shader instead of passing in the quad/billboard information.
+//that should save some calls./
+
+Shader "Particles/ParticleSimple"
 {
 	Properties
 	{
@@ -17,7 +20,7 @@
 		Pass
 		{
 			CGPROGRAM
-			#pragma	exclude_renderers gles //cannot handle a shader without both vertex and fragment method
+
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma target 5.0

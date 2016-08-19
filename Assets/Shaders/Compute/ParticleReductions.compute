@@ -87,7 +87,7 @@ void ReduceSum1(uint tid : SV_GroupIndex, uint3 groupIdx : SV_GroupID)
 
 }
 
-//same as above, but requires n == groupDim
+//same as above, but requires n == groupDim and does not use two elments for summation.
 [numthreads(REDUCTION_BLOCKSIZE, 1, 1)]
 void ReduceSum2(uint tid : SV_GroupIndex, uint3 groupIdx : SV_GroupID)
 {
