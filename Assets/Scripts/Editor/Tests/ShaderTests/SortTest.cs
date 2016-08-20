@@ -39,19 +39,20 @@ public class ComputeSortTest : MonoBehaviour {
     public void GPUCount()
     {
         //make an array to test
-        int[] input = new int[200];
-        int[] gpu = new int[200];
-        int[] cpu = new int[200];
-        for (int i = 0; i < 200; i++)
+        uint N = 128;
+        int[] input = new int[N];
+        int[] gpu = new int[N];
+        int[] cpu = new int[N];
+        for (int i = 0; i < N; i++)
         {
-            input[i] = (int) Random.Range(0, 200);
+            input[i] = (int)Random.Range(0, N);
         }
 
-            
+
         cs.CPUCount(input, ref cpu);
         cs.GPUCount(input, ref gpu);
 
-        for (int i = 0; i < 200; i++)
+        for (int i = 0; i < N; i++)
         {
             Assert.That(gpu[i], Is.EqualTo(cpu[i]), "On element " + i);
         }
@@ -61,17 +62,18 @@ public class ComputeSortTest : MonoBehaviour {
     [Test]
     public void GPUSort()
     {
-        uint N = 10000;
-        int[] input = new int[N];
+        uint N = 128;
         int[] gpu = new int[N];
         int[] cpu = new int[N];
+        
         for (int i = 0; i < N; i++)
         {
-            input[i] = Random.Range(0, ComputeSort.MAX_SCAN_SIZE);
-            cpu[i] = input[i];
+            gpu[i] = Random.Range(0, ComputeSort.MAX_SCAN_SIZE);
+            cpu[i] = gpu[i];
         }
 
         System.Array.Sort(cpu);
+        cs.GPUSort(ref gpu,true);
 
         for (int i = 0; i < N; i++)
         {
@@ -79,4 +81,12 @@ public class ComputeSortTest : MonoBehaviour {
         }
         
     }
+
+    [Test]
+    public void GPUInPlaceSort()
+    {
+        //TODO!!!
+        fdsa = 3
+    }
+
 }

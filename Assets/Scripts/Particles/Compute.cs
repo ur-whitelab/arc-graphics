@@ -29,4 +29,9 @@ public abstract class Compute : MonoBehaviour
     {
         return;
     }
+
+    public virtual void UpdateBoundary(Vector2 low, Vector2 high)
+    {
+        return;
+    }
 }

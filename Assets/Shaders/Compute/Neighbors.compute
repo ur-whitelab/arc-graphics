@@ -1,0 +1,89 @@
+﻿#include "DataTypes.cginc"
+
+#pragma kernel Bin
+#pragma kernel BinStarts
+#pragma kernel Build
+
+RWStructuredBuffer<int> bins; //index is particle ID, value is bin index
+StructuredBuffer<int> sortedParticles;//Index is nothing, value is particle ID. Sorted in bin order. N = partice number
+RWStructuredBuffer<uint> binStarts; //Index is bin, value is index in sorted particles where the bin starts
+StructuredBuffer<float2> positions;
+RWStructuredBuffer<int> nlist;
+StructuredBuffer<int> binOffsets; //a once computed list of offsets that must be considered for neighbors
+
+float cutoff;
+float2 boundaryMax;
+float2 boundaryMin;
+uint2 binNumber;
+uint maxNeighbors;
+uint exceededMaxNeighbors;
+
+
+[numthreads(PARTICLE_BLOCKSIZE,1,1)]
+void Bin (uint3 id : SV_DispatchThreadID)
+{
+	float2 length = boundaryMax - boundaryMin;
+	//polynomial index of bin index.	
+	uint x = (uint) ((positions[0] - boundaryMin[0]) / length[0] * binNumber[0]);
+	uint y = (uint) ((positions[1] - boundaryMin[1]) / length[1] * binNumber[1]);
+	bins[id.x] = x + y * binNumber[1];
+
+	//clear bin starts because now is a good time.
+	if (id.x < binNumber.x * binNumber.y)
+		binStarts[id.x] = 0;
+}
+
+
+[numthreads(PARTICLE_BLOCKSIZE, 1, 1)]
+void BinStarts(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x > 0) {
+		if (bins[sortedParticles[id.x - 1]] != bins[sortedParticles[id.x]])
+			binStarts[bins[sortedParticles[id.x]]] = id.x;
+	}
+
+}
+
+[numthreads(PARTICLE_BLOCKSIZE, 1, 1)]
+void Build(uint3 id : SV_DispatchThreadID)
+{
+	uint N, _;
+	binOffsets.GetDimensions(N, _);
+
+	
+	uint count = 0;
+	uint ni = id.x * maxNeighbors;
+	int index;
+	float2 r;
+
+	//get particles in my cell first
+	//assume everyhing in my cell is close enough
+	for (uint i = binStarts[bins[id.x]]; i < binStarts[bins[id.x] + 1]; i++) {
+		if(sortedParticles[i] != id.x) //don't add yourself
+			nlist[ni++] = sortedParticles[i];
+		if (ni == maxNeighbors) {
+			exceededMaxNeighbors = true;
+			return;
+		}
+	}
+
+	for (uint o = 0; o < 2 * N; o++) {
+		if(o % 2 == 0)
+			index = binOffsets[o / 2] + bins[id.x];
+		else
+			index = -binOffsets[o / 2] + bins[id.x];
+		if (index > binNumber[0] * binNumber[1] || index <= 0)
+			continue;
+		for (uint i = binStarts[index]; i < binStarts[index + 1]; i++) {
+			if (ni == maxNeighbors) {
+				exceededMaxNeighbors = true;
+				return;
+			}
+			r = positions[id.x] - positions[sortedParticles[i]];
+			if(dot(r,r) < cutoff)
+				nlist[ni++] = sortedParticles[i];
+		}
+	}
+	for (i = ni; ni < maxNeighbors; i++)
+		nlist[i] = -1;
+}

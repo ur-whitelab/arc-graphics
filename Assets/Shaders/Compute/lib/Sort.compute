@@ -34,13 +34,13 @@ void Count(uint3 id : SV_DispatchThreadID) {
 }
 
 
-
 [numthreads(SORT_BLOCKSIZE, 1, 1)]
 void Finish(uint3 id : SV_DispatchThreadID) {
-	sortOutput[id.x] = scanOutput[sortInput[id.x]];
-	InterlockedAdd(scanOutput[sortInput[id.x]], 1);
+	uint v;
+	InterlockedAdd(scanOutput[sortInput[id.x]], 1, v);
+	sortOutput[v] = sortInput[id.x];
+	
 }
-
 
 //the input array must be equal to the SCAN_BLOCKSIZE * 2
 [numthreads(SCAN_BLOCKSIZE, 1, 1)]
@@ -101,11 +101,8 @@ void Scan(uint3 id : SV_DispatchThreadID) {
 	bankOffsetA = CONFLICT_FREE_OFFSET(ai);
 	bankOffsetB = CONFLICT_FREE_OFFSET(bi);
 
-	if (thid != 0)
-		scanOutput[ai - 1] = temp[ai + bankOffsetA];
-	scanOutput[bi - 1] = temp[bi + bankOffsetB];
 
-	GroupMemoryBarrierWithGroupSync();
-	if (thid == 0)
-		scanOutput[N - 1] = scanOutput[N - 2] + scanInput[N - 1];
+	scanOutput[ai ] = temp[ai + bankOffsetA];
+	scanOutput[bi ] = temp[bi + bankOffsetB];
+	
 }
