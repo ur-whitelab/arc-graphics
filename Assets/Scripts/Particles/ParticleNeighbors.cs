@@ -70,6 +70,9 @@ public class ParticleNeighbors : Compute {
         Neighbors.SetBuffer(binHandle, "positions", pm.positions);
         Neighbors.SetBuffer(buildHandle, "positions", pm.positions);
 
+        //for visualizing
+        Neighbors.SetBuffer(buildHandle, "properties", pm.properties);
+
         Neighbors.SetBuffer(buildHandle, "sortedParticles", sortedParticles);
         Neighbors.SetBuffer(binStartsHandle, "sortedParticles", sortedParticles);
 

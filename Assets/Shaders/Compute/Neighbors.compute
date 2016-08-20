@@ -8,6 +8,7 @@ RWStructuredBuffer<int> bins; //index is particle ID, value is bin index
 StructuredBuffer<int> sortedParticles;//Index is nothing, value is particle ID. Sorted in bin order. N = partice number
 RWStructuredBuffer<uint> binStarts; //Index is bin, value is index in sorted particles where the bin starts
 StructuredBuffer<float2> positions;
+RWStructuredBuffer<ParticleProperties> properties;
 RWStructuredBuffer<int> nlist;
 StructuredBuffer<int> binOffsets; //a once computed list of offsets that must be considered for neighbors
 
@@ -86,4 +87,11 @@ void Build(uint3 id : SV_DispatchThreadID)
 	}
 	for (i = ni; ni < maxNeighbors; i++)
 		nlist[i] = -1;
+
+	//for debugging
+	if (id.x == 0) {
+		for (i = 0; i < maxNeighbors && nlist[i] != -1; i++) {
+			properties[i].color = float4(0, 1, 0, 1);
+		}
+	}
 }
