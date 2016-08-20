@@ -1,0 +1,111 @@
+﻿
+#define SCAN_BLOCKSIZE 128
+#define SORT_BLOCKSIZE 128
+#define SCAN_SIZE 256
+#define NUM_BANKS 16  
+#define LOG_NUM_BANKS 4  
+#define CONFLICT_FREE_OFFSET(n) ((n) >> NUM_BANKS + (n) >> (2 * LOG_NUM_BANKS))
+
+
+#pragma kernel Scan
+#pragma kernel Zero
+#pragma kernel Count
+#pragma kernel Finish
+#pragma kernel Sort
+
+//These offsets are to reduce bank conflicts
+
+RWStructuredBuffer<int> scanInput;
+RWStructuredBuffer<int> scanOutput;
+StructuredBuffer<int> sortInput;
+RWStructuredBuffer<int> sortOutput;
+
+groupshared int temp[SCAN_SIZE];
+
+[numthreads(SCAN_BLOCKSIZE, 1, 1)]
+void Zero(uint3 id : SV_DispatchThreadID) {
+	scanInput[id.x] = 0;
+}
+
+
+[numthreads(SORT_BLOCKSIZE, 1, 1)]
+void Count(uint3 id : SV_DispatchThreadID) {
+	InterlockedAdd(scanInput[sortInput[id.x]], 1);
+}
+
+
+
+[numthreads(SORT_BLOCKSIZE, 1, 1)]
+void Finish(uint3 id : SV_DispatchThreadID) {
+	sortOutput[id.x] = scanOutput[sortInput[id.x]];
+	InterlockedAdd(scanOutput[sortInput[id.x]], 1);
+}
+
+
+//the input array must be equal to the SCAN_BLOCKSIZE * 2
+[numthreads(SCAN_BLOCKSIZE, 1, 1)]
+void Scan(uint3 id : SV_DispatchThreadID) {
+
+
+	//load the data
+	int thid = id.x; 
+	int offset = 1;
+	uint N, _;
+	scanInput.GetDimensions(N, _);
+
+	int ai = thid;
+	int bi = thid + (N / 2);
+	int bankOffsetA = CONFLICT_FREE_OFFSET(ai);
+	int bankOffsetB = CONFLICT_FREE_OFFSET(bi);
+
+
+	temp[ai + bankOffsetA] = scanInput[ai];
+	temp[bi + bankOffsetB] = scanInput[bi];
+
+	//upsweep -> log2(n) iterations
+	for (int d = N >> 1; d > 0; d >>= 1) {
+		GroupMemoryBarrierWithGroupSync();
+		if (thid < d) {
+			ai = offset * (2 * thid + 1) - 1;
+			bi = offset * (2 * thid + 2) - 1;
+			ai += CONFLICT_FREE_OFFSET(ai);
+			bi += CONFLICT_FREE_OFFSET(bi);
+			temp[bi] += temp[ai];
+		}
+		offset *= 2;
+	}
+
+	if (thid == 0) { temp[N - 1 + CONFLICT_FREE_OFFSET(N - 1)] = 0; } //clear the last element
+
+
+	//downsweep
+	for (d = 1; d < N; d *= 2) {
+		offset >>= 1;
+		GroupMemoryBarrierWithGroupSync();
+		if (thid < d) {
+			ai = offset * (2 * thid + 1) - 1;
+			bi = offset * (2 * thid + 2) - 1;
+			ai += CONFLICT_FREE_OFFSET(ai);
+			bi += CONFLICT_FREE_OFFSET(bi);
+			int t = temp[ai];
+			temp[ai] = temp[bi];
+			temp[bi] += t;
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	//write results
+	//shift to get to inclusive scan
+	ai = thid;
+	bi = thid + (N / 2);
+	bankOffsetA = CONFLICT_FREE_OFFSET(ai);
+	bankOffsetB = CONFLICT_FREE_OFFSET(bi);
+
+	if (thid != 0)
+		scanOutput[ai - 1] = temp[ai + bankOffsetA];
+	scanOutput[bi - 1] = temp[bi + bankOffsetB];
+
+	GroupMemoryBarrierWithGroupSync();
+	if (thid == 0)
+		scanOutput[N - 1] = scanOutput[N - 2] + scanInput[N - 1];
+}
