@@ -29,7 +29,8 @@ void Bin (uint3 id : SV_DispatchThreadID)
 
 	float2 length = boundaryMax - boundaryMin;
 
-	//polynomial index of bin index
+	//check if the particle is alive.
+	///if not, tuck away in the top bin.
 	if (properties[id.x].state == PARTICLE_STATE_DEAD) {
 		bins[id.x] = binNumber[0] * binNumber[1];
 	} else {

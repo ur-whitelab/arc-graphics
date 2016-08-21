@@ -4,7 +4,8 @@
 
 #pragma kernel ApplyForces
 
-RWStructuredBuffer<float2> positions;
+StructuredBuffer<float2> positions;
+StructuredBuffer<float2> velocities;
 RWStructuredBuffer<float2> forces;
 RWStructuredBuffer<ParticleProperties> properties;
 StructuredBuffer<ParticleGInfo> ginfo;
@@ -15,34 +16,32 @@ float strength;
 int maxNeighbors;
 const static float PI = 3.14159254f;
 
-[numthreads(PARTICLE_BLOCKSIZE,1,1)]
+[numthreads(PARTICLE_BLOCKSIZE, 1, 1)]
 void ApplyForces(uint3 id : SV_DispatchThreadID)
 {
 	uint i = id.x;
 	uint NP, _, nj;
 	positions.GetDimensions(NP, _);
-	float r2, s2, deno;
+	float r2, s2, v2, deno;
 	float2 r;
 
-	
+
 	s2 = cutoff * cutoff;
-	deno = 1.0 / s2;
-	
-	if (properties[i].state == PARTICLE_STATE_NLIST_VALID && ginfo[i].interactions & INTERACTIONS_DISPERSION) {
+
+	if (properties[i].state == PARTICLE_STATE_NLIST_VALID && ginfo[i].interactions & INTERACTIONS_ALIGN) {
 		for (int j = 0; j < maxNeighbors; j++) {
 			nj = nlist[NLIST_INDEX(i, j)];
 			if (nj == -1)
 				break;
 
-			if (!(ginfo[nj].interactions & INTERACTIONS_DISPERSION))
+			if (!(ginfo[nj].interactions & INTERACTIONS_ALIGN))
 				continue;
 			r = positions[nj] - positions[i];
 			r2 = dot(r, r);
 			if (r2 < s2) {
-				//strength * cos(PI / 2 * r2 * deno) * r;
-				//strength * pow(s2 / r2, 2) * r;
-				forces[i] -= strength * sin(PI / 2 * r2 * deno) * r;
-				forces[nj] += strength * sin(PI / 2 * r2 * deno) * r;
+				r = velocities[nj] - velocities[i];				
+				forces[i] += strength * r / r2;
+				forces[nj] -= strength * r / r2;
 			}
 		}
 	}

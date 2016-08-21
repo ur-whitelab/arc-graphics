@@ -133,6 +133,6 @@ void PrepareModifierSum(uint3 id : SV_DispatchThreadID) {
 	inputSum[id.x] = int3(0, 0, 0);
 	if (properties[id.x].lastModifier == modifier[0] && properties[id.x].lastModifierIndex == modifier[1]) {
 		state = properties[id.x].state;
-		inputSum[id.x] = int3(state == PARTICLE_STATE_DEAD, state == PARTICLE_STATE_ALIVE, state > 1);
+		inputSum[id.x] = int3(state == PARTICLE_STATE_DEAD, state == PARTICLE_STATE_ALIVE, state >= 1);
 	}
 }

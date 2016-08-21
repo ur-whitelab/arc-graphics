@@ -35,6 +35,10 @@ public static class ShaderConstants
     public const int PARTICLE_MODIFIER_TARGET = 2;
     public const int PARTICLE_MODIFIER_PARTICLE = 3;
 
+    public const int INTERACTIONS_GRAVITY = 1 << 0;
+    public const int INTERACTIONS_DISPERSION = 1 << 1;
+    public const int INTERACTIONS_ALIGN = 1 << 2;
+
     public static readonly int[] PARTICLE_STATES = { PARTICLE_STATE_DEAD, PARTICLE_STATE_ALIVE, PARTICLE_STATE_NLIST_VALID };
     public static readonly int[] PARTICLE_MODIFIERS = { PARTICLE_MODIFIER_SPAWN, PARTICLE_MODIFIER_INTEGRATOR, PARTICLE_MODIFIER_TARGET, PARTICLE_MODIFIER_PARTICLE };
 

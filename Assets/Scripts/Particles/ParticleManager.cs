@@ -6,7 +6,9 @@ public class ParticleManager : MonoBehaviour {
 
     public float TimeStep = 0.01f;
     public float ParticleLifeEnd = 25f;
+    public float DragCoefficient = 0f;
     private float ParticleDiameter = 1.0f;
+
 
     private List<Compute> computes;
 
@@ -101,7 +103,7 @@ public class ParticleManager : MonoBehaviour {
         {            
             props[i].state = ShaderConstants.PARTICLE_STATE_DEAD;
             //if(i < 3000)
-              //  props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
+                //props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
             props[i].color = new Vector4(1f, 1f, 1f, 1f);
         }
 
@@ -109,9 +111,11 @@ public class ParticleManager : MonoBehaviour {
 
         //set up group info.
         var temp = new ShaderConstants.GInfo[ParticleNumber];
-        for (uint i = 0; i < ParticleNumber; i++)
-            if (i % 2 == 0)
-                temp[i].interactions = 1;
+        for (uint i = 0; i < ParticleNumber; i++) {
+               temp[i].interactions = ShaderConstants.INTERACTIONS_DISPERSION | 
+                ShaderConstants.INTERACTIONS_GRAVITY | 
+                ShaderConstants.INTERACTIONS_ALIGN; 
+        }
         ginfo.SetData(temp);
 
 
@@ -131,6 +135,7 @@ public class ParticleManager : MonoBehaviour {
         //set constants
         integrateShader.SetFloat("timeStep", TimeStep);
         integrateShader.SetFloat("lifeEnd", ParticleLifeEnd);
+        integrateShader.SetFloat("drag", DragCoefficient);
 
         //set-up our geometry for drawing.
         quadPoints = new ComputeBuffer(6, ShaderConstants.QUAD_STRIDE);

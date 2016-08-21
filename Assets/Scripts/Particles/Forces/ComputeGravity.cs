@@ -6,7 +6,7 @@ public class ComputeGravity : Compute
 
     
     public ComputeShader gravityShader;
-    public float GravityStrength;
+    public float GravityStrength = 1;
 
     private int forceHandle;
     private ComputeBuffer nlist;

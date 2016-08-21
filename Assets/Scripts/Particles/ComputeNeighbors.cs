@@ -134,7 +134,7 @@ public class ComputeNeighbors : Compute {
                 if ((r1.magnitude) <= Cutoff)
                 {
                     offsets.Add(i + j * cpuBins[0]);
-                    UnityEngine.Debug.Log("Decided that " + i + " " + j + " is close enough to consider");
+                    //UnityEngine.Debug.Log("Decided that " + i + " " + j + " is close enough to consider");
                 }
 
             }
