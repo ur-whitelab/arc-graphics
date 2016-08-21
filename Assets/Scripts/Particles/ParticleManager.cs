@@ -98,6 +98,8 @@ public class ParticleManager : MonoBehaviour {
         for (uint i = 0; i < ParticleNumber; i++)
         {            
             props[i].state = ShaderConstants.PARTICLE_STATE_DEAD;
+            //if(i < 3000)
+              //  props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
             props[i].color = new Vector4(1f, 1f, 1f, 1f);
         }
            

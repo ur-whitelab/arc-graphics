@@ -2,6 +2,7 @@
 
 #include "DataTypes.cginc"
 
+
 #pragma kernel ApplyForces
 
 
@@ -42,7 +43,7 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 
 
 			r = normalize(r);
-			r2 += 1; //add one to avoid singularity
+			r2 += 1; //add to avoid singularity
 			//compute cutoff correction to zeroforces there
 			c = strength * r / (cutoff * cutoff + 1);
 			forces[i] += (strength * r / r2 - c); 
