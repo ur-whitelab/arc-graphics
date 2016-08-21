@@ -43,9 +43,9 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 
 
 			r = normalize(r);
-			r2 += 1; //add to avoid singularity
+			r2 += 0.2; //add to avoid singularity
 			//compute cutoff correction to zeroforces there
-			c = 1.0 / (cutoff * cutoff);
+			c = 1.0 / (cutoff * cutoff + 0.2);
 			//now total strength
 			c = strength * (1.0 / r2 - c);
 			forces[i] += c * r; 

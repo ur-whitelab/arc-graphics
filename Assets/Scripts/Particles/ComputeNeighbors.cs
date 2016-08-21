@@ -185,6 +185,20 @@ public class ComputeNeighbors : Compute {
         binOffsets.GetData(cpuBinOffsets);
     }
 
+    private void debugGetAll()
+    {
+        binOffsets.GetData(cpuBinOffsets);
+        var b = new int[bins.count];
+        var sp = new int[bins.count, 2];
+        var o = new int[binStarts.count];
+
+        bins.GetData(b);
+        sortedParticles.GetData(sp);
+        binStarts.GetData(o);
+
+        return;
+    }
+
 
     //We use states here to amoritize the calcualtion.
     //Obviously it would be better to use yields, but that breaks
@@ -237,7 +251,6 @@ public class ComputeNeighbors : Compute {
                     UnityEngine.Debug.Log(stopwatch.ElapsedMilliseconds + " " + buildDispatchOffset);
                     UnityEngine.Debug.Log(" " + n * buildDispatchOffset * ShaderConstants.PARTICLE_BLOCK_SIZE + " to " + n * (buildDispatchOffset + 1) * ShaderConstants.PARTICLE_BLOCK_SIZE);
                 }
-                
 
                 buildDispatchOffset++;
                 //computeState = States.pause;

@@ -14,7 +14,7 @@ public class ParticleManager : MonoBehaviour {
     public ComputeShader integrateShader;
     public Material particleMaterial;
 
-    public const int ParticleNumber = 262144;//65536;//16384;//262144; //2^18. Must be multiple of 256 (2^8) due to particle reduction blocksize
+    public const int ParticleNumber = 262144;//262144;//65536;//16384;//262144; //2^18. Must be multiple of 256 (2^8) due to particle reduction blocksize
 
     //compute buffers for particle information
     public ComputeBuffer positions;

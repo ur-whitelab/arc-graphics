@@ -31,7 +31,7 @@ void Bin (uint3 id : SV_DispatchThreadID)
 
 	//polynomial index of bin index
 	if (properties[id.x].state == PARTICLE_STATE_DEAD) {
-		bins[id.x] = binNumber[0] * binNumber[1] + 1;
+		bins[id.x] = binNumber[0] * binNumber[1];
 	} else {
 		uint x = (uint) ((positions[id.x][0] - boundaryMin[0]) / length[0] * binNumber[0]);
 		uint y = (uint) ((positions[id.x][1] - boundaryMin[1]) / length[1] * binNumber[1]);
@@ -48,11 +48,9 @@ void Bin (uint3 id : SV_DispatchThreadID)
 void BinStarts(uint3 id : SV_DispatchThreadID)
 {
 	//contains scattered writes. Maybe not the best.
-	if (id.x > 0) {
-		//remember to check against the upper bin which is for dead particles
-		if (sortedParticles[id.x - 1][1] != sortedParticles[id.x][1])
-			binStarts[sortedParticles[id.x][1]] = id.x;
-	}
+	if (id.x == 0 || sortedParticles[id.x - 1][1] != sortedParticles[id.x][1])
+		binStarts[sortedParticles[id.x][1]] = id.x;
+
 
 }
 
@@ -70,7 +68,7 @@ void Build(uint3 id : SV_DispatchThreadID)
 	uint tid = sortedParticles[id.x + buildOffset][0];
 	uint nj = 0;
 	int NB = binNumber[0] * binNumber[1];
-	uint i;
+	uint i, j;
 	int index;
 	float2 r;
 
@@ -82,7 +80,6 @@ void Build(uint3 id : SV_DispatchThreadID)
 
 	if(properties[tid].state == PARTICLE_STATE_ALIVE)//upgrade state if it's "ALIVE"
 		properties[tid].state = PARTICLE_STATE_NLIST_VALID; //optimistic we'll get to the bottom ;)
-
 	
 	for (uint o = 0; o < 2 * N; o++) {
 		if(o % 2 == 0)
@@ -92,12 +89,18 @@ void Build(uint3 id : SV_DispatchThreadID)
 		if (index >= NB || index < 0 || o == 1) //the o == 1 is so we don't double count our own bin.
 			continue;
 		//Note NB is not the true total of bins, since we keep an extra for dead particles
-		//hence no out of bounds error in the next line.
-		for (i = binStarts[index]; i < binStarts[index + 1]; i++) {
-			r = positions[tid] - positions[sortedParticles[i][0]];
+		//hence no out of bounds error in the next line.		
+		for (i = binStarts[index]; i < NP; i++) {
+
+			j = sortedParticles[i][0];
+
+			if (sortedParticles[i][1] != index)
+				break;
+
+			r = positions[tid] - positions[j];
 			//we only build half-neighbor lists to save space.
-			if (sortedParticles[i][0] < tid && dot(r, r) < (cutoff * cutoff)) {
-				nlist[NLIST_INDEX(tid, nj)] = sortedParticles[i][0];								
+			if (j < tid && dot(r, r) < (cutoff * cutoff)) {
+				nlist[NLIST_INDEX(tid, nj)] = j;			
 				nj = min(maxNeighbors - 1, nj + 1); //done to prevent divergence as opposed to if/break				
 			}
 		}
