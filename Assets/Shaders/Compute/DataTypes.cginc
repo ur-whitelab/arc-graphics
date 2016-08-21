@@ -16,8 +16,10 @@
 #define PARTICLE_MODIFIER_TARGET 2
 #define PARTICLE_MODIFIER_PARTICLE 3
 
+#define INTERACTIONS_GRAVITY 1<<0
+
 #define NLIST_INDEX(i,j) ((j) * NP + (i))
-//#define NLIST_INDEX(i,j) ((i) * maxNeighbors + (j))
+
 
 struct ParticleProperties {
 	uint state;
@@ -29,6 +31,7 @@ struct ParticleProperties {
 
 struct ParticleGInfo {
 	uint group;
+	uint interactions;
 };
 
 struct Source {

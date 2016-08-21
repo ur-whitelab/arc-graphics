@@ -109,6 +109,9 @@ public class ParticleManager : MonoBehaviour {
 
         //set up group info.
         var temp = new ShaderConstants.GInfo[ParticleNumber];
+        for (uint i = 0; i < ParticleNumber; i++)
+            if (i % 2 == 0)
+                temp[i].interactions = 1;
         ginfo.SetData(temp);
 
 

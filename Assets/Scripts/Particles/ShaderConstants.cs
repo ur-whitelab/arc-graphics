@@ -15,7 +15,7 @@ public static class ShaderConstants
 
     public const int SOURCE_STRIDE = 2 * 2 * FLOAT_STRIDE + FLOAT_STRIDE + 1 * INT_STRIDE + 1 * UINT_STRIDE;
     public const int PROP_STRIDE = 3 * UINT_STRIDE + FLOAT_STRIDE + 4 * FLOAT_STRIDE;
-    public const int GINFO_STRIDE = 1 * UINT_STRIDE;
+    public const int GINFO_STRIDE = 2 * UINT_STRIDE;
     public const int ATTRACTOR_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
     public const int WALL_STRIDE = 2 * 2 * FLOAT_STRIDE;
     public const int TARGET_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
@@ -113,7 +113,8 @@ public static class ShaderConstants
     //game info
     public struct GInfo
     {
-        uint group;
+        public uint group;
+        public uint interactions;
     }
 
 }

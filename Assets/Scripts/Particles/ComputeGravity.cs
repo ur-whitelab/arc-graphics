@@ -19,6 +19,7 @@ public class ComputeGravity : Compute
         gravityShader.SetBuffer(forceHandle, "positions", pm.positions);
         gravityShader.SetBuffer(forceHandle, "forces", pm.forces);
         gravityShader.SetBuffer(forceHandle, "properties", pm.properties);
+        gravityShader.SetBuffer(forceHandle, "ginfo", pm.ginfo);
         gravityShader.SetFloat("strength", GravityStrength * 1E0f);
     }
 

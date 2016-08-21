@@ -9,6 +9,7 @@
 StructuredBuffer<float2> positions;
 RWStructuredBuffer<float2> forces;
 RWStructuredBuffer<ParticleProperties> properties;
+StructuredBuffer<ParticleGInfo> ginfo;
 StructuredBuffer<int> nlist;
 
 int maxNeighbors;
@@ -30,11 +31,15 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 	int nj;
 
 	
-	if (properties[i].state == PARTICLE_STATE_NLIST_VALID) {
+	if (properties[i].state == PARTICLE_STATE_NLIST_VALID && ginfo[i].interactions & INTERACTIONS_GRAVITY) {
 		for (int j = 0; j < maxNeighbors; j++) {
 			nj = nlist[NLIST_INDEX(i, j)];
 			if (nj == -1)
-				break;			
+				break;
+
+			if (!(ginfo[nj].interactions & INTERACTIONS_GRAVITY))
+				continue;
+
 			r = positions[nj] - positions[i];
 			r2 = dot(r, r);
 
