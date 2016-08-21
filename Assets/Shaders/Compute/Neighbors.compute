@@ -5,9 +5,9 @@
 #pragma kernel Build
 
 RWStructuredBuffer<int> bins; //index is particle ID, value is bin index
-StructuredBuffer<int> sortedParticles;//Index is nothing, value is particle ID. Sorted in bin order. N = partice number
-RWStructuredBuffer<uint> binStarts; //Index is bin, value is index in sorted particles where the bin starts
-StructuredBuffer<float2> positions;
+StructuredBuffer<int2> sortedParticles;//Index is nothing, value is particle ID, bin. Sorted in bin order. N = partice number
+RWStructuredBuffer<uint> binStarts; //Index is bin, value is index in sorted particles where the bin starts. Needs to be large enough to find end (N + 1)
+RWStructuredBuffer<float2> positions;
 RWStructuredBuffer<ParticleProperties> properties;
 RWStructuredBuffer<int> nlist;
 StructuredBuffer<int> binOffsets; //a once computed list of offsets that must be considered for neighbors
@@ -15,19 +15,28 @@ StructuredBuffer<int> binOffsets; //a once computed list of offsets that must be
 float cutoff;
 float2 boundaryMax;
 float2 boundaryMin;
-uint2 binNumber;
+uint2 binNumber; // number of bins in x & y. There is always an extra bin for non-interacting (dead) particles though
 uint maxNeighbors;
 uint exceededMaxNeighbors;
+int buildOffset;
 
 
 [numthreads(PARTICLE_BLOCKSIZE,1,1)]
 void Bin (uint3 id : SV_DispatchThreadID)
 {
+	uint N, _;
+	positions.GetDimensions(N, _);
+
 	float2 length = boundaryMax - boundaryMin;
-	//polynomial index of bin index.	
-	uint x = (uint) ((positions[0] - boundaryMin[0]) / length[0] * binNumber[0]);
-	uint y = (uint) ((positions[1] - boundaryMin[1]) / length[1] * binNumber[1]);
-	bins[id.x] = x + y * binNumber[1];
+
+	//polynomial index of bin index
+	if (properties[id.x].state == PARTICLE_STATE_DEAD) {
+		bins[id.x] = binNumber[0] * binNumber[1] + 1;
+	} else {
+		uint x = (uint) ((positions[id.x][0] - boundaryMin[0]) / length[0] * binNumber[0]);
+		uint y = (uint) ((positions[id.x][1] - boundaryMin[1]) / length[1] * binNumber[1]);
+		bins[id.x] = x + y * binNumber[0];
+	}
 
 	//clear bin starts because now is a good time.
 	if (id.x < binNumber.x * binNumber.y)
@@ -38,9 +47,11 @@ void Bin (uint3 id : SV_DispatchThreadID)
 [numthreads(PARTICLE_BLOCKSIZE, 1, 1)]
 void BinStarts(uint3 id : SV_DispatchThreadID)
 {
+	//contains scattered writes. Maybe not the best.
 	if (id.x > 0) {
-		if (bins[sortedParticles[id.x - 1]] != bins[sortedParticles[id.x]])
-			binStarts[bins[sortedParticles[id.x]]] = id.x;
+		//remember to check against the upper bin which is for dead particles
+		if (sortedParticles[id.x - 1][1] != sortedParticles[id.x][1])
+			binStarts[sortedParticles[id.x][1]] = id.x;
 	}
 
 }
@@ -48,50 +59,54 @@ void BinStarts(uint3 id : SV_DispatchThreadID)
 [numthreads(PARTICLE_BLOCKSIZE, 1, 1)]
 void Build(uint3 id : SV_DispatchThreadID)
 {
-	uint N, _;
+	uint N, NP, _;
 	binOffsets.GetDimensions(N, _);
+	positions.GetDimensions(NP, _);
 
 	
 	uint count = 0;
-	uint ni = id.x * maxNeighbors;
+	//use the sorted particle id, so that threads
+	//in the same warp have nearby particles.
+	uint tid = sortedParticles[id.x + buildOffset][0];
+	uint nj = 0;
+	int NB = binNumber[0] * binNumber[1];
+	uint i;
 	int index;
 	float2 r;
 
-	//get particles in my cell first
-	//assume everyhing in my cell is close enough
-	for (uint i = binStarts[bins[id.x]]; i < binStarts[bins[id.x] + 1]; i++) {
-		if(sortedParticles[i] != id.x) //don't add yourself
-			nlist[ni++] = sortedParticles[i];
-		if (ni == maxNeighbors) {
-			exceededMaxNeighbors = true;
-			return;
-		}
-	}
 
+	//all the dead paritcles are in the same upper bin, so there shouldn't be 
+	//too much divergence here.
+	if (properties[tid].state == PARTICLE_STATE_DEAD)
+		return;
+
+	properties[tid].state = PARTICLE_STATE_NLIST_VALID; //optimistic we'll get to the bottom ;)
+	//properties[tid].color = float4(1, 0, 0, 1);
+
+	
 	for (uint o = 0; o < 2 * N; o++) {
 		if(o % 2 == 0)
-			index = binOffsets[o / 2] + bins[id.x];
+			index = binOffsets[o / 2] + bins[tid];
 		else
-			index = -binOffsets[o / 2] + bins[id.x];
-		if (index > binNumber[0] * binNumber[1] || index <= 0)
+			index = -binOffsets[o / 2] + bins[tid];
+		if (index >= NB || index < 0 || o == 1) //the o == 1 is so we don't double count our own bin.
 			continue;
-		for (uint i = binStarts[index]; i < binStarts[index + 1]; i++) {
-			if (ni == maxNeighbors) {
-				exceededMaxNeighbors = true;
-				return;
+		//Note NB is not the true total of bins, since we keep an extra for dead particles
+		//hence no out of bounds error in the next line.
+		for (i = binStarts[index]; i < binStarts[index + 1]; i++) {
+			r = positions[tid] - positions[sortedParticles[i][0]];
+			//we only build half-neighbor lists to save space.
+			if (sortedParticles[i][0] < tid && dot(r, r) < cutoff * cutoff) {
+				nlist[NLIST_INDEX(tid, nj)] = sortedParticles[i][0];								
+				nj = min(maxNeighbors - 1, nj + 1); //done to prevent divergence as opposed to if/break				
 			}
-			r = positions[id.x] - positions[sortedParticles[i]];
-			if(dot(r,r) < cutoff)
-				nlist[ni++] = sortedParticles[i];
 		}
-	}
-	for (i = ni; ni < maxNeighbors; i++)
-		nlist[i] = -1;
+	}			
 
-	//for debugging
-	if (id.x == 0) {
-		for (i = 0; i < maxNeighbors && nlist[i] != -1; i++) {
-			properties[i].color = float4(0, 1, 0, 1);
-		}
-	}
+	for (i = nj; i < maxNeighbors; i++)
+		nlist[NLIST_INDEX(tid, i)] = -1;
+
+	if (nj - 1 == maxNeighbors)//may have exceeded above due to min
+		exceededMaxNeighbors = 1;
+
 }

@@ -1,0 +1,52 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+
+#include "DataTypes.cginc"
+
+#pragma kernel ApplyForces
+
+
+StructuredBuffer<float2> positions;
+RWStructuredBuffer<float2> forces;
+RWStructuredBuffer<ParticleProperties> properties;
+StructuredBuffer<int> nlist;
+
+int maxNeighbors;
+float strength;
+float cutoff;
+
+
+
+[numthreads(PARTICLE_BLOCKSIZE, 1, 1)]
+void ApplyForces(uint3 id : SV_DispatchThreadID)
+{
+	int i = id.x;
+	//need NP for indexing nlist
+	uint NP, _;
+	positions.GetDimensions(NP, _);
+	float2 r;
+	float r2;
+	float c;
+	int nj;
+
+	
+	if (properties[i].state == PARTICLE_STATE_NLIST_VALID) {
+		for (int j = 0; j < maxNeighbors; j++) {
+			nj = nlist[NLIST_INDEX(i, j)];
+			if (nj == -1)
+				break;			
+			r = positions[nj] - positions[i];
+			r2 = dot(r, r);
+
+			if (r2 > cutoff)
+				continue;
+
+
+			r = normalize(r);
+			r2 += 1; //add one to avoid singularity
+			//compute cutoff correction to zeroforces there
+			c = strength * r / (cutoff * cutoff + 1);
+			forces[i] += (strength * r / r2 - c); 
+			forces[nj] -= (strength * r / r2 - c);
+		}
+	}
+}

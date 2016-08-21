@@ -23,7 +23,7 @@ public class GameUI : MonoBehaviour
 
         //Just use ananyomous event handlers
         ps.ComputeModifierStatistics(0, 0, (s, e) => {
-            AliveParticlesText.text = ((ParticleStatisticsModifierEventArgs)e).sum[1].ToString();
+            AliveParticlesText.text = ((ParticleStatisticsModifierEventArgs)e).sum[2].ToString();
         });
 
         ps.ComputeTargetStatistics(0, (s, e) => {

@@ -4,16 +4,19 @@
 // BEFORE DEBUGGING!!!!!
 //NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 //Please make sure these are consistent with what is in the shader
-#define PARTICLE_BLOCKSIZE 256
+#define PARTICLE_BLOCKSIZE 128
 
 #define PARTICLE_STATE_DEAD 0
 #define PARTICLE_STATE_ALIVE 1
-#define PARTICLE_STATE_DYING 2
+#define PARTICLE_STATE_NLIST_VALID 2
 
 #define PARTICLE_MODIFIER_SPAWN 0
 #define PARTICLE_MODIFIER_INTEGRATOR 1
 #define PARTICLE_MODIFIER_TARGET 2
 #define PARTICLE_MODIFIER_PARTICLE 3
+
+#define NLIST_INDEX(i,j) ((j) * NP + (i))
+//#define NLIST_INDEX(i,j) ((i) * maxNeighbors + (j))
 
 struct ParticleProperties {
 	uint state;
@@ -25,8 +28,7 @@ struct ParticleProperties {
 
 struct Source {
 	float2 position;
-	float2 velocity_1;
-	float2 velocity_2;
+	float2 velocity;
 	float life_start;
 	uint spawn_period;
 	int spawn_amount;

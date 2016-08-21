@@ -13,7 +13,7 @@ public static class ShaderConstants
     public const int INT_STRIDE = 4;
     public const int QUAD_STRIDE = 12;
 
-    public const int SOURCE_STRIDE = 2 * 3 * FLOAT_STRIDE + FLOAT_STRIDE + 1 * UINT_STRIDE + 1 * INT_STRIDE;
+    public const int SOURCE_STRIDE = 2 * 2 * FLOAT_STRIDE + FLOAT_STRIDE + 1 * UINT_STRIDE + 1 * INT_STRIDE;
     public const int PROP_STRIDE = 3 * UINT_STRIDE + FLOAT_STRIDE + 4 * FLOAT_STRIDE;
     public const int ATTRACTOR_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
     public const int WALL_STRIDE = 2 * 2 * FLOAT_STRIDE;
@@ -21,46 +21,34 @@ public static class ShaderConstants
 
     public const int SPAWN_BLOCKSIZE_X = 1;
     public const int SPAWN_BLOCKSIZE_Y = 128;
-    public const int PARTICLE_BLOCK_SIZE = 256;
+    public const int PARTICLE_BLOCK_SIZE = 128;
     public const int REDUCTION_BLOCKSIZE = 128;
 
 
     public const int PARTICLE_STATE_DEAD = 0;
     public const int PARTICLE_STATE_ALIVE = 1;
-    public const int PARTICLE_STATE_DYING = 2;
+    public const int PARTICLE_STATE_NLIST_VALID = 2;
 
     public const int PARTICLE_MODIFIER_SPAWN = 0;
     public const int PARTICLE_MODIFIER_INTEGRATOR = 1;
     public const int PARTICLE_MODIFIER_TARGET = 2;
     public const int PARTICLE_MODIFIER_PARTICLE = 3;
 
-    public static readonly int[] PARTICLE_STATES = { PARTICLE_STATE_DEAD, PARTICLE_STATE_ALIVE, PARTICLE_STATE_DYING };
+    public static readonly int[] PARTICLE_STATES = { PARTICLE_STATE_DEAD, PARTICLE_STATE_ALIVE, PARTICLE_STATE_NLIST_VALID };
     public static readonly int[] PARTICLE_MODIFIERS = { PARTICLE_MODIFIER_SPAWN, PARTICLE_MODIFIER_INTEGRATOR, PARTICLE_MODIFIER_TARGET, PARTICLE_MODIFIER_PARTICLE };
 
     public struct Source
     {
         public Vector2 position;
-        public Vector2 velocity1;
-        public Vector2 velocity2;
+        public Vector2 velocity;
         public float lifeStart;
         public uint spawnPeriod;
         public int spawnAmount;
 
-        public Source(Vector2 position, Vector2 velocity1, Vector2 velocity2, float lifeStart = 0f, uint spawnPeriod = 60, int spawnAmount = 1)
-        {
-            this.position = position;
-            this.velocity1 = velocity1;
-            this.velocity2 = velocity2;
-            this.lifeStart = lifeStart;
-            this.spawnPeriod = spawnPeriod;
-            this.spawnAmount = spawnAmount;
-        }
-
         public Source(Vector2 position, Vector2 velocity, float lifeStart = 0f, uint spawnPeriod = 60, int spawnAmount = 1)
         {
             this.position = position;
-            this.velocity1 = velocity;
-            this.velocity2 = velocity;
+            this.velocity = velocity;
             this.lifeStart = lifeStart;
             this.spawnPeriod = spawnPeriod;
             this.spawnAmount = spawnAmount;

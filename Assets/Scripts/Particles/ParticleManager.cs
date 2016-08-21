@@ -14,7 +14,7 @@ public class ParticleManager : MonoBehaviour {
     public ComputeShader integrateShader;
     public Material particleMaterial;
 
-    public const int ParticleNumber = 262144; //2^18. Must be multiple of 256 (2^8) due to particle reduction blocksize
+    public const int ParticleNumber = 262144;//65536;//16384;//262144; //2^18. Must be multiple of 256 (2^8) due to particle reduction blocksize
 
     //compute buffers for particle information
     public ComputeBuffer positions;
@@ -31,19 +31,20 @@ public class ParticleManager : MonoBehaviour {
     private int integrate2Handle;
 
     // Use this for initialization
-    private void updateBoundary()
+    public void updateParticleBoundary(Vector2 low, Vector2 high)
     {
 
-        integrateShader.SetFloats("boundaryLow", new float[] { world.boundariesLow.x, world.boundariesLow.y });
-        integrateShader.SetFloats("boundaryHigh", new float[] { world.boundariesHigh.x, world.boundariesHigh.y });
+        integrateShader.SetFloats("boundaryLow", new float[] { low.x,low.y });
+        integrateShader.SetFloats("boundaryHigh", new float[] { high.x, high.y });
+        foreach (var c in computes)
+            c.UpdateBoundary(low, high);
     }
 
     public IEnumerator slowUpdates()
     {
         for (;;)
         {
-            updateBoundary();
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(100f);
         }
     }
 
@@ -53,7 +54,7 @@ public class ParticleManager : MonoBehaviour {
             world = GameObject.Find("World").GetComponent<World>();
 
         computes = new List<Compute>();
-        foreach (Compute c in this.GetComponentsInChildren<Compute>())
+        foreach (var c in this.GetComponentsInChildren<Compute>())
             computes.Add(c);
 
         //set handles
@@ -78,13 +79,13 @@ public class ParticleManager : MonoBehaviour {
 
         //make positions interesting
         for (int i = 0; i < ParticleNumber; i++)
-            zeros[i].Set(Random.Range(-10f, 10f), Random.Range(-10f, 10f));
+            zeros[i].Set(Random.Range(-100f, 100f), Random.Range(-100f, 100f));
         positions.SetData(zeros);
 
         //make velocities interesting
         for (int i = 0; i < ParticleNumber; i++)
             zeros[i].Set(Random.Range(-1f,1f), Random.Range(-1f,1f));
-        velocities.SetData(zeros);
+        //velocities.SetData(zeros);
 
         //make forces interesting
         
@@ -94,8 +95,8 @@ public class ParticleManager : MonoBehaviour {
         
 
         ShaderConstants.Prop[] props = new ShaderConstants.Prop[ParticleNumber];
-        for (int i = 0; i < ParticleNumber; i++)
-        {
+        for (uint i = 0; i < ParticleNumber; i++)
+        {            
             props[i].state = ShaderConstants.PARTICLE_STATE_DEAD;
             props[i].color = new Vector4(1f, 1f, 1f, 1f);
         }
@@ -137,7 +138,7 @@ public class ParticleManager : MonoBehaviour {
         particleMaterial.SetBuffer("properties", properties);
         particleMaterial.SetBuffer("quadPoints", quadPoints);
 
-        foreach (Compute c in computes)
+        foreach (var c in computes)
             c.SetupShader(this);
 
         StartCoroutine(slowUpdates());
@@ -152,7 +153,7 @@ public class ParticleManager : MonoBehaviour {
         properties.Release();
         lastPositions.Release();
 
-        foreach (Compute c in computes)
+        foreach (var c in computes)
             c.ReleaseBuffers();
 
     }
@@ -165,17 +166,17 @@ public class ParticleManager : MonoBehaviour {
 	void Update () {
         int nx = Mathf.CeilToInt((float) ParticleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE);
 
-        foreach (Compute c in computes)
+        foreach (var c in computes)
             c.UpdatePreIntegrate(nx);
 
         integrateShader.Dispatch(integrate1Handle, nx, 1, 1);
 
-        foreach (Compute c in computes)
+        foreach (var c in computes)
             c.UpdateForces(nx);
 
         integrateShader.Dispatch(integrate2Handle, nx, 1, 1);
 
-        foreach (Compute c in computes)
+        foreach (var c in computes)
             c.UpdatePostIntegrate(nx);
 
     }
@@ -184,7 +185,7 @@ public class ParticleManager : MonoBehaviour {
     {
         if (!SystemInfo.supportsComputeShaders)
         {
-            return;
+            new System.Exception("Compute shaders not supported on your platform.");
         }
 
         // set the pass -> there is only 1 pass here because we have a simple shader

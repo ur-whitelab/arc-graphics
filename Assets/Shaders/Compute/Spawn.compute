@@ -66,18 +66,22 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 		}
 		*/
 		if (to_add > 0) {
-			float lerp_s;
 			for (i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
-
+				int state;
 				//go ahead and add now
 				if (to_add > 0 && properties[i].state == PARTICLE_STATE_DEAD) {
+
+					//there may be other nx's interacting. Going to sort-of ignore that
+					//by interlocked exchanges. It's not deterministic though if we'll get enough
+					//particles for the source.
+					InterlockedExchange(properties[i].state, PARTICLE_STATE_ALIVE, state);
+					if (state != PARTICLE_STATE_DEAD)
+						continue;
+
 					to_add -= 1;
 
 					positions[i] = sources[id.x].position;
-					//in theory, this should never need to be clamped. This code is so hard :(
-					lerp_s = clamp((float)(count + to_add) / sources[id.x].spawn_amount, 0, 1);
-					velocities[i] = lerp(sources[id.x].velocity_1, sources[id.x].velocity_2, float2(lerp_s, lerp_s));
-					properties[i].state = PARTICLE_STATE_ALIVE;
+					velocities[i] = sources[id.x].velocity;
 					properties[i].life = sources[id.x].life_start;
 					properties[i].color = float4(0, 0, 1, 1);
 					properties[i].lastModifier = PARTICLE_MODIFIER_SPAWN;

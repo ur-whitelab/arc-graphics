@@ -9,12 +9,7 @@ public class ComputeWalls : Compute
     public ComputeShader wallShader;
 
     private ComputeBuffer walls;
-    private List<ShaderConstants.Wall> cpu_walls;
-
-    public void Awake()
-    {
-        cpu_walls = new List<ShaderConstants.Wall>();
-    }
+    private List<ShaderConstants.Wall> cpu_walls = new List<ShaderConstants.Wall>();
 
     public override void SetupShader(ParticleManager pm)
     {

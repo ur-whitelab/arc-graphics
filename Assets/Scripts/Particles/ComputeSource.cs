@@ -127,7 +127,7 @@ public class ComputeSource : Compute {
     }
 
     private void syncBuffers() { 
-        //extend if necessary
+        //extend if necessary        
         if (sources != null)
             sources.Release();
         ShaderConstants.Source[] data = extendSources(cpuSources);
@@ -171,11 +171,13 @@ public class ComputeSource : Compute {
         if (cpuSources.Count == 0)
             return;
 
-        int ns = Mathf.CeilToInt((float)gpuSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);
+        int ns = Mathf.CeilToInt((float)gpuSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);        
         spawnShader.Dispatch(spawnHandle, ns, 1, 1);
 
-        //This code mimicks the GPU code
-        //Need to keep track of how many particles I've created, etc.
+        //for profiling (forces GPU-CPU sync)
+        //sources.GetData(cpuSources.ToArray());
+
+        //Check to see if the GPU souces are spewing too many/too few particles
 
         bool dirty = false;
         for (int i = 0; i < sourceInfo.Count; i++)
@@ -193,7 +195,7 @@ public class ComputeSource : Compute {
                 s.spawnAmount = 1;
                 cpuSources[i] = s;
                 dirty = true;
-            }
+            }    
         }
         if (dirty)
             syncBuffers();

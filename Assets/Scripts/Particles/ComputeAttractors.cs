@@ -33,7 +33,7 @@ public class ComputeAttractors : Compute
             AttractorShader.Dispatch(forceHandle, nx, 1, 1);
     }
 
-    public int AddAttractor(Vector2 location, float magnitude = 5f)
+    public int AddAttractor(Vector2 location, float magnitude = 7f)
     {
         int index = cpu_attractors.Count;
         cpu_attractors.Add(new ShaderConstants.Attractor(location, magnitude));

@@ -2,6 +2,10 @@
 using System.Collections;
 using System;
 
+/*
+ *  Sorts ints. The output is an int2, where the first value corresponds to the index of the input array and the second is 
+ *  the value of the input array.
+ */
 public class ComputeSort : MonoBehaviour {
 
     public ComputeShader SortShader;
@@ -16,9 +20,9 @@ public class ComputeSort : MonoBehaviour {
     private int finishHandle;
     private int zeroHandle;
 
-    public const int SCAN_BLOCKSIZE = 128;
+    public const int SCAN_BLOCKSIZE = 256;
     public const int SORT_BLOCKSIZE = 128;
-    public const int MAX_SCAN_SIZE = 2 * 128;
+    public const int MAX_SCAN_SIZE = 2 * SCAN_BLOCKSIZE;
 
 
 
@@ -49,12 +53,7 @@ public class ComputeSort : MonoBehaviour {
         int size = data.Length;
         if (size % SORT_BLOCKSIZE != 0)
             throw new ArgumentException("Data length must be multiple of SORT_BLOCKSIZE");
-        if(sortInput == null)
-        {
-            sortInput = new ComputeBuffer(size, ShaderConstants.INT_STRIDE);
-            sortOutput = new ComputeBuffer(size, ShaderConstants.INT_STRIDE);
-            OwnBuffer = true;
-        } else if (!OwnBuffer || size != sortInput.count)
+        if (sortInput == null || !OwnBuffer || size != sortInput.count)
         {
             if (sortInput != null)
                 sortInput.Release();
@@ -62,7 +61,7 @@ public class ComputeSort : MonoBehaviour {
                 sortOutput.Release();
 
             sortInput = new ComputeBuffer(size, ShaderConstants.INT_STRIDE);
-            sortOutput = new ComputeBuffer(size, ShaderConstants.INT_STRIDE);
+            sortOutput = new ComputeBuffer(size, 2 * ShaderConstants.INT_STRIDE);
             OwnBuffer = true;
         }
         
@@ -142,7 +141,7 @@ public class ComputeSort : MonoBehaviour {
         if(checkData)
         {
             foreach (var a in array)
-                if (a > MAX_SCAN_SIZE)
+                if (a >= MAX_SCAN_SIZE)
                     throw new ArgumentException("Values too large in input array");
         }
         setupSortBuffers(array);
@@ -150,7 +149,13 @@ public class ComputeSort : MonoBehaviour {
         SortShader.Dispatch(countHandle, Mathf.CeilToInt((float)array.Length / SORT_BLOCKSIZE), 1, 1);
         SortShader.Dispatch(scanHandle, 1, 1, 1);
         SortShader.Dispatch(finishHandle, Mathf.CeilToInt((float)array.Length / SORT_BLOCKSIZE), 1, 1);
-        sortOutput.GetData(array);
+
+        int[,] output = new int[array.Length,2];
+        sortOutput.GetData(output);
+        for(int i = 0; i < array.Length; i++)
+        {
+            array[i] = output[i,1]; //get sorted value. x contains sorted index
+        }
     }
 
     public void GPUSortInplace(ComputeBuffer input, ComputeBuffer output)
@@ -158,7 +163,7 @@ public class ComputeSort : MonoBehaviour {
 
         int size = input.count;
         //check if we have to set the buffers. 
-        if (input != sortInput || output != sortInput)
+        if (input != sortInput || output != sortOutput)
         {
             //have to shuffle buffers
             if (size % SORT_BLOCKSIZE != 0)
@@ -169,9 +174,12 @@ public class ComputeSort : MonoBehaviour {
             if (sortOutput != null)
                 sortOutput.Release();
 
-            SortShader.SetBuffer(countHandle, "sortInput", input);
-            SortShader.SetBuffer(finishHandle, "sortInput", input);
-            SortShader.SetBuffer(finishHandle, "sortOutput", output);
+            sortInput = input;
+            sortOutput = output;
+
+            SortShader.SetBuffer(countHandle, "sortInput", sortInput);
+            SortShader.SetBuffer(finishHandle, "sortInput", sortInput);
+            SortShader.SetBuffer(finishHandle, "sortOutput", sortOutput);
             OwnBuffer = false;
 
         }

@@ -22,6 +22,11 @@ public class World : MonoBehaviour {
         collider = GetComponent<Collider>();
     }
 
+    public void Start()
+    {
+        GameObject.Find("ParticleManager").GetComponent<ParticleManager>().updateParticleBoundary(boundariesLow, boundariesHigh);
+    }
+
     /*
      * Returns the mouse position or zero if it can't find it.
      */

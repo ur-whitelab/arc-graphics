@@ -34,12 +34,12 @@ public class StructureSource : MonoBehaviour
     {
         get
         {
-            return Source.velocity1;
+            return Source.velocity;
         }
         set
         {
             ShaderConstants.Source s = _source;
-            s.velocity1 = value;
+            s.velocity = value;
             Source = s;
         }
     }
@@ -48,8 +48,7 @@ public class StructureSource : MonoBehaviour
         get; private set;
     }
 
-    public Vector2 StartVelocity1;
-    public Vector2 StartVelocity2;
+    public Vector2 StartVelocity;
     public int startSpawnAmount;
 
     private ComputeSource ct;
@@ -67,7 +66,7 @@ public class StructureSource : MonoBehaviour
     void Start()
     {
         ct = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeSource>();
-        _source = new ShaderConstants.Source(new Vector2(transform.position.x, transform.position.y), StartVelocity1, StartVelocity2, 0, 60, startSpawnAmount);
+        _source = new ShaderConstants.Source(new Vector2(transform.position.x, transform.position.y), StartVelocity, 0, 1, startSpawnAmount);
         SourceIndex = ct.AddSource(_source);
     }
 }

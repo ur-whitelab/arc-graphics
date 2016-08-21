@@ -16,7 +16,7 @@ void Walls (uint3 id : SV_DispatchThreadID)
 {
 	uint i = id.x;
 
-	if (properties[i].state != PARTICLE_STATE_ALIVE)
+	if (properties[i].state == PARTICLE_STATE_DEAD)
 		return;
 
 	uint N, _;

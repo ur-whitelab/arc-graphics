@@ -17,8 +17,9 @@ public class ComputeSortTest : MonoBehaviour {
     public void GPUScan()
     {
         //make an array to test
-        int[] array = new int[200];
-        int[] expected = new int[200];
+        int N = ComputeSort.MAX_SCAN_SIZE;
+        int[] array = new int[N];
+        int[] expected = new int[N];
         for (int i = 0; i < 125; i++)
         {
             array[i] = i * i;
@@ -28,7 +29,7 @@ public class ComputeSortTest : MonoBehaviour {
         cs.CPUScan(ref expected);
         cs.GPUScan(ref array);
 
-        for (int i = 0; i < 200; i++)
+        for (int i = 0; i < N; i++)
         {
             Assert.That(array[i], Is.EqualTo(expected[i]), "On element " + i);
         }
@@ -39,7 +40,7 @@ public class ComputeSortTest : MonoBehaviour {
     public void GPUCount()
     {
         //make an array to test
-        uint N = 128;
+        uint N = ComputeSort.MAX_SCAN_SIZE;
         int[] input = new int[N];
         int[] gpu = new int[N];
         int[] cpu = new int[N];
@@ -62,7 +63,7 @@ public class ComputeSortTest : MonoBehaviour {
     [Test]
     public void GPUSort()
     {
-        uint N = 128;
+        uint N = 512;
         int[] gpu = new int[N];
         int[] cpu = new int[N];
         
@@ -74,6 +75,8 @@ public class ComputeSortTest : MonoBehaviour {
 
         System.Array.Sort(cpu);
         cs.GPUSort(ref gpu,true);
+        //call it twice to make sure it doesn't change behavior
+        cs.GPUSort(ref gpu, true);
 
         for (int i = 0; i < N; i++)
         {
@@ -85,8 +88,36 @@ public class ComputeSortTest : MonoBehaviour {
     [Test]
     public void GPUInPlaceSort()
     {
-        //TODO!!!
-        fdsa = 3
+        int N = 256;
+        int[] gpu = new int[N];
+        int[] cpu = new int[N];
+
+        ComputeBuffer input = new ComputeBuffer(N, 4);
+        ComputeBuffer output = new ComputeBuffer(N, 4 * 2);
+
+        //try doing it 5 times.
+        
+        for(int j = 0; j < 5; j++)
+        {
+            for (int i = 0; i < N; i++)
+            {
+                gpu[i] = Random.Range(0, ComputeSort.MAX_SCAN_SIZE);
+                cpu[i] = gpu[i];
+            }
+
+            input.SetData(gpu);
+            cs.GPUSortInplace(input, output);
+
+            int[,] result = new int[N, 2];
+            output.GetData(result);
+
+            System.Array.Sort(cpu);
+
+            for (int i = 0; i < N; i++)
+            {
+                Assert.That(result[i,1], Is.EqualTo(cpu[i]), "On element " + i + " after " + j + " iterations.");
+            }
+        }        
     }
 
 }

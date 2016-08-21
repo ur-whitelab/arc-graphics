@@ -1,9 +1,9 @@
 ﻿
-#define SCAN_BLOCKSIZE 128
+#define SCAN_BLOCKSIZE 256
 #define SORT_BLOCKSIZE 128
-#define SCAN_SIZE 256
-#define NUM_BANKS 16  
-#define LOG_NUM_BANKS 4  
+#define SCAN_SIZE (2 * SCAN_BLOCKSIZE)
+#define NUM_BANKS 32
+#define LOG_NUM_BANKS 5
 #define CONFLICT_FREE_OFFSET(n) ((n) >> NUM_BANKS + (n) >> (2 * LOG_NUM_BANKS))
 
 
@@ -18,11 +18,11 @@
 RWStructuredBuffer<int> scanInput;
 RWStructuredBuffer<int> scanOutput;
 StructuredBuffer<int> sortInput;
-RWStructuredBuffer<int> sortOutput;
+RWStructuredBuffer<int2> sortOutput;
 
 groupshared int temp[SCAN_SIZE];
 
-[numthreads(SCAN_BLOCKSIZE, 1, 1)]
+[numthreads(SCAN_SIZE, 1, 1)]
 void Zero(uint3 id : SV_DispatchThreadID) {
 	scanInput[id.x] = 0;
 }
@@ -38,7 +38,7 @@ void Count(uint3 id : SV_DispatchThreadID) {
 void Finish(uint3 id : SV_DispatchThreadID) {
 	uint v;
 	InterlockedAdd(scanOutput[sortInput[id.x]], 1, v);
-	sortOutput[v] = sortInput[id.x];
+	sortOutput[v] = int2(id.x, sortInput[id.x]);
 	
 }
 
