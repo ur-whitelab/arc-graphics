@@ -9,6 +9,7 @@
 #define PARTICLE_STATE_DEAD 0
 #define PARTICLE_STATE_ALIVE 1
 #define PARTICLE_STATE_NLIST_VALID 2
+#define PARTICLE_STATE_EXPLODING 3
 
 #define PARTICLE_MODIFIER_SPAWN 0
 #define PARTICLE_MODIFIER_INTEGRATOR 1
@@ -26,12 +27,16 @@ struct ParticleProperties {
 	float4 color;
 };
 
+struct ParticleGInfo {
+	uint group;
+};
+
 struct Source {
 	float2 position;
 	float2 velocity;
 	float life_start;
-	uint spawn_period;
-	int spawn_amount;
+	int spawn_period;
+	uint group;
 };
 
 struct Attractor {

@@ -76,7 +76,7 @@ public class ComputeNeighbors : Compute {
         debugPositions = pm.positions;
 
         //don't want to allocate too much memory yet
-        MaxNeighbors = Mathf.Min(64, Mathf.CeilToInt(MaxNListMemoryMB * 1024 * 1024 /  (ShaderConstants.INT_STRIDE * N)));
+        MaxNeighbors = Mathf.Min(256, Mathf.CeilToInt(MaxNListMemoryMB * 1024 * 1024 /  (ShaderConstants.INT_STRIDE * N)));
         UnityEngine.Debug.Log("Max Neighbors = " + MaxNeighbors);
 
         Neighbors.SetBuffer(binHandle, "positions", pm.positions);

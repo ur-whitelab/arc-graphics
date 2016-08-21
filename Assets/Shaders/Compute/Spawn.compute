@@ -10,8 +10,9 @@ RWStructuredBuffer<float2> velocities;
 RWStructuredBuffer<int> spawnTimers;
 StructuredBuffer<Source> sources;
 RWStructuredBuffer<ParticleProperties> properties;
+RWStructuredBuffer<ParticleGInfo> ginfo;
 
-groupshared int source_count;
+groupshared int sourceCount;
 
 
 #pragma kernel Spawn	
@@ -27,14 +28,14 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 	properties.GetDimensions(np, _);
 
 	if (id.y == 0) {
-		source_count = 0;
+		sourceCount = 0;
 		spawnTimers[id.x] += 1;
 	}
 
 	GroupMemoryBarrierWithGroupSync();
 
 	//check if we need to spawn
-	if (spawnTimers[id.x] % sources[id.x].spawn_period == 0) {
+	if (sources[id.x].spawn_period > 0 &&  (uint) (spawnTimers[id.x]) % sources[id.x].spawn_period == 0) {
 
 		//we are going to spawn
 		//search particles along y thread id. This partitions the particles amongst the y threads
@@ -43,33 +44,19 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 
 		for (uint i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
 			//only can add if the particle is not in use.
-			can_add += (properties[i].state == PARTICLE_STATE_DEAD);
+			can_add |= (properties[i].state == PARTICLE_STATE_DEAD);
 		}
 
 		//announce we're going to add as many as we can.
 		int count;
-		InterlockedAdd(source_count, can_add, count);
-		//now, add as many as we need
-		int to_add = can_add;
-		//if we would add too many, remove them
-		to_add -= max(0, (count + can_add) - sources[id.x].spawn_amount);
+		InterlockedAdd(sourceCount, can_add, count);
 
-		//debug code for making sure we got a good number added
-		//update what I'm going to add now
-		to_add = max(to_add, 0);
-		InterlockedAdd(source_count, -(can_add - to_add));
-		/*
-		if (to_add > 10 && count < 0) {
-			positions[0] = float2(-5, 3);
-			velocities[0] = float2(1, 1);
-			properties[0].state = 1;
-		}
-		*/
-		if (to_add > 0) {
+		//check if we succeeded in being first to add and we could have added
+		if (can_add && count == 0) {
 			for (i = stride * id.y; i < min(np, stride * (id.y + 1)); i++) {
 				int state;
-				//go ahead and add now
-				if (to_add > 0 && properties[i].state == PARTICLE_STATE_DEAD) {
+				//go ahead and try add now
+				if (can_add && properties[i].state == PARTICLE_STATE_DEAD) {
 
 					//there may be other nx's interacting. Going to sort-of ignore that
 					//by interlocked exchanges. It's not deterministic though if we'll get enough
@@ -77,16 +64,25 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 					InterlockedExchange(properties[i].state, PARTICLE_STATE_ALIVE, state);
 					if (state != PARTICLE_STATE_DEAD)
 						continue;
-
-					to_add -= 1;
+					can_add--;
 
 					positions[i] = sources[id.x].position;
 					velocities[i] = sources[id.x].velocity;
 					properties[i].life = sources[id.x].life_start;
+					
 					properties[i].color = float4(0, 0, 1, 1);
 					properties[i].lastModifier = PARTICLE_MODIFIER_SPAWN;
 					properties[i].lastModifierIndex = id.x;
+					
+					ginfo[i].group = sources[id.x].group;
+					
+					if (sources[id.x].group == 1) 
+					{
+						properties[i].color = float4(1, 0, 0, 1);
+					}
 				}
+				if (!can_add)
+					break;
 			}
 		}
 
@@ -97,16 +93,5 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 			spawnTimers[id.x] = 0;
 		}	
 	}
-
-	
-	//GroupMemoryBarrierWithGroupSync();
-	//Debug code for indicating if we got the correct number added.
-	/*
-	if (id.y == 5 && spawnTimers[id.x] % sources[id.x].spawn_period == 0 && sources[id.x].spawn_amount != source_count) {
-		positions[0] = float2(25, 10);
-		velocities[0] = float2(10, 10);
-		properties[0].state = 1;
-	}
-	*/
 	
 }

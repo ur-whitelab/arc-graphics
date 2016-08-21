@@ -80,8 +80,8 @@ void Build(uint3 id : SV_DispatchThreadID)
 	if (properties[tid].state == PARTICLE_STATE_DEAD)
 		return;
 
-	properties[tid].state = PARTICLE_STATE_NLIST_VALID; //optimistic we'll get to the bottom ;)
-	//properties[tid].color = float4(1, 0, 0, 1);
+	if(properties[tid].state == PARTICLE_STATE_ALIVE)//upgrade state if it's "ALIVE"
+		properties[tid].state = PARTICLE_STATE_NLIST_VALID; //optimistic we'll get to the bottom ;)
 
 	
 	for (uint o = 0; o < 2 * N; o++) {
@@ -96,7 +96,7 @@ void Build(uint3 id : SV_DispatchThreadID)
 		for (i = binStarts[index]; i < binStarts[index + 1]; i++) {
 			r = positions[tid] - positions[sortedParticles[i][0]];
 			//we only build half-neighbor lists to save space.
-			if (sortedParticles[i][0] < tid && dot(r, r) < cutoff * cutoff) {
+			if (sortedParticles[i][0] < tid && dot(r, r) < (cutoff * cutoff)) {
 				nlist[NLIST_INDEX(tid, nj)] = sortedParticles[i][0];								
 				nj = min(maxNeighbors - 1, nj + 1); //done to prevent divergence as opposed to if/break				
 			}

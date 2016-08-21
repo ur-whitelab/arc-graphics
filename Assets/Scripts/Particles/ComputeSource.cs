@@ -26,11 +26,9 @@ public class ComputeSource : Compute {
             timer += 1;
             if(timer % s.spawnPeriod == 0)
             {
-                instancedParticles += s.spawnAmount;
+                instancedParticles++;
                 if (timer > particleLife)
-                    availableParticles -= s.spawnAmount; //we have some dying at each spawn period.
-
-
+                    availableParticles--; //we have some dying at each spawn period.
             }
         }
 
@@ -92,6 +90,7 @@ public class ComputeSource : Compute {
         spawnShader.SetBuffer(spawnHandle, "positions", pm.positions);
         spawnShader.SetBuffer(spawnHandle, "velocities", pm.velocities);
         spawnShader.SetBuffer(spawnHandle, "properties", pm.properties);
+        spawnShader.SetBuffer(spawnHandle, "ginfo", pm.ginfo);
 
     }
 
@@ -183,19 +182,14 @@ public class ComputeSource : Compute {
         for (int i = 0; i < sourceInfo.Count; i++)
         {
             sourceInfo[i].update(cpuSources[i]);
-            if(sourceInfo[i].availableParticles < 0 && cpuSources[i].spawnAmount > 0)
+            if(sourceInfo[i].availableParticles < 0 && cpuSources[i].spawnPeriod > 0 ||
+                sourceInfo[i].availableParticles > 0 && cpuSources[i].spawnPeriod < 0)
             {
                 ShaderConstants.Source s = cpuSources[i];
-                s.spawnAmount = 0;
+                s.spawnPeriod *= -1;
                 cpuSources[i] = s;
                 dirty = true;
-            } else if(sourceInfo[i].availableParticles > 0 && cpuSources[i].spawnAmount == 0)
-            {
-                ShaderConstants.Source s = cpuSources[i];
-                s.spawnAmount = 1;
-                cpuSources[i] = s;
-                dirty = true;
-            }    
+            }
         }
         if (dirty)
             syncBuffers();

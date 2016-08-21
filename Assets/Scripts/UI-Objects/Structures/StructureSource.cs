@@ -3,20 +3,8 @@ using System.Collections;
 
 public class StructureSource : MonoBehaviour
 {
-    public int spawnAmount {
-        get
-        {
-            return Source.spawnAmount;
-        }
-        set
-        {
-            ShaderConstants.Source s = _source;
-            s.spawnAmount = value;
-            Source = s;
-        }
-    }
 
-    public uint spawnPeriod
+    public int spawnPeriod
     {
         get
         {
@@ -49,7 +37,8 @@ public class StructureSource : MonoBehaviour
     }
 
     public Vector2 StartVelocity;
-    public int startSpawnAmount;
+    public int StartPeriod;
+    public uint Group;
 
     private ComputeSource ct;
 
@@ -66,7 +55,8 @@ public class StructureSource : MonoBehaviour
     void Start()
     {
         ct = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeSource>();
-        _source = new ShaderConstants.Source(new Vector2(transform.position.x, transform.position.y), StartVelocity, 0, 1, startSpawnAmount);
+        StartPeriod = Mathf.Max(1, StartPeriod);
+        _source = new ShaderConstants.Source(new Vector2(transform.position.x, transform.position.y), StartVelocity, spawnPeriod : StartPeriod, group : Group);
         SourceIndex = ct.AddSource(_source);
     }
 }

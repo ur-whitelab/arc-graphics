@@ -22,6 +22,7 @@ public class ParticleManager : MonoBehaviour {
     public ComputeBuffer velocities;
     public ComputeBuffer forces;
     public ComputeBuffer properties;
+    public ComputeBuffer ginfo;
 
     //buffer that contains geometry
     private ComputeBuffer quadPoints;
@@ -68,6 +69,7 @@ public class ParticleManager : MonoBehaviour {
         velocities = new ComputeBuffer(ParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
         forces = new ComputeBuffer(ParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
         properties = new ComputeBuffer(ParticleNumber, ShaderConstants.PROP_STRIDE);
+        ginfo = new ComputeBuffer(ParticleNumber, ShaderConstants.GINFO_STRIDE);
 
 
         //initialize the per-particle data
@@ -102,10 +104,14 @@ public class ParticleManager : MonoBehaviour {
               //  props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
             props[i].color = new Vector4(1f, 1f, 1f, 1f);
         }
-           
+
         properties.SetData(props);
 
-       
+        //set up group info.
+        var temp = new ShaderConstants.GInfo[ParticleNumber];
+        ginfo.SetData(temp);
+
+
 
         //set buffers
         integrateShader.SetBuffer(integrate1Handle, "positions", positions);

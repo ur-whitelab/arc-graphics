@@ -38,16 +38,18 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 			r = positions[nj] - positions[i];
 			r2 = dot(r, r);
 
-			if (r2 > cutoff)
+			if (r2 > (cutoff * cutoff))
 				continue;
 
 
 			r = normalize(r);
 			r2 += 1; //add to avoid singularity
 			//compute cutoff correction to zeroforces there
-			c = strength * r / (cutoff * cutoff + 1);
-			forces[i] += (strength * r / r2 - c); 
-			forces[nj] -= (strength * r / r2 - c);
+			c = 1.0 / (cutoff * cutoff);
+			//now total strength
+			c = strength * (1.0 / r2 - c);
+			forces[i] += c * r; 
+			forces[nj] -= c * r;
 		}
 	}
 }

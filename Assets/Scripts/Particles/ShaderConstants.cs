@@ -13,8 +13,9 @@ public static class ShaderConstants
     public const int INT_STRIDE = 4;
     public const int QUAD_STRIDE = 12;
 
-    public const int SOURCE_STRIDE = 2 * 2 * FLOAT_STRIDE + FLOAT_STRIDE + 1 * UINT_STRIDE + 1 * INT_STRIDE;
+    public const int SOURCE_STRIDE = 2 * 2 * FLOAT_STRIDE + FLOAT_STRIDE + 1 * INT_STRIDE + 1 * UINT_STRIDE;
     public const int PROP_STRIDE = 3 * UINT_STRIDE + FLOAT_STRIDE + 4 * FLOAT_STRIDE;
+    public const int GINFO_STRIDE = 1 * UINT_STRIDE;
     public const int ATTRACTOR_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
     public const int WALL_STRIDE = 2 * 2 * FLOAT_STRIDE;
     public const int TARGET_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
@@ -42,16 +43,16 @@ public static class ShaderConstants
         public Vector2 position;
         public Vector2 velocity;
         public float lifeStart;
-        public uint spawnPeriod;
-        public int spawnAmount;
+        public int spawnPeriod;
+        public uint group;
 
-        public Source(Vector2 position, Vector2 velocity, float lifeStart = 0f, uint spawnPeriod = 60, int spawnAmount = 1)
+        public Source(Vector2 position, Vector2 velocity, float lifeStart = 0f, int spawnPeriod = 60, uint group = 0)
         {
             this.position = position;
             this.velocity = velocity;
             this.lifeStart = lifeStart;
             this.spawnPeriod = spawnPeriod;
-            this.spawnAmount = spawnAmount;
+            this.group = group;
         }
 
     }
@@ -108,6 +109,11 @@ public static class ShaderConstants
             this.position = position;
             this.radius = radius;
         }
+    }
+    //game info
+    public struct GInfo
+    {
+        uint group;
     }
 
 }

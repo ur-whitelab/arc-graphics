@@ -31,10 +31,6 @@ public class GameManager : MonoBehaviour {
                      {
                          c.spawnPeriod--;
                      }
-                     if (level > 150 && level % 4 == 0)
-                     {
-                         c.spawnAmount = Mathf.Clamp(c.spawnAmount + 1, 0, maxSpawnAmount);
-                     }
                  }
              }
          });
