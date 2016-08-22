@@ -100,9 +100,10 @@ Shader "Particles/ParticleBillboard"
 				float3 right = float3(1, 0, 0);
 				uint i;
 				FS_INPUT fIn;
+				float halfSize = _Size / 2;
 
 				if (p[0].explode == 0) {
-					float halfSize = _Size / 2;
+
 					v[0] = float4(p[0].pos + halfSize * right - halfSize * up, 1.0f);
 					uv[0] = float2(1, 0);
 
@@ -131,7 +132,7 @@ Shader "Particles/ParticleBillboard"
 					uint N = EXPLODE_NUMBER;
 					float iN = 1.0f / N;
 					
-					float theta = p[0].explode;//give it a small rotation
+					float theta = p[0].explode / 2;//give it a small rotation
 					
 					float offset_x, offset_y, offset_t;
 					float3 noise;
@@ -150,8 +151,9 @@ Shader "Particles/ParticleBillboard"
 							badNoise(p[0].fid * i + 1), 
 							badNoise(p[0].fid * i + 2));						
 
-						offset_x = noise[0] * explodeRadius * p[0].explode * cos(offset_t);
-						offset_y = noise[1] * explodeRadius * p[0].explode * sin(offset_t);
+						//we add hs/8 so that the starting radius is small but non-zero
+						offset_x = (halfSize/4 + noise[0] * explodeRadius * p[0].explode) * cos(offset_t);
+						offset_y = (halfSize/4 + noise[1] * explodeRadius * p[0].explode) * sin(offset_t);
 
 						//change the position to be on the new circle
 						pos = p[0].pos + float3(offset_x, offset_y, 0);
@@ -169,7 +171,7 @@ Shader "Particles/ParticleBillboard"
 						[unroll]
 						for (uint j = 0; j < 3; j++) {
 							fIn.pos = mul(UNITY_MATRIX_MVP, v[j]);
-							fIn.uv = float2(0.5, 0.5); //Take the center of the texture as the explosion point.
+							fIn.uv = float2(0.4, 0.4); //Take a point onthe texture as the explosion point.
 							fIn.color = p[0].color;							
 							triStream.Append(fIn);
 						}
