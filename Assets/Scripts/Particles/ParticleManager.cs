@@ -4,10 +4,16 @@ using System.Collections.Generic;
 
 public class ParticleManager : MonoBehaviour {
 
+    public float TargetFPS = 100;
     public float TimeStep = 0.01f;
     public float ParticleLifeEnd = 25f;
     public float DragCoefficient = 0f;
+    public float ExplodeTime = 1f;
+    public float ExplodeRadius = 2f;
+    public float ExplodeMeshSize = 0.25f;
+
     private float ParticleDiameter = 1.0f;
+
 
 
     private List<Compute> computes;
@@ -102,8 +108,8 @@ public class ParticleManager : MonoBehaviour {
         for (uint i = 0; i < ParticleNumber; i++)
         {            
             props[i].state = ShaderConstants.PARTICLE_STATE_DEAD;
-            //if(i < 3000)
-                //props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
+            //if(i < 30000)
+              //  props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
             props[i].color = new Vector4(1f, 1f, 1f, 1f);
         }
 
@@ -137,22 +143,14 @@ public class ParticleManager : MonoBehaviour {
         integrateShader.SetFloat("lifeEnd", ParticleLifeEnd);
         integrateShader.SetFloat("drag", DragCoefficient);
 
-        //set-up our geometry for drawing.
-        quadPoints = new ComputeBuffer(6, ShaderConstants.QUAD_STRIDE);
-        quadPoints.SetData(new[]
-        {
-            new Vector3(-ParticleDiameter / 2, ParticleDiameter / 2),
-            new Vector3(ParticleDiameter / 2, ParticleDiameter / 2),
-            new Vector3(ParticleDiameter / 2, -ParticleDiameter / 2),
-            new Vector3(ParticleDiameter / 2, -ParticleDiameter / 2),
-            new Vector3(-ParticleDiameter / 2, -ParticleDiameter / 2),
-            new Vector3(-ParticleDiameter / 2, ParticleDiameter / 2),
-        });
 
         // bind resources to material
         particleMaterial.SetBuffer("positions", positions);
         particleMaterial.SetBuffer("properties", properties);
-        particleMaterial.SetBuffer("quadPoints", quadPoints);
+        particleMaterial.SetFloat("explodeLife", ExplodeTime);
+        particleMaterial.SetFloat("explodeRadius", ExplodeRadius);
+        particleMaterial.SetFloat("explodeSize", ExplodeMeshSize);
+        particleMaterial.SetInt("particleNumber", ParticleNumber);
 
         foreach (var c in computes)
             c.SetupShader(this);
@@ -185,6 +183,8 @@ public class ParticleManager : MonoBehaviour {
         foreach (var c in computes)
             c.UpdatePreIntegrate(nx);
 
+        integrateShader.SetFloat("timeStep", Mathf.Clamp(TimeStep * Time.smoothDeltaTime * TargetFPS, TimeStep/100, 2 * TimeStep));
+
         integrateShader.Dispatch(integrate1Handle, nx, 1, 1);
 
         foreach (var c in computes)
@@ -208,6 +208,7 @@ public class ParticleManager : MonoBehaviour {
         particleMaterial.SetPass(0);
 
         // draw
-        Graphics.DrawProcedural(MeshTopology.Triangles, 6, ParticleNumber);
+        //Graphics.DrawProcedural(MeshTopology.Triangles, 6, ParticleNumber);
+        Graphics.DrawProcedural(MeshTopology.Points, ParticleNumber, 1);
     }
 }

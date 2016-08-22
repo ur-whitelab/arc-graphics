@@ -15,12 +15,7 @@ public class ComputeWalls : Compute
     {
         wallHandle = wallShader.FindKernel("Walls");
 
-        if (cpu_walls.Count == 0)
-        {
-            ShaderConstants.Wall[] dummy = new ShaderConstants.Wall[1];
-            walls = new ComputeBuffer(1, ShaderConstants.WALL_STRIDE);
-            walls.SetData(dummy);
-        } else
+        if (cpu_walls.Count != 0)
         {
             walls.SetData(cpu_walls.ToArray());
         }
@@ -31,7 +26,6 @@ public class ComputeWalls : Compute
         wallShader.SetBuffer(wallHandle, "lastPositions", pm.lastPositions);
         wallShader.SetBuffer(wallHandle, "forces", pm.forces);
         wallShader.SetBuffer(wallHandle, "properties", pm.properties);
-        wallShader.SetBuffer(wallHandle, "walls", walls);
         wallShader.SetFloat("timeStep", pm.TimeStep);        
 
     }
@@ -69,6 +63,7 @@ public class ComputeWalls : Compute
 
     public override void UpdatePostIntegrate(int nx)
     {
-        wallShader.Dispatch(wallHandle, nx, 1, 1);
+        if(cpu_walls.Count > 0)
+            wallShader.Dispatch(wallHandle, nx, 1, 1);
     }
 }

@@ -6,6 +6,9 @@
 //Please make sure these are consistent with what is in the shader
 #define PARTICLE_BLOCKSIZE 128
 
+#define EXPLODE_NUMBER 12
+#define GS_VERT_NUMBER 40 //^*3 + 4
+
 #define PARTICLE_STATE_DEAD 0
 #define PARTICLE_STATE_ALIVE 1
 #define PARTICLE_STATE_NLIST_VALID 2

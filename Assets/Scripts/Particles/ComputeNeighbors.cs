@@ -227,12 +227,12 @@ public class ComputeNeighbors : Compute {
                 break;
             case States.sort:
                 Sorter.GPUSortInplace(bins, sortedParticles);
-                profiler1();
+                //profiler1();
                 computeState = States.binStarts;
                 break;
             case States.binStarts:
                 Neighbors.Dispatch(binStartsHandle, nx, 1, 1);
-                profiler2();
+                //profiler2();
                 computeState = States.build;
                 break;
             case States.build:
@@ -240,11 +240,11 @@ public class ComputeNeighbors : Compute {
                 int n = nx / buildPeriod;
 
                 Stopwatch stopwatch = new Stopwatch();
-                profiler3();
+                //profiler3();
                 stopwatch.Start();
                 Neighbors.SetInt("buildOffset", n * buildDispatchOffset * ShaderConstants.PARTICLE_BLOCK_SIZE);
                 Neighbors.Dispatch(buildHandle, n, 1, 1);
-                profiler3();
+                //profiler3();
                 stopwatch.Stop();
                 if(stopwatch.ElapsedMilliseconds > 40)
                 {

@@ -5,7 +5,6 @@ public class ComputeGame : Compute
 {
 
     public float IntersectionRadius;
-    public float ExplodeTime;
     public ComputeShader intersectionShader;
 
     private int intersectionsHandle;
@@ -25,7 +24,7 @@ public class ComputeGame : Compute
         intersectionShader.SetBuffer(explodeHandle, "properties", pm.properties);
         intersectionShader.SetBuffer(explodeHandle, "ginfo", pm.ginfo);
         intersectionShader.SetFloat("cutoff", IntersectionRadius);
-        intersectionShader.SetFloat("explodeTime", ExplodeTime);
+        intersectionShader.SetFloat("explodeTime", pm.ExplodeTime);
     }
 
     public override void UpdatePostIntegrate(int nx)

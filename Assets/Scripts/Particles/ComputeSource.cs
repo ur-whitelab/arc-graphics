@@ -17,19 +17,6 @@ public class ComputeSource : Compute {
             this.instancedParticles = 0;
             this.availableParticles = available;
             this.totalParticles = available;
-            this.timer = 0;
-            this.particleLife = particleLife;
-        }
-
-        public void update(ShaderConstants.Source s)
-        {
-            timer += 1;
-            if(timer % s.spawnPeriod == 0)
-            {
-                instancedParticles++;
-                if (timer > particleLife)
-                    availableParticles--; //we have some dying at each spawn period.
-            }
         }
 
     }
@@ -181,7 +168,6 @@ public class ComputeSource : Compute {
         bool dirty = false;
         for (int i = 0; i < sourceInfo.Count; i++)
         {
-            sourceInfo[i].update(cpuSources[i]);
             if(sourceInfo[i].availableParticles < 0 && cpuSources[i].spawnPeriod > 0 ||
                 sourceInfo[i].availableParticles > 0 && cpuSources[i].spawnPeriod < 0)
             {
