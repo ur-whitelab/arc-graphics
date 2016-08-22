@@ -10,16 +10,16 @@ public class World : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
+        collider = GetComponentInChildren<Collider2D>();
         if (boundariesHigh.Equals(boundariesLow))
         {
-            Vector3 bounds_min = GetComponent<Collider2D>().bounds.min;
-            Vector3 bounds_max = GetComponent<Collider2D>().bounds.max;
+            Vector3 bounds_min = collider.bounds.min;
+            Vector3 bounds_max = collider.bounds.max;
             boundariesLow = new Vector2(bounds_min.x, bounds_min.y);
             boundariesHigh = new Vector2(bounds_max.x, bounds_max.y);
             size = boundariesHigh - boundariesLow;
         }
 
-        collider = GetComponent<Collider2D>();
     }
 
     public void Start()
@@ -44,6 +44,8 @@ public class World : MonoBehaviour {
         {
             return hit.point;
         }
+
+        return Vector3.zero;
         */
         return Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }

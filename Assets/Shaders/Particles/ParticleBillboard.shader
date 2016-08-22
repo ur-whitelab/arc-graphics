@@ -1,7 +1,7 @@
 ﻿//TODO: Use a geomtry shader instead of passing in the quad/billboard information.
 //that should save some calls./
 
-Shader "Particles/ParticleBillboard"
+Shader "Custom/ParticleBillboard"
 {
 	Properties
 	{
@@ -64,10 +64,10 @@ Shader "Particles/ParticleBillboard"
 			float explodeRadius;
 			int particleNumber;
 
-			float badNoise(float n)
+			float badNoise(float n, float min, float max)
 			{
-				//returns noise between 0.8 and 1.2 (supposed to be psuedo-log)
-				return sin(n * 4324.3435) * 0.5 + 1;
+				//returns noise between 0.5 and 2.5 (supposed to be psuedo-log)
+				return sin(n * 4324.3435) * (max - min) + max;
 			}
 
 			// Vertex Shader ------------------------------------------------
@@ -147,9 +147,9 @@ Shader "Particles/ParticleBillboard"
 						offset_t = theta + i * iN * 2.0 * PI;			
 						
 						//get shift for radius due to nosie
-						noise = float3(badNoise(p[0].fid * i), 
-							badNoise(p[0].fid * i + 1), 
-							badNoise(p[0].fid * i + 2));						
+						noise = float3(badNoise(p[0].fid * i, 0.3, 2.0), 
+							badNoise(p[0].fid * i + 1, 0.3, 2.0), 
+							badNoise(p[0].fid * i + 2, 0.8, 1.2));						
 
 						//we add hs/8 so that the starting radius is small but non-zero
 						offset_x = (halfSize/4 + noise[0] * explodeRadius * p[0].explode) * cos(offset_t);

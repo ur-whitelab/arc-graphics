@@ -1,7 +1,7 @@
 ﻿//TODO: Use a geomtry shader instead of passing in the quad/billboard information.
 //that should save some calls./
 
-Shader "Particles/ParticleSimple"
+Shader "Custom/ParticleSimple"
 {
 	Properties
 	{
