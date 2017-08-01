@@ -166,6 +166,7 @@ public class ComputeSource : Compute {
         //Check to see if the GPU souces are spewing too many/too few particles
 
         bool dirty = false;
+	
         for (int i = 0; i < sourceInfo.Count; i++)
         {
             if(sourceInfo[i].availableParticles < 0 && cpuSources[i].spawnPeriod > 0 ||

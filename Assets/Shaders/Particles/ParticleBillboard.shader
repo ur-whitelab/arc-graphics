@@ -1,4 +1,6 @@
-﻿//TODO: Use a geomtry shader instead of passing in the quad/billboard information.
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+//TODO: Use a geomtry shader instead of passing in the quad/billboard information.
 //that should save some calls./
 
 Shader "Particles/ParticleBillboard"
@@ -121,7 +123,7 @@ Shader "Particles/ParticleBillboard"
 
 					[unroll]
 					for (i = 0; i < 4; i++) {
-						fIn.pos = mul(UNITY_MATRIX_MVP, v[i]);
+						fIn.pos = UnityObjectToClipPos(v[i]);
 						fIn.uv = uv[i];
 						fIn.color = p[0].color;
 						triStream.Append(fIn);
@@ -170,7 +172,7 @@ Shader "Particles/ParticleBillboard"
 						//load it
 						[unroll]
 						for (uint j = 0; j < 3; j++) {
-							fIn.pos = mul(UNITY_MATRIX_MVP, v[j]);
+							fIn.pos = UnityObjectToClipPos(v[j]);
 							fIn.uv = float2(0.4, 0.4); //Take a point onthe texture as the explosion point.
 							fIn.color = p[0].color;							
 							triStream.Append(fIn);

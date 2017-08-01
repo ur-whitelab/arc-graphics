@@ -12,6 +12,7 @@ StructuredBuffer<Source> sources;
 RWStructuredBuffer<ParticleProperties> properties;
 RWStructuredBuffer<ParticleGInfo> ginfo;
 
+
 groupshared int sourceCount;
 
 
@@ -67,6 +68,7 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 					can_add--;
 
 					positions[i] = sources[id.x].position;
+					//velocities[i] = sources[id.x].velocity;
 					velocities[i] = sources[id.x].velocity;
 					properties[i].life = sources[id.x].life_start;
 					

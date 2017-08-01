@@ -11,7 +11,7 @@
 #pragma kernel Zero
 #pragma kernel Count
 #pragma kernel Finish
-#pragma kernel Sort
+
 
 //These offsets are to reduce bank conflicts
 
@@ -43,6 +43,7 @@ void Finish(uint3 id : SV_DispatchThreadID) {
 }
 
 //the input array must be equal to the SCAN_BLOCKSIZE * 2
+
 [numthreads(SCAN_BLOCKSIZE, 1, 1)]
 void Scan(uint3 id : SV_DispatchThreadID) {
 
@@ -79,7 +80,7 @@ void Scan(uint3 id : SV_DispatchThreadID) {
 
 
 	//downsweep
-	for (d = 1; d < N; d *= 2) {
+	for (d = 1; (uint) d < N; d *= 2) {
 		offset >>= 1;
 		GroupMemoryBarrierWithGroupSync();
 		if (thid < d) {

@@ -50,7 +50,7 @@ public class ComputeNeighbors : Compute {
 
     public ComputeBuffer NeighborList
     {
-        get { nlistRequested = Cutoff > 0; return nlist; }
+	get {nlistRequested = true; return nlist;}
     }
 
     private int binHandle;

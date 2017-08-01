@@ -18,7 +18,8 @@ public class ComputeGame : Compute
         intersectionsHandle = intersectionShader.FindKernel("Intersections");
         explodeHandle = intersectionShader.FindKernel("TreatExplosions");
 
-        intersectionShader.SetBuffer(intersectionsHandle, "positions", pm.positions);;
+
+	intersectionShader.SetBuffer(intersectionsHandle, "positions", pm.positions);;
         intersectionShader.SetBuffer(intersectionsHandle, "properties", pm.properties);
         intersectionShader.SetBuffer(intersectionsHandle, "ginfo", pm.ginfo);
         intersectionShader.SetBuffer(explodeHandle, "properties", pm.properties);
