@@ -1,0 +1,18 @@
+﻿syntax = "proto3";
+package tutorial;
+option csharp_namespace = "Rochester.Physics.Communication";
+
+message Attractor {
+	repeated float position = 1;
+	enum State {
+		ACTIVE = 0;
+		INACTIVE = 1;		
+	}
+	State state = 2;
+}
+
+
+message GameState {
+	int64 time = 1; //timestep
+	repeated Attractor attractors = 2;
+}
