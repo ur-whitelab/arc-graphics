@@ -1,5 +1,5 @@
 ﻿syntax = "proto3";
-package tutorial;
+package communication;
 option csharp_namespace = "Rochester.Physics.Communication";
 
 message Attractor {
