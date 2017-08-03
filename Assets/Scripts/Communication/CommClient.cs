@@ -584,5 +584,4 @@ namespace Rochester.ARTable.Communication
             ScreenshotPoller.Dispose();
         }
     }
-
 }

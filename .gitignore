@@ -30,6 +30,15 @@ sysinfo.txt
 # Unity EXE files
 exe/
 
+#Unity meta files
+*.meta
+
+#Unity project settings
+ProjectSettings/**
+
+#visual studio project files
+.vs/**
+
 # Builds
 *.apk
 *.unitypackage
