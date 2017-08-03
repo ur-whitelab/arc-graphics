@@ -6,15 +6,19 @@ using Google.Protobuf;
 using NetMQ.Sockets;
 using System.Threading.Tasks;
 
+//TODO: Put namespaces everywhere, add two frames to messages. One to indicate
+// type, one for content. Switch to pub/sub model. Write python server.
+
 namespace Rochester.Physics.Communication
 {
     public class CommClient : MonoBehaviour
     {
-
+        
         private RequestSocket client;
         private NetMQPoller poller;
         private TaskCompletionSource<byte[]> responseTask;
 
+        [Tooltip("Follows ZeroMQ syntax")]
         public string server_uri = "@tcp://*:5000";
 
         // Use this for initialization
