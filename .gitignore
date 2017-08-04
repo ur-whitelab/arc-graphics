@@ -33,3 +33,12 @@ sysinfo.txt
 #UWP
 /UWP/
 /App/
+
+#emacs
+*~
+
+#python
+*__pycache__
+
+#other
+*_history
