@@ -1,27 +1,26 @@
 import zmq, zmq.asyncio, asyncio
-import GameState_pb2
+import State_pb2
 
 class StateServer:
-
-
     def __init__(self, uri):
         self.ctx = zmq.asyncio.Context()
         self.sock = self.ctx.socket(zmq.PUB)
         self.sock.bind(uri)
-        self.state = GameState_pb2.GameState()
+        self.state = State_pb2.StructuresState()
         self.state.time = 0
         #create some random attractors
         for i in range(3):
-            a = self.state.attractors.add()
+            a = self.state.structures.add()
+            a.type = 0
+            a.id = i
             a.position.append(i * 10.0)
             a.position.append(0.0)
-            a.state = GameState_pb2.Attractor.ACTIVE
 
     async def update_gamestate(self):    
         self.state.time += 1        
-        for a in self.state.attractors:
-            a.position[1] + 1
-        await asyncio.sleep(0.5)
+        for a in self.state.structures:
+            a.position[1] += 0.01
+        await asyncio.sleep(0.02)
         return self.state
         
     async def loop(self):
