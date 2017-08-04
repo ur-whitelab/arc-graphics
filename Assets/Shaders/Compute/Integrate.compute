@@ -32,13 +32,12 @@ void Integrate1(uint3 id : SV_DispatchThreadID)
 		if(drag > 0)
 			forces[i] -= drag * velocities[i] * 0.5 * timeStep * dot(velocities[i], velocities[i]);
 		velocities[i] += (0.5 * timeStep * forces[i]);		
-		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);
 		positions[i] += (0.5 * timeStep * velocities[i]);	
 
 
 		//Check if the particle is stationary or out of bounds
 		uint in_bounds = (uint) all(step(positions[i], boundaryHigh)) & all(step(boundaryLow, positions[i]));
-		uint is_mobile = 1;// (uint) any(step(moving_delta, abs(velocities[i])));
+		uint is_mobile = 1;//(uint) any(step(moving_delta, abs(velocities[i])));
 		properties[i].state = in_bounds & is_mobile ? properties[i].state : PARTICLE_STATE_DEAD;
 	}
 	

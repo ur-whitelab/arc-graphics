@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+package communication;
+option csharp_namespace = "Rochester.Physics.Communication";
+
+message Structure {
+	int32 type = 1;
+	int32 id = 2;
+	repeated float position = 3;
+}
+
+
+message StructuresState {
+	int64 time = 1; //timestep
+	repeated Structure structures = 2;
+}

@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour {
 
     public int maxSpawnAmount = 8;
     public int minSpawnPeriod = 1;
+    [Tooltip("The frame-rate below which there will be throttling")]
+    public int UncappedFPS = 60;
 
 	// Use this for initialization
 	void Start () {
@@ -35,5 +37,12 @@ public class GameManager : MonoBehaviour {
              }
          });
 	}
+
+    void update()
+    {
+        //if above uncapped fps, slow down to account for faster frame rate
+        //otherwise, make it fixed
+        Time.timeScale = Mathf.Clamp(Time.smoothDeltaTime * UncappedFPS, 1.0f, 0.00001f);        
+    }
 
 }

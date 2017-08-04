@@ -266,4 +266,24 @@ public class ComputeNeighbors : Compute {
         }        
         return;
     }
+
+    public override void ReleaseBuffers() {
+    if(sortedParticles != null) 
+        sortedParticles.Release();
+    
+    if(binStarts != null) 
+        binStarts.Release();
+    
+    if(nlist != null) 
+        nlist.Release();
+    
+    if(binOffsets != null) 
+        binOffsets.Release();
+    
+    if(debugPositions != null) 
+        debugPositions.Release();
+        
+    if(bins != null)
+        bins.Release();
+    }
 }

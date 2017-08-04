@@ -24,7 +24,7 @@ public class StructureWall : Structure {
             Positions.Add(transform.position);
         }
 
-        lr.SetVertexCount(Positions.Count);
+        lr.positionCount = Positions.Count;
         lr.SetPositions(Positions.ToArray());
     }
 
@@ -49,7 +49,7 @@ public class StructureWall : Structure {
     public void DeletePosition()
     {
         Positions.RemoveAt(Positions.Count - 1);
-        lr.SetVertexCount(Positions.Count);
+        lr.positionCount = Positions.Count;
         lr.SetPositions(Positions.ToArray());
     }
 
@@ -74,7 +74,7 @@ public class StructureWall : Structure {
 
         //we can place another, so get it ready
         Positions.Add((Positions[Positions.Count - 1]));
-        lr.SetVertexCount(Positions.Count);
+        lr.positionCount = Positions.Count;
         lr.SetPositions(Positions.ToArray());
 
         return false;
@@ -87,7 +87,7 @@ public class StructureWall : Structure {
         if (Positions.Count != MaxPoints)
         {
             Positions.RemoveAt(Positions.Count - 1);
-            lr.SetVertexCount(Positions.Count);
+            lr.positionCount = Positions.Count;
             lr.SetPositions(Positions.ToArray());
         }
 
@@ -100,7 +100,7 @@ public class StructureWall : Structure {
     {
         p.z = 0;
         Positions[Positions.Count - 1] = p;
-        lr.SetVertexCount(Positions.Count);
+        lr.positionCount = Positions.Count;
         lr.SetPositions(Positions.ToArray());
         //Debug.Log("Setting to " + p.x + " " + p.y);
     }

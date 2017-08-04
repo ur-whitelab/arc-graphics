@@ -48,6 +48,12 @@ public class ComputeSort : MonoBehaviour {
 
     }
 
+    public void OnDestroy() {
+
+        scanInput.Release();
+        scanOutput.Release();
+    }
+
     private void setupSortBuffers(int[] data)
     {
         int size = data.Length;

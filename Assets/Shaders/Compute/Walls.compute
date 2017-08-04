@@ -26,7 +26,10 @@ void Walls (uint3 id : SV_DispatchThreadID)
 
 	walls.GetDimensions(N, _);
 
-	for (uint j = 1; j < N; j++) {
+	for (uint j = 0; j < N; j++) {
+
+		
+
 		//a norm of 0 indicates it is a separation point
 		if (!any(walls[j].norm))
 			continue;
@@ -51,9 +54,10 @@ void Walls (uint3 id : SV_DispatchThreadID)
 
 		vsign1 = sign(wvector2[0] * pvector1[1] - wvector2[1] * pvector1[0]);
 		vsign2 = sign(wvector2[0] * pvector2[1] - wvector2[1] * pvector2[0]);
-
+		
 		//check if we crossed
 		if (vsign1 != vsign2) {
+			
 			//we have to rewind the particle to be on the other side.
 			// @ intersection wvector x (pvector + delta t * velocity) == 0
 			//so delta t = w x p / p x v
@@ -62,18 +66,18 @@ void Walls (uint3 id : SV_DispatchThreadID)
 			t = (wvector2[0] * pvector2[1] - wvector2[1] * pvector2[0]) / (wvector2[1] * velocities[i][0] - wvector2[0] * velocities[i][1]);			
 			t = abs(t);
 			t = min(timeStep / 2, t);//should deal with nan
-			
+			properties[i].color = float4(0.2, 0.8, 0.1, 1);
 			//now rewind. t is negative
 			positions[i] += velocities[i] * -t;
 
-			//now flip
-			//velocities[i] -= 2 * dot(velocities[i], walls[j].norm) * walls[j].norm;
-			velocities[i] = reflect(velocities[i], walls[j].norm);
+			//now flip					
+			velocities[i] = reflect(velocities[i], walls[j].norm);			
 
 			//now integrate
 			//note that velocities have already been integrated from last step, so we don't need to do forces/velocities
-			positions[i] += (timeStep - t) * velocities[i];
+			positions[i] += (timeStep - t) * velocities[i];			
 		}
+		
 
 	}
 

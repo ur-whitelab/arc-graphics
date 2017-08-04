@@ -75,6 +75,18 @@ public class ParticleStatistics : Compute
         cTargets = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeTargets>();
     }
 
+    public override void ReleaseBuffers() {
+        if(tempSum != null) {
+            tempSum.Release();
+        }
+        if(inputSum != null) {
+            inputSum.Release();
+        }
+        if(result != null) {
+            result.Release();
+        }
+    }
+
     public override void SetupShader(ParticleManager pm)
     {
         particleNumber = ParticleManager.ParticleNumber;

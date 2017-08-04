@@ -6,10 +6,19 @@ public class StructureAttractor : Structure {
 
     private ComputeAttractors ca;
     private int aIndex = -1;
+    private bool placed = false;
 
     public override void CancelPlace()
     {        
         Destroy(gameObject);
+    }
+    
+    void update() {
+        //only check for transform updates after we have placed.
+        if(placed && transform.hasChanged) {
+            ca.UpdateAttractor(aIndex, new Vector2(transform.localPosition.x, transform.localPosition.y));
+            transform.hasChanged = false;
+        }
     }
 
     public override bool CanPlace()
@@ -26,7 +35,7 @@ public class StructureAttractor : Structure {
         {
             //preview it
             if (aIndex < 0)
-                Place();
+                placed = Place();
             else
                 ca.UpdateAttractor(aIndex, loc);
         }
@@ -40,6 +49,7 @@ public class StructureAttractor : Structure {
 
     void Awake () {
         ca = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeAttractors>();
+        transform.hasChanged = false;
     }
 
 }

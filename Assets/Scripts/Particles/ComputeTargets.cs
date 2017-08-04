@@ -27,6 +27,13 @@ public class ComputeTargets : Compute {
 
     }
 
+    public override void ReleaseBuffers() {
+        if(targets != null)
+            targets.Release();
+        if(targetCounts != null)
+            targetCounts.Release();
+    }
+
     public override void UpdateForces(int nx)
     {
         if(cpu_targets.Count > 0)

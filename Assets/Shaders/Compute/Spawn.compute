@@ -6,6 +6,7 @@
 
 
 RWStructuredBuffer<float2> positions;
+RWStructuredBuffer<float2> lastPositions;
 RWStructuredBuffer<float2> velocities;
 RWStructuredBuffer<int> spawnTimers;
 StructuredBuffer<Source> sources;
@@ -64,13 +65,13 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 					//particles for the source.
 					InterlockedExchange(properties[i].state, PARTICLE_STATE_ALIVE, state);
 					if (state != PARTICLE_STATE_DEAD)
-						continue;
+						continue; //tried making the particle alive, but someone else got to it
 					can_add--;
 
-					positions[i] = sources[id.x].position;
-					//velocities[i] = sources[id.x].velocity;
-					velocities[i] = sources[id.x].velocity;
-					properties[i].life = sources[id.x].life_start;
+					positions[i] = sources[id.x].position;					
+					lastPositions[i] = sources[id.x].position;
+					velocities[i] = sources[id.x].velocity;					
+					properties[i].life = sources[id.x].life_start;					
 					
 					properties[i].color = float4(0, 0, 1, 1);
 					properties[i].lastModifier = PARTICLE_MODIFIER_SPAWN;
@@ -81,16 +82,14 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 					if (sources[id.x].group == 1) 
 					{
 						properties[i].color = float4(1, 0, 0, 1);
-					}
+					}					
 				}
 				if (!can_add)
 					break;
 			}
 		}
 
-		//reset the sources count
-
-
+		//reset the sources count		
 		if (id.y == 0) {
 			spawnTimers[id.x] = 0;
 		}	

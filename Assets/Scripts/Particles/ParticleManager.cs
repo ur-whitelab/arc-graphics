@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class ParticleManager : MonoBehaviour {
 
-    public float TargetFPS = 100;
     public float TimeStep = 0.01f;
     public float ParticleLifeEnd = 25f;
     public float DragCoefficient = 0f;
@@ -166,6 +165,7 @@ public class ParticleManager : MonoBehaviour {
         forces.Release();
         properties.Release();
         lastPositions.Release();
+        ginfo.Release();
 
         foreach (var c in computes)
             c.ReleaseBuffers();
@@ -182,8 +182,8 @@ public class ParticleManager : MonoBehaviour {
 
         foreach (var c in computes)
             c.UpdatePreIntegrate(nx);
-
-        integrateShader.SetFloat("timeStep", Mathf.Clamp(TimeStep * Time.smoothDeltaTime * TargetFPS, TimeStep/100, 2 * TimeStep));
+        
+        integrateShader.SetFloat("timeStep", TimeStep * Time.timeScale);        
 
         integrateShader.Dispatch(integrate1Handle, nx, 1, 1);
 

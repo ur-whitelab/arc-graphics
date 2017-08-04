@@ -78,6 +78,7 @@ public class ComputeSource : Compute {
         spawnShader.SetBuffer(spawnHandle, "velocities", pm.velocities);
         spawnShader.SetBuffer(spawnHandle, "properties", pm.properties);
         spawnShader.SetBuffer(spawnHandle, "ginfo", pm.ginfo);
+        spawnShader.SetBuffer(spawnHandle, "lastPositions", pm.lastPositions);
 
     }
 
@@ -157,7 +158,7 @@ public class ComputeSource : Compute {
         if (cpuSources.Count == 0)
             return;
 
-        int ns = Mathf.CeilToInt((float)gpuSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);        
+        int ns = Mathf.CeilToInt((float)gpuSourceNumber / ShaderConstants.SPAWN_BLOCKSIZE_X);
         spawnShader.Dispatch(spawnHandle, ns, 1, 1);
 
         //for profiling (forces GPU-CPU sync)

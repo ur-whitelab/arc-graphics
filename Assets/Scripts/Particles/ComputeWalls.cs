@@ -61,9 +61,14 @@ public class ComputeWalls : Compute
         wallShader.SetBuffer(wallHandle, "walls", walls);
     }
 
-    public override void UpdatePostIntegrate(int nx)
+    //NO Idea why, but on linux having this as post-integrate leads to crash...
+    public override void UpdatePreIntegrate(int nx)
     {
         if(cpu_walls.Count > 0)
             wallShader.Dispatch(wallHandle, nx, 1, 1);
+    }
+
+    public override void ReleaseBuffers() {
+        walls.Release();
     }
 }
