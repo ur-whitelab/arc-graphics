@@ -1,44 +1,49 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ComputeGame : Compute
+namespace Rochester.ARTable.Particles
 {
 
-    public float IntersectionRadius;
-    public ComputeShader intersectionShader;
-
-    private int intersectionsHandle;
-    private int explodeHandle;
-    private ComputeBuffer nlist;
-    private ComputeNeighbors nlistComputer;
-
-    public override void SetupShader(ParticleManager pm)
+    public class ComputeGame : Compute
     {
-        
-        intersectionsHandle = intersectionShader.FindKernel("Intersections");
-        explodeHandle = intersectionShader.FindKernel("TreatExplosions");
 
+        public float IntersectionRadius;
+        public ComputeShader intersectionShader;
 
-	intersectionShader.SetBuffer(intersectionsHandle, "positions", pm.positions);;
-        intersectionShader.SetBuffer(intersectionsHandle, "properties", pm.properties);
-        intersectionShader.SetBuffer(intersectionsHandle, "ginfo", pm.ginfo);
-        intersectionShader.SetBuffer(explodeHandle, "properties", pm.properties);
-        intersectionShader.SetBuffer(explodeHandle, "ginfo", pm.ginfo);
-        intersectionShader.SetFloat("cutoff", IntersectionRadius);
-        intersectionShader.SetFloat("explodeTime", pm.ExplodeTime);
-    }
+        private int intersectionsHandle;
+        private int explodeHandle;
+        private ComputeBuffer nlist;
+        private ComputeNeighbors nlistComputer;
 
-    public override void UpdatePostIntegrate(int nx)
-    {
-        if (nlist == null)
+        public override void SetupShader(ParticleManager pm)
         {
-            nlistComputer = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeNeighbors>();
-            nlist = nlistComputer.NeighborList;
-            intersectionShader.SetInt("maxNeighbors", nlistComputer.MaxNeighbors);
-            intersectionShader.SetBuffer(intersectionsHandle, "nlist", nlist);
 
+            intersectionsHandle = intersectionShader.FindKernel("Intersections");
+            explodeHandle = intersectionShader.FindKernel("TreatExplosions");
+
+
+            intersectionShader.SetBuffer(intersectionsHandle, "positions", pm.positions); ;
+            intersectionShader.SetBuffer(intersectionsHandle, "properties", pm.properties);
+            intersectionShader.SetBuffer(intersectionsHandle, "ginfo", pm.ginfo);
+            intersectionShader.SetBuffer(explodeHandle, "properties", pm.properties);
+            intersectionShader.SetBuffer(explodeHandle, "ginfo", pm.ginfo);
+            intersectionShader.SetFloat("cutoff", IntersectionRadius);
+            intersectionShader.SetFloat("explodeTime", pm.ExplodeTime);
         }
-        intersectionShader.Dispatch(intersectionsHandle, nx, 1, 1);
-        intersectionShader.Dispatch(explodeHandle, nx, 1, 1);
+
+        public override void UpdatePostIntegrate(int nx)
+        {
+            if (nlist == null)
+            {
+                nlistComputer = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeNeighbors>();
+                nlist = nlistComputer.NeighborList;
+                intersectionShader.SetInt("maxNeighbors", nlistComputer.MaxNeighbors);
+                intersectionShader.SetBuffer(intersectionsHandle, "nlist", nlist);
+
+            }
+            intersectionShader.Dispatch(intersectionsHandle, nx, 1, 1);
+            intersectionShader.Dispatch(explodeHandle, nx, 1, 1);
+        }
     }
+
 }

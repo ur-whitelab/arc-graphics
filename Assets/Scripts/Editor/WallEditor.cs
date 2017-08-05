@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
+using Rochester.ARTable.UI;
 
 [CustomEditor(typeof(StructureWall))]
 public class WallEditor : Editor {

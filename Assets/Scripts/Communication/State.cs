@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Rochester.Physics.Communication {
+namespace Rochester.ARTable.Communication {
 
   /// <summary>Holder for reflection information generated from State.proto</summary>
   public static partial class StateReflection {
@@ -30,8 +30,8 @@ namespace Rochester.Physics.Communication {
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.Structure), global::Rochester.Physics.Communication.Structure.Parser, new[]{ "Type", "Id", "Position" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.StructuresState), global::Rochester.Physics.Communication.StructuresState.Parser, new[]{ "Time", "Structures" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.ARTable.Communication.Structure), global::Rochester.ARTable.Communication.Structure.Parser, new[]{ "Type", "Id", "Position" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.ARTable.Communication.StructuresState), global::Rochester.ARTable.Communication.StructuresState.Parser, new[]{ "Time", "Structures" }, null, null, null)
           }));
     }
     #endregion
@@ -45,7 +45,7 @@ namespace Rochester.Physics.Communication {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Rochester.Physics.Communication.StateReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Rochester.ARTable.Communication.StateReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -211,7 +211,7 @@ namespace Rochester.Physics.Communication {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Rochester.Physics.Communication.StateReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Rochester.ARTable.Communication.StateReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -253,11 +253,11 @@ namespace Rochester.Physics.Communication {
 
     /// <summary>Field number for the "structures" field.</summary>
     public const int StructuresFieldNumber = 2;
-    private static readonly pb::FieldCodec<global::Rochester.Physics.Communication.Structure> _repeated_structures_codec
-        = pb::FieldCodec.ForMessage(18, global::Rochester.Physics.Communication.Structure.Parser);
-    private readonly pbc::RepeatedField<global::Rochester.Physics.Communication.Structure> structures_ = new pbc::RepeatedField<global::Rochester.Physics.Communication.Structure>();
+    private static readonly pb::FieldCodec<global::Rochester.ARTable.Communication.Structure> _repeated_structures_codec
+        = pb::FieldCodec.ForMessage(18, global::Rochester.ARTable.Communication.Structure.Parser);
+    private readonly pbc::RepeatedField<global::Rochester.ARTable.Communication.Structure> structures_ = new pbc::RepeatedField<global::Rochester.ARTable.Communication.Structure>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Rochester.Physics.Communication.Structure> Structures {
+    public pbc::RepeatedField<global::Rochester.ARTable.Communication.Structure> Structures {
       get { return structures_; }
     }
 

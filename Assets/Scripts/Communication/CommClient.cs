@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 //and unity. Bluehive will also pub/sub for unity and possible monitors/multiple table.s
 //have an issue with velocity update in source object. should investigate. Maybe not disposing buffer..?
 
-namespace Rochester.Physics.Communication
+namespace Rochester.ARTable.Communication
 {
     public class CommClient : MonoBehaviour
     {
