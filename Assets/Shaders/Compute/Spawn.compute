@@ -71,18 +71,14 @@ void Spawn(uint3 id : SV_DispatchThreadID) {
 					positions[i] = sources[id.x].position;					
 					lastPositions[i] = sources[id.x].position;
 					velocities[i] = sources[id.x].velocity;					
-					properties[i].life = sources[id.x].life_start;					
-					
-					properties[i].color = float4(0, 0, 1, 1);
+					properties[i].life = sources[id.x].life_start;										
+					properties[i].color = sources[id.x].color;
+
 					properties[i].lastModifier = PARTICLE_MODIFIER_SPAWN;
 					properties[i].lastModifierIndex = id.x;
 					
 					ginfo[i].group = sources[id.x].group;
-					
-					if (sources[id.x].group == 1) 
-					{
-						properties[i].color = float4(1, 0, 0, 1);
-					}					
+							
 				}
 				if (!can_add)
 					break;

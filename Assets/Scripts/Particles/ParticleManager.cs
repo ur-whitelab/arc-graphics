@@ -16,8 +16,6 @@ namespace Rochester.ARTable.Particles
         public float ExplodeRadius = 2f;
         public float ExplodeMeshSize = 0.25f;
 
-        private float ParticleDiameter = 1.0f;
-
 
 
         private List<Compute> computes;
@@ -26,7 +24,17 @@ namespace Rochester.ARTable.Particles
         public ComputeShader integrateShader;
         public Material particleMaterial;
 
-        public const int ParticleNumber = 262144;//262144;//65536;//16384;//262144; //2^18. Must be multiple of 256 (2^8) due to particle reduction blocksize
+        private int _particleNumber = 262144;//262144;//65536;//16384;//262144; //2^18. Must be multiple of 256 (2^8) due to particle reduction blocksize
+        public int ParticleNumber {
+            get { return _particleNumber; }
+            set
+            {
+                //risky, not sure if this can really be called twice....
+                ReleaseBuffers();
+                Start();
+            }
+        }
+
 
         //compute buffers for particle information
         public ComputeBuffer positions;
@@ -51,14 +59,6 @@ namespace Rochester.ARTable.Particles
             integrateShader.SetFloats("boundaryHigh", new float[] { high.x, high.y });
             foreach (var c in computes)
                 c.UpdateBoundary(low, high);
-        }
-
-        public IEnumerator slowUpdates()
-        {
-            for (;;)
-            {
-                yield return new WaitForSeconds(100f);
-            }
         }
 
         void Start()
@@ -161,11 +161,9 @@ namespace Rochester.ARTable.Particles
             foreach (var c in computes)
                 c.SetupShader(this);
 
-            StartCoroutine(slowUpdates());
         }
 
-
-        private void OnDestroy()
+        private void ReleaseBuffers()
         {
             positions.Release();
             velocities.Release();
@@ -176,6 +174,11 @@ namespace Rochester.ARTable.Particles
 
             foreach (var c in computes)
                 c.ReleaseBuffers();
+        }
+
+        private void OnDestroy()
+        {
+            ReleaseBuffers();
 
         }
         private void updateBuffers(int i)

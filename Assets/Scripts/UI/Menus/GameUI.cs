@@ -27,14 +27,14 @@ namespace Rochester.ARTable.UI
             ps = ParticleManager.GetComponentInChildren<ParticleStatistics>();
 
             //Just use ananyomous event handlers
-            ps.ComputeModifierStatistics(0, 0, (s, e) =>
+            ps.ComputeModifierStatistics((s, e) =>
             {
                 AliveParticlesText.text = ((ParticleStatisticsModifierEventArgs)e).sum[2].ToString();
             });
 
-            ps.ComputeTargetStatistics(0, (s, e) =>
+            ps.ComputeModifierStatistics(ShaderConstants.PARTICLE_MODIFIER_TARGET, (s, e) =>
             {
-                TargetParticlesText.text = ((ParticleStatisticsTargetEventArgs)e).sum.ToString();
+                TargetParticlesText.text = ((ParticleStatisticsModifierEventArgs)e).sum[0].ToString();
             });
 
             StartCoroutine(SlowUpdate());

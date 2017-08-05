@@ -7,6 +7,8 @@ namespace Rochester.ARTable.Particles
     public class ParticleStatisticsModifierEventArgs : EventArgs
     {
 
+        //modifier type/index refer to things manipulating a praticle's state
+        //-1 indicates none
         public int ModifierType { get; private set; }
         public int ModifierIndex { get; private set; }
         public int[] sum { get; private set; }
@@ -20,16 +22,4 @@ namespace Rochester.ARTable.Particles
 
     }
 
-    public class ParticleStatisticsTargetEventArgs : EventArgs
-    {
-        public int targetIndex { get; private set; }
-        public int sum { get; private set; }
-
-        public ParticleStatisticsTargetEventArgs(int targetIndex, int sum)
-        {
-            this.targetIndex = targetIndex;
-            this.sum = sum;
-        }
-
-    }
 }

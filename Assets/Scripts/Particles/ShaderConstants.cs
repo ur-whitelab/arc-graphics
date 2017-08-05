@@ -16,7 +16,7 @@ namespace Rochester.ARTable.Particles
         public const int INT_STRIDE = 4;
         public const int QUAD_STRIDE = 12;
 
-        public const int SOURCE_STRIDE = 2 * 2 * FLOAT_STRIDE + FLOAT_STRIDE + 1 * INT_STRIDE + 1 * UINT_STRIDE;
+        public const int SOURCE_STRIDE = 2 * 2 * FLOAT_STRIDE + 4 * FLOAT_STRIDE + FLOAT_STRIDE + 1 * INT_STRIDE + 1 * UINT_STRIDE;
         public const int PROP_STRIDE = 3 * UINT_STRIDE + FLOAT_STRIDE + 4 * FLOAT_STRIDE;
         public const int GINFO_STRIDE = 2 * UINT_STRIDE;
         public const int ATTRACTOR_STRIDE = 2 * FLOAT_STRIDE + FLOAT_STRIDE;
@@ -49,14 +49,16 @@ namespace Rochester.ARTable.Particles
         {
             public Vector2 position;
             public Vector2 velocity;
+            public Vector4 color;
             public float lifeStart;
             public int spawnPeriod;
             public uint group;
 
-            public Source(Vector2 position, Vector2 velocity, float lifeStart = 0f, int spawnPeriod = 60, uint group = 0)
+            public Source(Vector2 position, Vector2 velocity, Vector4 color, float lifeStart = 0f, int spawnPeriod = 60, uint group = 0)
             {
                 this.position = position;
                 this.velocity = velocity;
+                this.color = color;
                 this.lifeStart = lifeStart;
                 this.spawnPeriod = spawnPeriod;
                 this.group = group;

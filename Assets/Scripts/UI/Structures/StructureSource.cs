@@ -42,6 +42,7 @@ namespace Rochester.ARTable.UI
         }
 
         public Vector2 StartVelocity;
+        public Color particleColor = Color.grey;
         public int StartPeriod;
         public uint Group;
 
@@ -62,7 +63,7 @@ namespace Rochester.ARTable.UI
         {
             ct = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeSource>();
             StartPeriod = Mathf.Max(1, StartPeriod);
-            _source = new ShaderConstants.Source(new Vector2(transform.position.x, transform.position.y), StartVelocity, spawnPeriod: StartPeriod, group: Group);
+            _source = new ShaderConstants.Source(new Vector2(transform.position.x, transform.position.y), StartVelocity, particleColor, spawnPeriod: StartPeriod, group: Group);
             SourceIndex = ct.AddSource(_source);
         }
     }

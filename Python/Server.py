@@ -1,4 +1,4 @@
-import zmq, zmq.asyncio, asyncio
+dimport zmq, zmq.asyncio, asyncio
 import State_pb2
 
 class StateServer:
@@ -23,26 +23,17 @@ class StateServer:
         await asyncio.sleep(0.02)
         return self.state
         
-    async def loop(self):
+    async def pubLoop(self):
         while True:
             state = await self.update_gamestate()
-            self.sock.send(state.SerializeToString())
-        
-    
-    
-    
+            self.sock.send(state.SerializeToString())           
 
 def main():
     zmq.asyncio.install()
     server = StateServer('tcp://*:5000')
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(server.loop())
+    loop.run_until_complete(server.pubLoop())
     loop.close()
-#    context = zmq.Context()
-#    sock = context.socket(zmq.PAIR)
-#    sock.bind('tcp://*:5000')
-#    while True:
-#        msg = sock.send(b'hello')
         
 
 

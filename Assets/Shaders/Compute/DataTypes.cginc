@@ -42,6 +42,7 @@ struct ParticleGInfo {
 struct Source {
 	float2 position;
 	float2 velocity;
+	float4 color;
 	float life_start;
 	int spawn_period;
 	uint group;

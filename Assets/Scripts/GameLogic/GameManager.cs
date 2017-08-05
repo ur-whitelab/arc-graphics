@@ -27,9 +27,9 @@ namespace Rochester.ARTable.GameLogic
 
             int lastLevel = 0;
             ParticleStatistics ps = GameObject.Find("ParticleManager").GetComponentInChildren<ParticleStatistics>();
-            ps.ComputeTargetStatistics(0, (s, e) =>
-             {
-                 int level = (int)Mathf.Log(((ParticleStatisticsTargetEventArgs)e).sum, 1.03f);
+            ps.ComputeModifierStatistics(ShaderConstants.PARTICLE_MODIFIER_TARGET, (s, e) =>
+            {
+                 int level = (int)Mathf.Log(((ParticleStatisticsModifierEventArgs)e).sum[0], 1.03f);
                  if (level - lastLevel != 0)
                  {
                      lastLevel = level;
