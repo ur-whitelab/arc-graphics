@@ -9,10 +9,10 @@ namespace Rochester.ARTable.Particles
      *  Sorts ints. The output is an int2, where the first value corresponds to the index of the input array and the second is 
      *  the value of the input array.
      */
-    public class ParticleSorter : MonoBehaviour
+    public class ParticleSorter
     {
 
-        public ComputeShader SortShader;
+        private ComputeShader SortShader;
         private ComputeBuffer scanInput;
         private ComputeBuffer scanOutput;
         private ComputeBuffer sortInput;
@@ -33,8 +33,10 @@ namespace Rochester.ARTable.Particles
         // Make public for unit testing
 
         //NOTE: We do everything with fixed sizes, so no need to change buffers
-        public void Awake()
+        public ParticleSorter()
         {
+
+            SortShader =  (ComputeShader) Resources.Load("ComputeShaders/Sort");
             scanHandle = SortShader.FindKernel("Scan");
             countHandle = SortShader.FindKernel("Count");
             zeroHandle = SortShader.FindKernel("Zero");
@@ -53,7 +55,7 @@ namespace Rochester.ARTable.Particles
 
         }
 
-        public void OnDestroy()
+        public void ReleaseBuffers()
         {
 
             scanInput.Release();

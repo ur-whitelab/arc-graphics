@@ -1,11 +1,11 @@
 ﻿#pragma kernel ReduceSum1
 #pragma kernel ReduceSum2
 
-//Max is 512 based on code below!
+//Reduction blocksize must be equal to or greater than 64!!!
 #define REDUCTION_BLOCKSIZE 128
 
 RWStructuredBuffer<int3> tempSum; //used to go between sums. Should equal blocksize number
-RWStructuredBuffer<int3> inputSum;
+StructuredBuffer<int3> inputSum;
 RWStructuredBuffer<int3> result;
 uint dispatchDim;
 
@@ -31,7 +31,7 @@ void ReduceSum1(uint tid : SV_GroupIndex, uint3 groupIdx : SV_GroupID)
 	uint i = groupIdx.x * (REDUCTION_BLOCKSIZE * 2) + tid;
 	uint dispatchSize = REDUCTION_BLOCKSIZE * 2 * dispatchDim;
 
-	sdata[tid] = 0; //this data is shared within the group, so tid < REDUCTION_BLOCKSIZE
+	sdata[tid] = int3(0, 0, 0); //this data is shared within the group, so tid < REDUCTION_BLOCKSIZE
 
 	do {
 		//we read our assigned value AND one from a neighboring value.
@@ -42,9 +42,9 @@ void ReduceSum1(uint tid : SV_GroupIndex, uint3 groupIdx : SV_GroupID)
 
 	GroupMemoryBarrierWithGroupSync(); //wait for all threads in group to finish reading
 
-									   //based on the size of the thread groups (which is fixed at compile time)
-									   //we perform one extra left-hand side reduction. So tid 4, for example, will grab what tid 68 had
-									   //all sums are now stored between 0 and 64
+	//based on the size of the thread groups (which is fixed at compile time)
+	//we perform one extra left-hand side reduction. So tid 4, for example, will grab what tid 68 had
+	//all sums are now stored between 0 and 64
 	if (REDUCTION_BLOCKSIZE >= 512) { if (tid < 256) { sdata[tid] += sdata[tid + 256]; } GroupMemoryBarrierWithGroupSync(); }
 
 	if (REDUCTION_BLOCKSIZE >= 256) { if (tid < 128) { sdata[tid] += sdata[tid + 128]; } GroupMemoryBarrierWithGroupSync(); }
@@ -56,14 +56,20 @@ void ReduceSum1(uint tid : SV_GroupIndex, uint3 groupIdx : SV_GroupID)
 
 	//why do the below not require sync? Because Instructions are SIMD synchronous within a warp
 	//at < 32, we are in a single warp.
-
+	//Due to the inability to assign volatile to the groupshared memory,
+	//I have to synch these. They should execute in lockstep, but they don't;
 	if (tid < 32) {
-		if (REDUCTION_BLOCKSIZE >= 64) sdata[tid] += sdata[tid + 32]; //now all sums are between 0 and 32	
-		if (REDUCTION_BLOCKSIZE >= 32) sdata[tid] += sdata[tid + 16]; //between 0 and 16....
-		if (REDUCTION_BLOCKSIZE >= 16) sdata[tid] += sdata[tid + 8];
-		if (REDUCTION_BLOCKSIZE >= 8) sdata[tid] += sdata[tid + 4];
-		if (REDUCTION_BLOCKSIZE >= 4) sdata[tid] += sdata[tid + 2];
-		if (REDUCTION_BLOCKSIZE >= 2) sdata[tid] += sdata[tid + 1];
+		sdata[tid] += sdata[tid + 32]; //now all sums are between 0 and 32	
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 16]; //between 0 and 16....
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 8];
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 4];
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 2];
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 1];
 	}
 
 	if (tid == 0) {
@@ -95,18 +101,26 @@ void ReduceSum2(uint tid : SV_GroupIndex, uint3 groupIdx : SV_GroupID)
 
 	if (REDUCTION_BLOCKSIZE >= 128) { if (tid < 64) { sdata[tid] += sdata[tid + 64]; } GroupMemoryBarrierWithGroupSync(); }
 
+	//why do the below not require sync? Because Instructions are SIMD synchronous within a warp
+	//at < 32, we are in a single warp.
+	//Due to the inability to assign volatile to the groupshared memory,
+	//I have to synch these. They should execute in lockstep, but they don't;
 	if (tid < 32) {
-		if (REDUCTION_BLOCKSIZE >= 64) sdata[tid] += sdata[tid + 32]; //now all sums are between 0 and 32
-		if (REDUCTION_BLOCKSIZE >= 32) sdata[tid] += sdata[tid + 16]; //between 0 and 16....
-		if (REDUCTION_BLOCKSIZE >= 16) sdata[tid] += sdata[tid + 8];
-		if (REDUCTION_BLOCKSIZE >= 8) sdata[tid] += sdata[tid + 4];
-		if (REDUCTION_BLOCKSIZE >= 4) sdata[tid] += sdata[tid + 2];
-		if (REDUCTION_BLOCKSIZE >= 2) sdata[tid] += sdata[tid + 1];
+		sdata[tid] += sdata[tid + 32]; //now all sums are between 0 and 32	
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 16]; //between 0 and 16....
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 8];
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 4];
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 2];
+		GroupMemoryBarrier();
+		sdata[tid] += sdata[tid + 1];
 	}
 
 	if (tid == 0) {
 		result[0] = sdata[0];
-		//result[0] = int3(100, 100, 100);
 	}
 
 }

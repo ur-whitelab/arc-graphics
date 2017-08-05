@@ -31,7 +31,7 @@ namespace Rochester.ARTable.Particles
                 new Exception("Reduction Shader is hardcoded to int3");
             this.input = input;
             this.result = result;
-            threadGroupsX = N / ShaderConstants.REDUCTION_BLOCKSIZE / 2;
+            threadGroupsX = Math.Min(N / ShaderConstants.REDUCTION_BLOCKSIZE / 2, ShaderConstants.REDUCTION_BLOCKSIZE);
 
             tempSum = new ComputeBuffer(threadGroupsX, 3 * ShaderConstants.INT_STRIDE);
             //in computes, ints and floats both are 32 bits, so shouldn't matter what I use here
@@ -44,13 +44,11 @@ namespace Rochester.ARTable.Particles
             SumShader.SetBuffer(reduceSum2Handle, "tempSum", tempSum);
             SumShader.SetBuffer(reduceSum2Handle, "result", result);            
             SumShader.SetInt("dispatchDim", threadGroupsX);
-
-
         }
 
         public void Compute()
         {
-            SumShader.Dispatch(reduceSum1Handle, threadGroupsX, 1, 1);
+            SumShader.Dispatch(reduceSum1Handle, threadGroupsX, 1, 1);            
             SumShader.Dispatch(reduceSum2Handle, 1, 1, 1);
         }
 
@@ -60,6 +58,11 @@ namespace Rochester.ARTable.Particles
             int[,] result = new int[threadGroupsX, 3];
             tempSum.GetData(result);
             return result;
+        }
+
+        public void ReleaseBuffers()
+        {
+            tempSum.Release();
         }
     }
 }

@@ -23,6 +23,14 @@ namespace Rochester.ARTable.Particles
             return;
         }
 
+        /*
+         *  Will be called at a much longer interval then others
+         */
+        public virtual IEnumerator SlowUpdate(int nx, float waitTime)
+        {
+            yield return null;
+        }
+
         public virtual void UpdatePostIntegrate(int nx)
         {
             return;

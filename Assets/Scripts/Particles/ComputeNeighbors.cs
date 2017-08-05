@@ -39,7 +39,7 @@ namespace Rochester.ARTable.Particles
             }
         }
         public ComputeShader Neighbors;
-        public ParticleSorter Sorter;
+        private ParticleSorter sorter;
 
         private ComputeBuffer bins;
         private int[] cpuBins = new int[2];
@@ -98,8 +98,8 @@ namespace Rochester.ARTable.Particles
             Neighbors.SetBuffer(buildHandle, "bins", bins);
             Neighbors.SetBuffer(binStartsHandle, "bins", bins);
 
-            //find our sorter
-            Sorter = GameObject.Find("ParticleManagerLib").GetComponentInChildren<ParticleSorter>();
+            //make a sorter
+            sorter = new ParticleSorter();
 
         }
 
@@ -230,7 +230,7 @@ namespace Rochester.ARTable.Particles
                     computeState = States.sort;
                     break;
                 case States.sort:
-                    Sorter.GPUSortInplace(bins, sortedParticles);
+                    sorter.GPUSortInplace(bins, sortedParticles);
                     //profiler1();
                     computeState = States.binStarts;
                     break;
@@ -290,6 +290,8 @@ namespace Rochester.ARTable.Particles
 
             if (bins != null)
                 bins.Release();
+
+            sorter.ReleaseBuffers();
         }
     }
 

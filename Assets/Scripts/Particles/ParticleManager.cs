@@ -9,12 +9,19 @@ namespace Rochester.ARTable.Particles
     public class ParticleManager : MonoBehaviour
     {
 
+        [Tooltip("The scaling between simulation time and particle time")]
         public float TimeStep = 0.01f;
+        [Tooltip("How often to do optional calculations (e.g., statistics). In simulation time")]
+        public float SlowUpdateTime = 0.1f;
+        [Tooltip("How long particles will last")]
         public float ParticleLifeEnd = 25f;
+        [Tooltip("Particle friction drag")]
         public float DragCoefficient = 0f;
+        
         public float ExplodeTime = 1f;
         public float ExplodeRadius = 2f;
         public float ExplodeMeshSize = 0.25f;
+
 
 
 
@@ -44,8 +51,8 @@ namespace Rochester.ARTable.Particles
         public ComputeBuffer properties;
         public ComputeBuffer ginfo;
 
-        //buffer that contains geometry
-        private ComputeBuffer quadPoints;
+        [HideInInspector]
+        public int SlowUpdateCount = 0;
 
         //handles for calling kernels
         private int integrate1Handle;
@@ -160,7 +167,21 @@ namespace Rochester.ARTable.Particles
 
             foreach (var c in computes)
                 c.SetupShader(this);
+            StartCoroutine(SlowUpdates());
+        }
 
+        public IEnumerator SlowUpdates()
+        {
+            for (;;)
+            {
+                int nx = Mathf.CeilToInt((float)ParticleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE);
+                foreach (var c in computes)
+                {
+                    //spread them out                    
+                    StartCoroutine(c.SlowUpdate(nx, SlowUpdateTime));
+                    yield return new WaitForSeconds(SlowUpdateTime);
+                }
+            }
         }
 
         private void ReleaseBuffers()

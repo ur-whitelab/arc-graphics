@@ -6,11 +6,6 @@ using Google.Protobuf;
 using NetMQ.Sockets;
 using System.Threading.Tasks;
 
-//TODO: Put namespaces everywhere, add two frames to messages. One to indicate
-//.Type, one for content. Switch to pub/sub model. Write python server. Should talk to bluehive
-//and unity. Bluehive will also pub/sub for unity and possible monitors/multiple table.s
-//have an issue with velocity update in source object. should investigate. Maybe not disposing buffer..?
-
 namespace Rochester.ARTable.Communication
 {
     public class CommClient : MonoBehaviour

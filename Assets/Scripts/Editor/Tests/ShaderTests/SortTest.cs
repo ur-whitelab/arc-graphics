@@ -11,9 +11,15 @@ public class ComputeSortTest : MonoBehaviour {
     [SetUp]
     public void Init()
     {
-        cs = GameObject.Find("ComputeSort").GetComponent<ParticleSorter>();
-        cs.Awake();
+        cs = new ParticleSorter();
     }
+
+    [TearDown]
+    public void OnDestroy()
+    {
+        cs.ReleaseBuffers();
+    }
+
     [Test]
     public void GPUScan()
     {

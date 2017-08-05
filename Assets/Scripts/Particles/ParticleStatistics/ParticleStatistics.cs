@@ -10,7 +10,6 @@ namespace Rochester.ARTable.Particles
     public class ParticleStatistics : Compute
     {
         public ComputeShader PSShader;       
-        public float StatisticsPeriod = 0.2f;
 
         //I had to pack up the handlers
         //into structs so I can filter the events.
@@ -64,6 +63,8 @@ namespace Rochester.ARTable.Particles
             {
                 result.Release();
             }
+
+            adder.ReleaseBuffers();
         }
 
         public override void SetupShader(ParticleManager pm)
@@ -81,8 +82,6 @@ namespace Rochester.ARTable.Particles
             PSShader.SetBuffer(prepareModifierSumHandle, "properties", pm.properties);
 
             adder = new ParticleAdder(inputSum, result, particleNumber, 3);
-
-            StartCoroutine(ComputeStatistics());
         }
 
         public void ComputeModifierStatistics(EventHandler h)
@@ -112,16 +111,14 @@ namespace Rochester.ARTable.Particles
             modifiers.Add(new ModifierHandlers(modifierType, modifierIndex, h));
 
             totalStatsNumber++;
-            singleStatPeriod = StatisticsPeriod / totalStatsNumber;
         }
 
 
-        public IEnumerator ComputeStatistics()
+        public override IEnumerator SlowUpdate(int nx, float waitTime)
         {
-            for (;;)
+
+            if (totalStatsNumber > 0)
             {
-                if (totalStatsNumber == 0)
-                    yield return new WaitForSeconds(StatisticsPeriod);
                 ModifierHandlers m;
                 for (int i = 0; i < modifiers.Count; i++)
                 {
@@ -130,10 +127,11 @@ namespace Rochester.ARTable.Particles
                     //see the shader for details on this
                     PSShader.SetInts("modifier", new int[] { m.modifierType, m.modifierIndex });
                     PSShader.Dispatch(prepareModifierSumHandle, Mathf.CeilToInt((float)particleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE), 1, 1);
+                    adder.Compute();
                     //Now sum over all particles
-                    
+
                     //we wait to give time for computation
-                    yield return new WaitForSeconds(singleStatPeriod / 2);
+                    yield return new WaitForSeconds(waitTime);
 
                     //fetch the result
                     int[] resultArray = new int[3];
@@ -143,7 +141,7 @@ namespace Rochester.ARTable.Particles
                     m.call(this, new ParticleStatisticsModifierEventArgs(m.modifierType, m.modifierIndex, resultArray));
 
                     //wait the rest of the time
-                    yield return new WaitForSeconds(singleStatPeriod / 2);
+                    yield return new WaitForSeconds(waitTime);
                 }
             }
         }
