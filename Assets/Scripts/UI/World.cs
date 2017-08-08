@@ -27,15 +27,13 @@ namespace Rochester.ARTable.UI
             collider = GetComponent<Collider2D>();
         }
 
-        public void Start()
+        void Start()
         {
             GameObject.Find("ParticleManager").GetComponent<ParticleManager>().updateParticleBoundary(boundariesLow, boundariesHigh);
             //deal with editor placed objects
             ComputeAttractors ca = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeAttractors>();
-            UnityEngine.Debug.Log("START");
             foreach (GameObject g in GameObject.FindGameObjectsWithTag("Attractor"))
             {                
-                UnityEngine.Debug.Log("We have attractors");
                 ca.AddAttractor(new Vector2(g.transform.localPosition.x, g.transform.localPosition.y));    
             }
             

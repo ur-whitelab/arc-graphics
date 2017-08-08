@@ -65,12 +65,12 @@ namespace Rochester.ARTable.Particles
         {
 
             integrateShader.SetFloats("boundaryLow", new float[] { low.x, low.y });
-            integrateShader.SetFloats("boundaryHigh", new float[] { high.x, high.y });
+            integrateShader.SetFloats("boundaryHigh", new float[] { high.x, high.y });        
             foreach (var c in computes)
                 c.UpdateBoundary(low, high);
         }
 
-        void Start()
+        void Awake()
         {
 
             if (world == null)
@@ -79,10 +79,6 @@ namespace Rochester.ARTable.Particles
             computes = new List<Compute>();
             foreach (var c in this.GetComponentsInChildren<Compute>())
                 computes.Add(c);
-
-            //set handles
-            integrate1Handle = integrateShader.FindKernel("Integrate1");
-            integrate2Handle = integrateShader.FindKernel("Integrate2");
 
 
             //cerate empty buffers
@@ -102,16 +98,18 @@ namespace Rochester.ARTable.Particles
             forces.SetData(zeros);
 
             //make positions interesting
-            int sideCount = (int) Mathf.Floor(Mathf.Sqrt(visibleStartParticles)); 
+            int sideCount = (int) Mathf.Ceil(Mathf.Sqrt(visibleStartParticles)); 
             int index = 0;
             float x = 0;
             for (int j = 0; j < sideCount; j++) {
                 x = 200f / sideCount * j;
                 for (int k = 0; k < sideCount; k++) {
                     zeros[index++].Set(x - 100f, 200f / (sideCount - 1) * (k + 0.5f) - 100f);
+                    if (index >= visibleStartParticles)
+                        break;
                 }
             }
-            positions.SetData(zeros);
+            //positions.SetData(zeros);
 
             //make velocities interesting
             for (int i = 0; i < ParticleNumber; i++)
@@ -176,10 +174,14 @@ namespace Rochester.ARTable.Particles
 
             foreach (var c in computes)
                 c.SetupShader(this);
+        }
+
+        void Start()
+        {
             StartCoroutine(SlowUpdates());
         }
 
-        public IEnumerator SlowUpdates()
+        private IEnumerator SlowUpdates()
         {
             for (;;)
             {
