@@ -15,8 +15,8 @@ float drag;
 
 
 const static float2 moving_delta = { 0.001f, 0.001f };
-const static float2 max_velocity = { 20.0f, 20.0f };
-const static float2 neg_max_velocity = { -20.0f, -20.0f };
+const static float2 max_velocity = { 10.0f, 10.0f };
+const static float2 neg_max_velocity = { -10.0f, -10.0f };
 
 
 #pragma kernel Integrate1
@@ -56,8 +56,8 @@ void Integrate2(uint3 id : SV_DispatchThreadID)
 		properties[i].color.a = lerp(1, 0, step(0.8, life) * (life - 0.8) / 0.20);
 
 		float forFun = dot(velocities[i], velocities[i]);
-		//properties[i].color.rgb = lerp(float3(1, 1, 1), float3(1, 0, 0), float3(forFun, forFun, forFun));
-		//properties[i].color.a = lerp(1, 0, forFun);
+		//properties[i].color.rgb = lerp(float3(0, 0, 1), float3(1, 0, 0), float3(forFun, forFun, forFun));
+		properties[i].color.a = lerp(0, 1, min(1, forFun / 10));
 
 
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);

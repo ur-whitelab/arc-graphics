@@ -80,6 +80,9 @@ namespace Rochester.ARTable.Particles
             foreach (var c in this.GetComponentsInChildren<Compute>())
                 computes.Add(c);
 
+            integrate1Handle = integrateShader.FindKernel("Integrate1");
+            integrate2Handle = integrateShader.FindKernel("Integrate2");
+
 
             //cerate empty buffers
             positions = new ComputeBuffer(ParticleNumber, 2 * ShaderConstants.FLOAT_STRIDE);
@@ -109,7 +112,7 @@ namespace Rochester.ARTable.Particles
                         break;
                 }
             }
-            //positions.SetData(zeros);
+            positions.SetData(zeros);
 
             //make velocities interesting
             for (int i = 0; i < ParticleNumber; i++)
@@ -129,7 +132,7 @@ namespace Rochester.ARTable.Particles
                 props[i].state = ShaderConstants.PARTICLE_STATE_DEAD;
                 if(i < visibleStartParticles)
                   props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
-                props[i].color = new Vector4(1f, 1f, 1f, 1f);
+                props[i].color = new Vector4(0f, 0f, 1f, 1f);
             }
 
             properties.SetData(props);
@@ -181,7 +184,7 @@ namespace Rochester.ARTable.Particles
             StartCoroutine(SlowUpdates());
         }
 
-        private IEnumerator SlowUpdates()
+        public IEnumerator SlowUpdates()
         {
             for (;;)
             {
