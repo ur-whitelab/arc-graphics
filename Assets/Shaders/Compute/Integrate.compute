@@ -55,8 +55,8 @@ void Integrate2(uint3 id : SV_DispatchThreadID)
 		float life = properties[i].life / lifeEnd;
 		properties[i].color.a = lerp(1, 0, step(0.8, life) * (life - 0.8) / 0.20);
 
-		//float forFun = dot(velocities[i], velocities[i]) / 10 / 10;
-		//properties[i].color.rgb = lerp(float3(0, 0, 1), float3(1, 0, 0), float3(forFun, forFun, forFun));
+		float forFun = dot(velocities[i], velocities[i]) / 10 / 10;
+		properties[i].color.rgb = lerp(float3(1, 1, 1), float3(1, 0, 0), float3(forFun, forFun, forFun));
 
 
 		velocities[i] = clamp(velocities[i], neg_max_velocity, max_velocity);

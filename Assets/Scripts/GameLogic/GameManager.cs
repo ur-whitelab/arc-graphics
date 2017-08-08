@@ -25,6 +25,13 @@ namespace Rochester.ARTable.GameLogic
                 sources.Add(g.GetComponent<StructureSource>());
             }
 
+            List<StructureAttractor> Attractors = new List<StructureAttractor>();
+
+            foreach (GameObject g in GameObject.FindGameObjectsWithTag("Attractor"))
+            {
+                Attractors.Add(g.GetComponent<StructureAttractor>());
+            }
+
             int lastLevel = 0;
             ParticleStatistics ps = GameObject.Find("ParticleManager").GetComponentInChildren<ParticleStatistics>();
             ps.ComputeModifierStatistics(ShaderConstants.PARTICLE_MODIFIER_TARGET, (s, e) =>

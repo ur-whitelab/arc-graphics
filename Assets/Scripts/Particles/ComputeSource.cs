@@ -191,8 +191,10 @@ namespace Rochester.ARTable.Particles
 
         public override void ReleaseBuffers()
         {
-            sources.Release();
-            spawnTimers.Release();
+            if(sources != null)
+                sources.Release();
+            if(spawnTimers != null)
+                spawnTimers.Release();
         }
     }
 

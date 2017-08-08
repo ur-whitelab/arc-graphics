@@ -17,6 +17,8 @@ namespace Rochester.ARTable.Particles
         public float ParticleLifeEnd = 25f;
         [Tooltip("Particle friction drag")]
         public float DragCoefficient = 0f;
+        [Tooltip("The number of particles to display at start")]
+        public int visibleStartParticles = 0;
         
         public float ExplodeTime = 1f;
         public float ExplodeRadius = 2f;
@@ -100,8 +102,15 @@ namespace Rochester.ARTable.Particles
             forces.SetData(zeros);
 
             //make positions interesting
-            for (int i = 0; i < ParticleNumber; i++)
-                zeros[i].Set(Random.Range(-100f, 100f), Random.Range(-100f, 100f));
+            int sideCount = (int) Mathf.Floor(Mathf.Sqrt(visibleStartParticles)); 
+            int index = 0;
+            float x = 0;
+            for (int j = 0; j < sideCount; j++) {
+                x = 200f / sideCount * j;
+                for (int k = 0; k < sideCount; k++) {
+                    zeros[index++].Set(x - 100f, 200f / (sideCount - 1) * (k + 0.5f) - 100f);
+                }
+            }
             positions.SetData(zeros);
 
             //make velocities interesting
@@ -120,8 +129,8 @@ namespace Rochester.ARTable.Particles
             for (uint i = 0; i < ParticleNumber; i++)
             {
                 props[i].state = ShaderConstants.PARTICLE_STATE_DEAD;
-                //if(i < 30000)
-                //  props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
+                if(i < visibleStartParticles)
+                  props[i].state = ShaderConstants.PARTICLE_STATE_ALIVE;
                 props[i].color = new Vector4(1f, 1f, 1f, 1f);
             }
 
