@@ -73,7 +73,8 @@ namespace Rochester.ARTable.Particles
 
         public override void ReleaseBuffers()
         {
-            walls.Release();
+            if(walls != null)
+                walls.Release();
         }
     }
 

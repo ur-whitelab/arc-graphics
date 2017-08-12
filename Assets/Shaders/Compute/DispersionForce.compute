@@ -22,8 +22,8 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 	uint NP, _, nj;
 	positions.GetDimensions(NP, _);
 	float r2, s2, deno;
-	float2 r;
-
+	float2 r, f;
+	
 	
 	s2 = cutoff * cutoff;
 	deno = 1.0 / s2;
@@ -38,11 +38,11 @@ void ApplyForces(uint3 id : SV_DispatchThreadID)
 				continue;
 			r = positions[nj] - positions[i];
 			r2 = dot(r, r);
-			if (r2 < s2) {
-				//strength * cos(PI / 2 * r2 * deno) * r;
-				//strength * pow(s2 / r2, 2) * r;
-				forces[i] -= strength * sin(PI / 2 * r2 * deno) * r;
-				forces[nj] += strength * sin(PI / 2 * r2 * deno) * r;
+			if (r2 < s2) {				
+				f = strength * sin(PI / 2 * r2 * deno) * r;				
+				//f = -4 * strength * ( 6 *  pow(s2 / r2, 3) -  12 * pow(s2 / r2, 6)) * r;
+				forces[i] -= f;
+				forces[nj] += f;
 			}
 		}
 	}

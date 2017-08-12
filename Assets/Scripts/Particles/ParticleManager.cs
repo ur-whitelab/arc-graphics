@@ -117,7 +117,7 @@ namespace Rochester.ARTable.Particles
             //make velocities interesting
             for (int i = 0; i < ParticleNumber; i++)
                 zeros[i].Set(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-            //velocities.SetData(zeros);
+            velocities.SetData(zeros);
 
             //make forces interesting
 

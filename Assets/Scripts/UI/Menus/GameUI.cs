@@ -10,8 +10,6 @@ namespace Rochester.ARTable.UI
     public class GameUI : MonoBehaviour
     {
 
-        public GameObject ParticleManager;
-
         public float UpdateDelay = 0.05f;
 
         private ComputeSource cs;
@@ -23,8 +21,9 @@ namespace Rochester.ARTable.UI
 
         void Start()
         {
-            cs = ParticleManager.GetComponentInChildren<ComputeSource>();
-            ps = ParticleManager.GetComponentInChildren<ParticleStatistics>();
+            ParticleManager pm = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
+            cs = pm.GetComponentInChildren<ComputeSource>();
+            ps = pm.GetComponentInChildren<ParticleStatistics>();
 
             //Just use ananyomous event handlers
             ps.ComputeModifierStatistics((s, e) =>
