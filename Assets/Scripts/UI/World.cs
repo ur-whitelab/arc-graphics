@@ -9,7 +9,12 @@ namespace Rochester.ARTable.UI
 
         public Vector2 boundariesLow;
         public Vector2 boundariesHigh;
-        public Vector2 size;
+        private Vector2 _size;
+        public Vector2 size {
+            get {
+                return _size;
+            }
+        }
         private new Collider2D collider;
 
         // Use this for initialization
@@ -21,7 +26,7 @@ namespace Rochester.ARTable.UI
                 Vector3 bounds_max = GetComponent<Collider2D>().bounds.max;
                 boundariesLow = new Vector2(bounds_min.x, bounds_min.y);
                 boundariesHigh = new Vector2(bounds_max.x, bounds_max.y);
-                size = boundariesHigh - boundariesLow;
+                this._size = boundariesHigh - boundariesLow;
             }
 
             collider = GetComponent<Collider2D>();
@@ -33,10 +38,10 @@ namespace Rochester.ARTable.UI
             //deal with editor placed objects
             ComputeAttractors ca = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeAttractors>();
             foreach (GameObject g in GameObject.FindGameObjectsWithTag("Attractor"))
-            {                
-                ca.AddAttractor(new Vector2(g.transform.localPosition.x, g.transform.localPosition.y));    
+            {
+                ca.AddAttractor(new Vector2(g.transform.localPosition.x, g.transform.localPosition.y));
             }
-            
+
         }
 
         /*
