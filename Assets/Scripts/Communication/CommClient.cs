@@ -12,12 +12,12 @@ namespace Rochester.ARTable.Communication
     {
         
         private Dictionary<int, Dictionary<int, GameObject>> managedObjects;
-        private SubscriberSocket client;
+        private SubscriberSocket VisionClient, SimulationClient;
         private NetMQPoller poller;
-        private TaskCompletionSource<byte[]> responseTask;
+        private TaskCompletionSource<byte[]> VisionResponseTask, SimulationResponseTask;
 
         [Tooltip("Follows ZeroMQ syntax")]
-        public string server_uri = "tcp://localhost:5000";
+        public string server_uri = "tcp://127.0.0.10:5000";
 
         public List<int> CommObjIds;
         public List<GameObject> CommObjPrefabs;
@@ -39,14 +39,23 @@ namespace Rochester.ARTable.Communication
 
             //set-up socket and poller            
             AsyncIO.ForceDotNet.Force();
-            client = new SubscriberSocket();
-            client.Subscribe("");
-            client.Connect(server_uri);
-            poller = new NetMQPoller { client };
+            VisionClient = new SubscriberSocket();
+            SimulationClient = new SubscriberSocket();
+            VisionClient.Subscribe("");//vision-update, but "any" for testing
+            SimulationClient.Subscribe("simulation-update");
+            UnityEngine.Debug.Log("set up the subscriptions at " + server_uri);
+            VisionClient.Connect(server_uri);
+            SimulationClient.Connect(server_uri);
+            poller = new NetMQPoller { VisionClient, SimulationClient };
             //set-up event to add to task
-            responseTask = new TaskCompletionSource<byte[]>();
-            client.ReceiveReady += (s, a) => {               
-                responseTask.SetResult(a.Socket.ReceiveFrameBytes());
+            VisionResponseTask = new TaskCompletionSource<byte[]>();
+            SimulationResponseTask = new TaskCompletionSource<byte[]>();
+            SimulationClient.ReceiveReady += (s, a) => {               
+                SimulationResponseTask.SetResult(a.Socket.ReceiveFrameBytes());
+            };
+            VisionResponseTask = new TaskCompletionSource<byte[]>();
+            VisionClient.ReceiveReady += (s, a) => {
+                VisionResponseTask.SetResult(a.Socket.ReceiveFrameBytes());
             };
             //start polling thread
             poller.RunAsync();
@@ -56,14 +65,16 @@ namespace Rochester.ARTable.Communication
         // Update is called once per frame
         void Update()
         {
-            if (responseTask.Task.IsCompleted)
+            if (VisionResponseTask.Task.IsCompleted)
             {
-                StructuresState state = StructuresState.Parser.ParseFrom(responseTask.Task.Result);
-                UnityEngine.Debug.Log("Received message " +  state.Time);
+                StructuresState state = StructuresState.Parser.ParseFrom(VisionResponseTask.Task.Result);
+                UnityEngine.Debug.Log("Received message " +  state.Time + "from vision-update");
                 synchronizeState(state);
                 //this is how you reset?
-                responseTask = new TaskCompletionSource<byte[]>();
+                VisionResponseTask = new TaskCompletionSource<byte[]>();
             }
+
+
             
         }
 
@@ -83,10 +94,12 @@ namespace Rochester.ARTable.Communication
             }            
         }
 
-        void OnApplicationQuit()
+        void OnApplicationQuit()//cleanup
         {
-            client.Close();
-            client.Dispose();
+            VisionClient.Close();
+            VisionClient.Dispose();
+            SimulationClient.Close();
+            SimulationClient.Dispose();
             poller.StopAsync();
             poller.Dispose();
             NetMQConfig.Cleanup();

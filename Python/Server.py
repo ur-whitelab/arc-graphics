@@ -2,6 +2,9 @@ import zmq
 import zmq.asyncio
 import asyncio
 import State_pb2
+import kinetics_pb2
+import reactors_pb2
+
 
 class StateServer:
 
@@ -14,18 +17,25 @@ class StateServer:
         self.sock.bind(uri)
         self.state = State_pb2.StructuresState()
         self.state.time = 0
+
         #create some random attractors
         for i in range(3):
             a = self.state.structures.add()
-            a.type = 0
+            a.type = 1
             a.id = i
             a.position.append(i * 10.0)
             a.position.append(0.0)
+            b = self.state.structures.add()
+            b.type = 0
+            b.id = i
+            b.position.append(i * 10.0)
+            b.position.append(0.0)
+            
 
     async def update_gamestate(self):
         self.state.time += 1
         for a in self.state.structures:
-            a.position[1] += 1
+            a.position[1] += 3*(1 if self.state.time%2 else -1)
         await asyncio.sleep(1)
         return self.state
 
