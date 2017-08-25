@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='kinetics.proto',
   package='reactors',
   syntax='proto3',
-  serialized_pb=_b('\n\x0ekinetics.proto\x12\x08reactors\"O\n\x0fReactorKinetics\x12\x15\n\rmole_fraction\x18\x01 \x03(\x02\x12\x13\n\x0btemperature\x18\x02 \x01(\x02\x12\x10\n\x08pressure\x18\x03 \x01(\x02\"K\n\x0eSystemKinetics\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12+\n\x08kinetics\x18\x02 \x03(\x0b\x32\x19.reactors.ReactorKineticsb\x06proto3')
+  serialized_pb=_b('\n\x0ekinetics.proto\x12\x08reactors\"O\n\x0fReactorKinetics\x12\x15\n\rmole_fraction\x18\x01 \x03(\x02\x12\x13\n\x0btemperature\x18\x02 \x01(\x02\x12\x10\n\x08pressure\x18\x03 \x01(\x02\"K\n\x0eSystemKinetics\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12+\n\x08kinetics\x18\x02 \x03(\x0b\x32\x19.reactors.ReactorKineticsB\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
 )
 
 
@@ -127,4 +127,6 @@ SystemKinetics = _reflection.GeneratedProtocolMessageType('SystemKinetics', (_me
 _sym_db.RegisterMessage(SystemKinetics)
 
 
+DESCRIPTOR.has_options = True
+DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\252\002\037Rochester.Physics.Communication'))
 # @@protoc_insertion_point(module_scope)

@@ -3,7 +3,7 @@ import zmq.asyncio
 import asyncio
 import State_pb2
 import kinetics_pb2
-import reactors_pb2
+import graph_pb2
 
 
 class StateServer:
@@ -15,35 +15,43 @@ class StateServer:
         print('Opening PUB Socket on {}'.format(uri))
         self.sock = self.ctx.socket(zmq.PUB)
         self.sock.bind(uri)
-        self.state = State_pb2.StructuresState()
-        self.state.time = 0
+        #for use with state buffer:
+        #self.state = State_pb2.StructuresState()
+        #self.state.time = 0
 
-        #create some random attractors
+        #for use with reactor system buffer:
+        self.graph = graph_pb2.Graph()
+        self.graph.time = 0
+
+
+        #create some reactors
         for i in range(3):
-            a = self.state.structures.add()
+            a = self.graph.nodes.add()
             a.type = 1
             a.id = i
-            a.position.append(i * 10.0)
-            a.position.append(0.0)
-            b = self.state.structures.add()
-            b.type = 0
-            b.id = i
-            b.position.append(i * 10.0)
-            b.position.append(0.0)
+            a.position.append((i-1) * 10.0)
             
+            a.position.append(0.0)
 
     async def update_gamestate(self):
-        self.state.time += 1
+        self.graph.time += 1
+        '''
         for a in self.state.structures:
-            a.position[1] += 3*(1 if self.state.time%2 else -1)
+            a.position[1] += 3*(a.id+1)*(1 if self.state.time%2 else -1)
         await asyncio.sleep(1)
         return self.state
+        '''
+        for a in self.graph.nodes:
+            a.position[1] += 3*(a.id+1)*(1 if self.graph.time%2 else -1)
+        await asyncio.sleep(1)
+        return self.graph
+
 
     async def pubLoop(self):
         counter = 0
         while True:
-            state = await self.update_gamestate()
-            self.sock.send(state.SerializeToString())
+            graph = await self.update_gamestate()
+            self.sock.send(graph.SerializeToString())
             if(not self.connected):
                 self.connected = True
                 print('Socket has sent first packet')
