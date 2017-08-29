@@ -1,0 +1,82 @@
+Initialize engine version: 2017.1.0f3 (472613c02cf7)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce GTX 1080 (ID=0x1b80)
+    Vendor:   NVIDIA
+    VRAM:     8076 MB
+    Driver:   22.21.13.8494
+Begin MonoManager ReloadAssembly
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\System.Core.dll (this message is harmless)
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\UnityEngine.Timeline.dll into Unity Child Domain
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\AsyncIO.dll into Unity Child Domain
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\Google.Protobuf.dll into Unity Child Domain
+Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\NetMQ.dll into Unity Child Domain
+Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\System.dll (this message is harmless)
+- Completed reload, in  0.565 seconds
+<RI> Initializing input.
+<RI> Input initialized.
+<RI> Initialized touch support.
+UnloadTime: 0.901851 ms
+Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\System.Configuration.dll (this message is harmless)
+Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\System.Xml.dll (this message is harmless)
+Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\Mono.Security.dll (this message is harmless)
+set up the subscription at tcp://127.0.0.1:8076
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+set up the subscriptions at tcp://127.0.0.1:8076
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Received message background from scene server.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Scene 'background' couldn't be loaded because it has not been added to the build settings or the AssetBundle has not been loaded.
+To add a scene to the build settings use the menu File->Build Settings...
+ 
+(Filename:  Line: 141)
+
+Received message detection from scene server.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+The referenced script on this Behaviour (Game Object 'EditorWall') is missing!
+ 
+(Filename:  Line: 1758)
+
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.413575 ms
+Max Neighbors = 256
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 449.
+Total: 1.212193 ms (FindLiveObjects: 0.032060 ms CreateObjectMapping: 0.011221 ms MarkObjects: 1.161859 ms  DeleteObjects: 0.006091 ms)
+
+New object attractor:9
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+New object attractor:10
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+New object attractor:11
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Setting up 6 worker threads for Enlighten.
+  Thread -> id: 2b20 -> priority: 1 
+  Thread -> id: 1bc4 -> priority: 1 
+  Thread -> id: 1700 -> priority: 1 
+  Thread -> id: 30ec -> priority: 1 
+  Thread -> id: 125c -> priority: 1 
+  Thread -> id: 2940 -> priority: 1 

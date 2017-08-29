@@ -30,6 +30,14 @@ namespace Rochester.ARTable.UI
 
         }
 
+        public Vector2 UnitToWorld(Vector2 coords)
+        {
+            //coords must be scaled from 0 to 1 to use Matf.Lerp
+            Vector2 ScaledCoords;
+            ScaledCoords = new Vector2(Mathf.Lerp(clampLow.x, clampHigh.x, coords.x), Mathf.Lerp(clampLow.y, clampHigh.y, coords.y));
+            return (ScaledCoords);
+        }
+
         // Use this for initialization
         void Start()
         {

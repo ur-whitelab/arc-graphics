@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='graph.proto',
   package='graphs',
   syntax='proto3',
-  serialized_pb=_b('\n\x0bgraph.proto\x12\x06graphs\"B\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04type\x18\x02 \x01(\x05\x12\x10\n\x08position\x18\x03 \x03(\x02\x12\x0e\n\x06weight\x18\x04 \x03(\x02\"N\n\x04\x45\x64ge\x12\x0b\n\x03idA\x18\x01 \x01(\x05\x12\r\n\x05typeA\x18\x02 \x01(\x05\x12\x0b\n\x03idB\x18\x03 \x01(\x05\x12\r\n\x05typeB\x18\x04 \x01(\x05\x12\x0e\n\x06weight\x18\x05 \x03(\x02\"O\n\x05Graph\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\x1b\n\x05nodes\x18\x02 \x03(\x0b\x32\x0c.graphs.Node\x12\x1b\n\x05\x65\x64ges\x18\x03 \x03(\x0b\x32\x0c.graphs.EdgeB\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
+  serialized_pb=_b('\n\x0bgraph.proto\x12\x06graphs\"S\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05label\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x65lete\x18\x03 \x01(\x08\x12\x10\n\x08position\x18\x04 \x03(\x02\x12\x0e\n\x06weight\x18\x05 \x03(\x02\"N\n\x04\x45\x64ge\x12\x0b\n\x03idA\x18\x01 \x01(\x05\x12\r\n\x05typeA\x18\x02 \x01(\x05\x12\x0b\n\x03idB\x18\x03 \x01(\x05\x12\r\n\x05typeB\x18\x04 \x01(\x05\x12\x0e\n\x06weight\x18\x05 \x03(\x02\"\xdf\x01\n\x05Graph\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\'\n\x05nodes\x18\x02 \x03(\x0b\x32\x18.graphs.Graph.NodesEntry\x12\'\n\x05\x65\x64ges\x18\x03 \x03(\x0b\x32\x18.graphs.Graph.EdgesEntry\x1a:\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.graphs.Node:\x02\x38\x01\x1a:\n\nEdgesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.graphs.Edge:\x02\x38\x01\x42\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
 )
 
 
@@ -40,22 +40,29 @@ _NODE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='type', full_name='graphs.Node.type', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='label', full_name='graphs.Node.label', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='position', full_name='graphs.Node.position', index=2,
-      number=3, type=2, cpp_type=6, label=3,
+      name='delete', full_name='graphs.Node.delete', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='position', full_name='graphs.Node.position', index=3,
+      number=4, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='weight', full_name='graphs.Node.weight', index=3,
-      number=4, type=2, cpp_type=6, label=3,
+      name='weight', full_name='graphs.Node.weight', index=4,
+      number=5, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -73,7 +80,7 @@ _NODE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=23,
-  serialized_end=89,
+  serialized_end=106,
 )
 
 
@@ -131,10 +138,84 @@ _EDGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=91,
-  serialized_end=169,
+  serialized_start=108,
+  serialized_end=186,
 )
 
+
+_GRAPH_NODESENTRY = _descriptor.Descriptor(
+  name='NodesEntry',
+  full_name='graphs.Graph.NodesEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='graphs.Graph.NodesEntry.key', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='graphs.Graph.NodesEntry.value', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=294,
+  serialized_end=352,
+)
+
+_GRAPH_EDGESENTRY = _descriptor.Descriptor(
+  name='EdgesEntry',
+  full_name='graphs.Graph.EdgesEntry',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='graphs.Graph.EdgesEntry.key', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='graphs.Graph.EdgesEntry.value', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=354,
+  serialized_end=412,
+)
 
 _GRAPH = _descriptor.Descriptor(
   name='Graph',
@@ -167,7 +248,7 @@ _GRAPH = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[],
+  nested_types=[_GRAPH_NODESENTRY, _GRAPH_EDGESENTRY, ],
   enum_types=[
   ],
   options=None,
@@ -176,12 +257,16 @@ _GRAPH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=171,
-  serialized_end=250,
+  serialized_start=189,
+  serialized_end=412,
 )
 
-_GRAPH.fields_by_name['nodes'].message_type = _NODE
-_GRAPH.fields_by_name['edges'].message_type = _EDGE
+_GRAPH_NODESENTRY.fields_by_name['value'].message_type = _NODE
+_GRAPH_NODESENTRY.containing_type = _GRAPH
+_GRAPH_EDGESENTRY.fields_by_name['value'].message_type = _EDGE
+_GRAPH_EDGESENTRY.containing_type = _GRAPH
+_GRAPH.fields_by_name['nodes'].message_type = _GRAPH_NODESENTRY
+_GRAPH.fields_by_name['edges'].message_type = _GRAPH_EDGESENTRY
 DESCRIPTOR.message_types_by_name['Node'] = _NODE
 DESCRIPTOR.message_types_by_name['Edge'] = _EDGE
 DESCRIPTOR.message_types_by_name['Graph'] = _GRAPH
@@ -202,13 +287,33 @@ Edge = _reflection.GeneratedProtocolMessageType('Edge', (_message.Message,), dic
 _sym_db.RegisterMessage(Edge)
 
 Graph = _reflection.GeneratedProtocolMessageType('Graph', (_message.Message,), dict(
+
+  NodesEntry = _reflection.GeneratedProtocolMessageType('NodesEntry', (_message.Message,), dict(
+    DESCRIPTOR = _GRAPH_NODESENTRY,
+    __module__ = 'graph_pb2'
+    # @@protoc_insertion_point(class_scope:graphs.Graph.NodesEntry)
+    ))
+  ,
+
+  EdgesEntry = _reflection.GeneratedProtocolMessageType('EdgesEntry', (_message.Message,), dict(
+    DESCRIPTOR = _GRAPH_EDGESENTRY,
+    __module__ = 'graph_pb2'
+    # @@protoc_insertion_point(class_scope:graphs.Graph.EdgesEntry)
+    ))
+  ,
   DESCRIPTOR = _GRAPH,
   __module__ = 'graph_pb2'
   # @@protoc_insertion_point(class_scope:graphs.Graph)
   ))
 _sym_db.RegisterMessage(Graph)
+_sym_db.RegisterMessage(Graph.NodesEntry)
+_sym_db.RegisterMessage(Graph.EdgesEntry)
 
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\252\002\037Rochester.Physics.Communication'))
+_GRAPH_NODESENTRY.has_options = True
+_GRAPH_NODESENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
+_GRAPH_EDGESENTRY.has_options = True
+_GRAPH_EDGESENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
 # @@protoc_insertion_point(module_scope)

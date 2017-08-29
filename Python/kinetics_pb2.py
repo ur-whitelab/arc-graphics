@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='kinetics.proto',
   package='reactors',
   syntax='proto3',
-  serialized_pb=_b('\n\x0ekinetics.proto\x12\x08reactors\"O\n\x0fReactorKinetics\x12\x15\n\rmole_fraction\x18\x01 \x03(\x02\x12\x13\n\x0btemperature\x18\x02 \x01(\x02\x12\x10\n\x08pressure\x18\x03 \x01(\x02\"K\n\x0eSystemKinetics\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12+\n\x08kinetics\x18\x02 \x03(\x0b\x32\x19.reactors.ReactorKineticsB\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
+  serialized_pb=_b('\n\x0ekinetics.proto\x12\x08reactors\"O\n\x0fReactorKinetics\x12\x13\n\x0btemperature\x18\x01 \x01(\x02\x12\x10\n\x08pressure\x18\x02 \x01(\x02\x12\x15\n\rmole_fraction\x18\x03 \x03(\x02\"K\n\x0eSystemKinetics\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12+\n\x08kinetics\x18\x02 \x03(\x0b\x32\x19.reactors.ReactorKineticsB\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
 )
 
 
@@ -33,23 +33,23 @@ _REACTORKINETICS = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='mole_fraction', full_name='reactors.ReactorKinetics.mole_fraction', index=0,
-      number=1, type=2, cpp_type=6, label=3,
-      has_default_value=False, default_value=[],
+      name='temperature', full_name='reactors.ReactorKinetics.temperature', index=0,
+      number=1, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='temperature', full_name='reactors.ReactorKinetics.temperature', index=1,
+      name='pressure', full_name='reactors.ReactorKinetics.pressure', index=1,
       number=2, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='pressure', full_name='reactors.ReactorKinetics.pressure', index=2,
-      number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      name='mole_fraction', full_name='reactors.ReactorKinetics.mole_fraction', index=2,
+      number=3, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),

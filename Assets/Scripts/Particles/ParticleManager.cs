@@ -75,6 +75,7 @@ namespace Rochester.ARTable.Particles
 
             if (world == null)
                 world = GameObject.Find("World").GetComponent<World>();
+                
 
             computes = new List<Compute>();
             foreach (var c in this.GetComponentsInChildren<Compute>())
