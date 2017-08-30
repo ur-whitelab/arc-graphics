@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Rochester.Physics.Communication;
 using Rochester.ARTable.UI;
 using UnityEngine.SceneManagement;
+using Rochester.ARTable.Particles;
 
 namespace Rochester.ARTable.Communication
 {
@@ -15,7 +16,8 @@ namespace Rochester.ARTable.Communication
     {
         
         private Dictionary<string, Dictionary<int, GameObject>> managedObjects;
-        private SubscriberSocket VisionClient, SimulationClient, StrobeClient;
+        private SubscriberSocket VisionClient, SimulationClient;
+        private PairSocket StrobeServer;
         private NetMQPoller VisionPoller, SimulationPoller, StrobePoller;
         private TaskCompletionSource<byte[]> VisionResponseTask, SimulationResponseTask;
         private TaskCompletionSource<string> StrobeResponseTask;//, StrobeStopResponseTask ;
@@ -23,12 +25,19 @@ namespace Rochester.ARTable.Communication
 
 
         [Tooltip("Follows ZeroMQ syntax")]
-        public string server_uri = "tcp://127.0.0.1:5000";
+        public string ServerUri = "tcp://127.0.0.1:8076";
+        public string StrobeUri = "tcp://*:8079";
 
         public List<string> CommObjLabels;
         public List<GameObject> CommObjPrefabs;
         private Dictionary<string, GameObject> prefabs;
         public Renderer rend;
+
+        private GameObject Strobe;
+        private ParticleManager particleManager;
+
+
+        private int delays = 0;
 
 
         void Awake()
@@ -42,6 +51,11 @@ namespace Rochester.ARTable.Communication
         {
             //get camera functions
             camera = GameObject.Find("Main Camera").GetComponent<CameraControls>();
+            if (scene.name == "detection")
+            {
+                Strobe = GameObject.Find("Strobe");
+                particleManager = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
+            }
         }
 
 
@@ -62,16 +76,17 @@ namespace Rochester.ARTable.Communication
             //set-up socket and poller        
             VisionClient = new SubscriberSocket();
             SimulationClient = new SubscriberSocket();
-            StrobeClient = new SubscriberSocket("REP");
+            StrobeServer = new PairSocket();
             VisionClient.Subscribe("vision-update");
             SimulationClient.Subscribe("simulation-update");
-            StrobeClient.Subscribe("");
-            UnityEngine.Debug.Log("set up the subscriptions at " + server_uri);
-            VisionClient.Connect(server_uri);
-            SimulationClient.Connect(server_uri);
+            UnityEngine.Debug.Log("set up the subscriptions at " + ServerUri);
+            VisionClient.Connect(ServerUri);
+            SimulationClient.Connect(ServerUri);
+            StrobeServer.Bind(StrobeUri);
+            Debug.Log("set up rep server at " + StrobeUri);
             VisionPoller = new NetMQPoller { VisionClient };//, SimulationClient };
             SimulationPoller = new NetMQPoller { SimulationClient };
-            StrobePoller = new NetMQPoller { StrobeClient };
+            StrobePoller = new NetMQPoller { StrobeServer };
             //set-up event to add to task
             VisionResponseTask = new TaskCompletionSource<byte[]>();
             SimulationResponseTask = new TaskCompletionSource<byte[]>();
@@ -87,10 +102,10 @@ namespace Rochester.ARTable.Communication
                 var msg = b.Socket.ReceiveMultipartBytes();
                 VisionResponseTask.TrySetResult(msg[1]);
             };
-            StrobeClient.ReceiveReady += (s, a) =>
+            StrobeServer.ReceiveReady += (s, a) =>
             {
-                var msg = a.Socket.ReceiveMultipartStrings();
-                StrobeResponseTask.TrySetResult(msg[1]);
+                var msg = a.Socket.ReceiveFrameString();
+                StrobeResponseTask.TrySetResult(msg);
             };
             //start polling thread
             VisionPoller.RunAsync();
@@ -119,17 +134,31 @@ namespace Rochester.ARTable.Communication
                 SimulationResponseTask = new TaskCompletionSource<byte[]>();
             }
 
+            delays += 1;
             if (StrobeResponseTask.Task.IsCompleted)
             {
                 string status = StrobeResponseTask.Task.Result;
-                GameObject gameobj = GameObject.Find("Strobe");
                 if (status == "start")
                 {
-                    gameobj.GetComponent<Renderer>().enabled = false;
+                    if (!(Strobe.GetComponent<MeshRenderer>().enabled))
+                    {
+                        Strobe.GetComponent<MeshRenderer>().enabled = true;
+                        particleManager.Hidden = true;
+                        delays = 0;
+                    }
+
+                    else 
+                    {
+                        StrobeResponseTask = new TaskCompletionSource<string>();
+                        StrobeServer.SendFrame("ready");
+                    }
                 }
                 else if(status == "done")
                 {
-                    gameobj.GetComponent<MeshRenderer>().enabled = true;//turn it back on when we get the go-ahead
+                    Strobe.GetComponent<MeshRenderer>().enabled = false;//turn it back on when we get the go-ahead\
+                    StrobeResponseTask = new TaskCompletionSource<string>();
+                    particleManager.Hidden = false;
+                    StrobeServer.SendFrame("done");
                 }
             }
             
@@ -141,7 +170,7 @@ namespace Rochester.ARTable.Communication
                 var o = system.Nodes[key];
                 var currentObjs = managedObjects[o.Label];
                 GameObject existing;
-                Vector2 objectPos = new Vector2(o.Position[0], 1-o.Position[1]);
+                Vector2 objectPos = new Vector2(1-o.Position[0], 1-o.Position[1]);
                 Vector2 viewPos = camera.UnitToWorld(objectPos);
                 if (!currentObjs.TryGetValue(o.Id, out existing)) {
                     var placed = (GameObject) GameObject.Instantiate(prefabs[o.Label], new Vector2(viewPos.x, viewPos.y), new Quaternion()); 
@@ -159,7 +188,7 @@ namespace Rochester.ARTable.Communication
                 }
                 //if(system.Time % 2 == 0)
                 {
-                    camera.TakeShot(system.Time.ToString());
+                    //camera.TakeShot(system.Time.ToString());
                 }
             }            
         }
@@ -195,10 +224,13 @@ namespace Rochester.ARTable.Communication
             VisionClient.Dispose();
             SimulationClient.Close();
             SimulationClient.Dispose();
+            StrobeServer.Close();
+            StrobeServer.Dispose();
             try
             {
                 VisionPoller.StopAsync();
                 SimulationPoller.StopAsync();
+                StrobePoller.StopAsync();
             }
                 
             catch (System.Exception e)
@@ -207,6 +239,7 @@ namespace Rochester.ARTable.Communication
             }
             VisionPoller.Dispose();
             SimulationPoller.Dispose();
+            StrobePoller.Dispose();
         }
     }
 

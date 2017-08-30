@@ -23,7 +23,8 @@ namespace Rochester.ARTable.Particles
         public float ExplodeTime = 1f;
         public float ExplodeRadius = 2f;
         public float ExplodeMeshSize = 0.25f;
-
+        [Tooltip("Whether to render particles")]
+        public bool Hidden = false;
 
 
 
@@ -251,12 +252,15 @@ namespace Rochester.ARTable.Particles
                 new System.Exception("Compute shaders not supported on your platform.");
             }
 
-            // set the pass -> there is only 1 pass here because we have a simple shader
-            particleMaterial.SetPass(0);
+            if(!Hidden)
+            {
+                // set the pass -> there is only 1 pass here because we have a simple shader
+                particleMaterial.SetPass(0);
 
-            // draw
-            //Graphics.DrawProcedural(MeshTopology.Triangles, 6, ParticleNumber);
-            Graphics.DrawProcedural(MeshTopology.Points, ParticleNumber, 1);
+                // draw
+                //Graphics.DrawProcedural(MeshTopology.Triangles, 6, ParticleNumber);
+                Graphics.DrawProcedural(MeshTopology.Points, ParticleNumber, 1);
+            }
         }
     }
 

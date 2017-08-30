@@ -72,6 +72,12 @@ namespace Rochester.ARTable.Communication
         // Update is called once per frame
         void Update()
         {
+            bool SwitchToDetection = false;
+            SwitchToDetection|= Input.GetKeyDown("k");
+            if (SwitchToDetection)
+            {
+                OpenScene("detection");
+            }
             //get scene we need to go to
             if (SceneResponseTask.Task.IsCompleted)
             {
