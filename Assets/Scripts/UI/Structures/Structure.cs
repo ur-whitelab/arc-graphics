@@ -16,6 +16,11 @@ namespace Rochester.ARTable.UI
 
         public abstract void CancelPlace();
 
+        public virtual void StartPlace()
+        {
+            // presumes default is to start
+        }
+
         public virtual void TryPreview()
         {
             //pass

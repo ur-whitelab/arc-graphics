@@ -10,19 +10,24 @@ namespace Rochester.ARTable.UI
         private ComputeAttractors ca;
         private int aIndex = -1;
         private bool placed = false;
+        private bool autoplace = false;
 
         public override void CancelPlace()
         {
             Destroy(gameObject);
         }
 
-        void update()
+        void Update()
         {
             //only check for transform updates after we have placed.
-            if (placed && transform.hasChanged)
+            if (transform.hasChanged)
             {
                 ca.UpdateAttractor(aIndex, new Vector2(transform.localPosition.x, transform.localPosition.y));
                 transform.hasChanged = false;
+            }
+            if(autoplace)
+            {
+                Place();
             }
         }
 
@@ -56,6 +61,13 @@ namespace Rochester.ARTable.UI
         {
             ca = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeAttractors>();
             transform.hasChanged = false;
+            autoplace = true;
+        }
+
+
+        public virtual void StartPlace()
+        {
+            autoplace = false;
         }
 
     }
