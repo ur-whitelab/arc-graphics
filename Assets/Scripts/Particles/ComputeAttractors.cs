@@ -48,8 +48,27 @@ namespace Rochester.ARTable.Particles
         public void UpdateAttractor(int index, Vector2 location, float magnitude = 0)
         {
             if (magnitude == 0)
-                magnitude = cpu_attractors[index].magnitude;
-            cpu_attractors[index] = new ShaderConstants.Attractor(location, magnitude);
+            {
+                try
+                {
+                    magnitude = cpu_attractors[index].magnitude;
+                }
+                catch(System.ArgumentOutOfRangeException e)
+                {
+                    Debug.Log("That's a problem... " + e);
+                    magnitude = 1.0f;
+                }
+
+            }
+            if(index == -1)//this happens on startup for some reason
+            {
+                cpu_attractors.Add(new ShaderConstants.Attractor(location, magnitude));
+            }
+            else
+            {
+                cpu_attractors[index] = new ShaderConstants.Attractor(location, magnitude);
+
+            }
             syncBuffers();
         }
 
