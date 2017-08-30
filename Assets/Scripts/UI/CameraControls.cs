@@ -65,7 +65,9 @@ namespace Rochester.ARTable.UI
                 }
                 //System.IO.File.WriteAllBytes(filename, bytes);
                 Debug.Log(string.Format("Took screenshot but did NOT save to: {0}", filename));
+
                 takeShot = false;
+                name = "default";
             }
         }
 

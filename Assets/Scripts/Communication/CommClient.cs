@@ -15,9 +15,10 @@ namespace Rochester.ARTable.Communication
     {
         
         private Dictionary<string, Dictionary<int, GameObject>> managedObjects;
-        private SubscriberSocket VisionClient, SimulationClient;
-        private NetMQPoller VisionPoller, SimulationPoller;
-        private TaskCompletionSource<byte[]> VisionResponseTask, SimulationResponseTask ;
+        private SubscriberSocket VisionClient, SimulationClient, StrobeClient;
+        private NetMQPoller VisionPoller, SimulationPoller, StrobePoller;
+        private TaskCompletionSource<byte[]> VisionResponseTask, SimulationResponseTask;
+        private TaskCompletionSource<string> StrobeResponseTask;//, StrobeStopResponseTask ;
         private CameraControls camera;
 
 
@@ -61,16 +62,21 @@ namespace Rochester.ARTable.Communication
             //set-up socket and poller        
             VisionClient = new SubscriberSocket();
             SimulationClient = new SubscriberSocket();
-            VisionClient.Subscribe("vision-update");//vision-update, but "any" for testing
+            StrobeClient = new SubscriberSocket("REP");
+            VisionClient.Subscribe("vision-update");
             SimulationClient.Subscribe("simulation-update");
+            StrobeClient.Subscribe("");
             UnityEngine.Debug.Log("set up the subscriptions at " + server_uri);
             VisionClient.Connect(server_uri);
             SimulationClient.Connect(server_uri);
             VisionPoller = new NetMQPoller { VisionClient };//, SimulationClient };
             SimulationPoller = new NetMQPoller { SimulationClient };
+            StrobePoller = new NetMQPoller { StrobeClient };
             //set-up event to add to task
             VisionResponseTask = new TaskCompletionSource<byte[]>();
             SimulationResponseTask = new TaskCompletionSource<byte[]>();
+            StrobeResponseTask= new TaskCompletionSource<string>();
+            //StrobeStopResponseTask= new TaskCompletionSource<string[]>();
             SimulationClient.ReceiveReady += (s, a) => {
                 var msg = a.Socket.ReceiveMultipartBytes();
 
@@ -81,10 +87,15 @@ namespace Rochester.ARTable.Communication
                 var msg = b.Socket.ReceiveMultipartBytes();
                 VisionResponseTask.TrySetResult(msg[1]);
             };
+            StrobeClient.ReceiveReady += (s, a) =>
+            {
+                var msg = a.Socket.ReceiveMultipartStrings();
+                StrobeResponseTask.TrySetResult(msg[1]);
+            };
             //start polling thread
             VisionPoller.RunAsync();
             SimulationPoller.RunAsync();
-            
+            StrobePoller.RunAsync();
         }   
 
         // Update is called once per frame
@@ -106,6 +117,20 @@ namespace Rochester.ARTable.Communication
                 // UnityEngine.Debug.Log("Received message " + kinetics + " from kinetics.");
                 synchronizeSimulation(kinetics);
                 SimulationResponseTask = new TaskCompletionSource<byte[]>();
+            }
+
+            if (StrobeResponseTask.Task.IsCompleted)
+            {
+                string status = StrobeResponseTask.Task.Result;
+                GameObject gameobj = GameObject.Find("Strobe");
+                if (status == "start")
+                {
+                    gameobj.GetComponent<Renderer>().enabled = false;
+                }
+                else if(status == "done")
+                {
+                    gameobj.GetComponent<MeshRenderer>().enabled = true;//turn it back on when we get the go-ahead
+                }
             }
             
         }
@@ -149,7 +174,7 @@ namespace Rochester.ARTable.Communication
                 var currentObjs = managedObjects["1"];//hard-coded reactor type.
                 GameObject existing;
                 currentObjs.TryGetValue( rxrcount, out existing);
-                Renderer rend = existing.GetComponent<Renderer>();
+                rend = existing.GetComponent<Renderer>();
                 rend.material.shader = Shader.Find("Custom/WedgeCircle");
                 count = 0;
                 foreach(var molefrac in rxr.MoleFraction)
