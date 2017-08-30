@@ -19,15 +19,16 @@ namespace Rochester.ARTable.UI
 
         void Update()
         {
+            if (autoplace)
+            {
+                Place();
+                autoplace = false;
+            }
             //only check for transform updates after we have placed.
             if (transform.hasChanged)
             {
                 ca.UpdateAttractor(aIndex, new Vector2(transform.localPosition.x, transform.localPosition.y));
                 transform.hasChanged = false;
-            }
-            if(autoplace)
-            {
-                Place();
             }
         }
 
