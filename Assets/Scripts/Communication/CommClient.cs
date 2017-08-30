@@ -132,6 +132,10 @@ namespace Rochester.ARTable.Communication
                     existing.transform.localPosition = viewPos;                    
                     // UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" +viewPos.x + ", " + viewPos.y + ")"); 
                 }
+                if(system.Time % 100 == 0)
+                {
+                    camera.TakeHiResShot();
+                }
             }            
         }
 

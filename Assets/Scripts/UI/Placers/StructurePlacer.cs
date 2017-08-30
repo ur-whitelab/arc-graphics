@@ -94,7 +94,7 @@ namespace Rochester.ARTable.UI
             Vector3 location = world.GetMousePosition();
             placing = (GameObject)GameObject.Instantiate(placedPrefab, location, new Quaternion());
             placingScript = placing.GetComponent<Structure>();
-            placingScript.placed = false;
+            //placingScript.placed = false;
         }
 
         private void finishPlace()
