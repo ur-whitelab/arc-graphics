@@ -19,28 +19,30 @@ namespace Rochester.ARTable.UI
         private Vector2 clampHigh;
         private float maxZoom = 0;
 
-        public int resWidth = 2550;
-        public int resHeight = 3300;
+        public int resWidth = 960;
+        public int resHeight = 540;
 
-        private bool takeHiResShot = false;
+        private bool takeShot = false;
+        public string name = "default";
 
         public static string ScreenShotName(int width, int height)
         {
-            return string.Format("{0}/screenshots/screen_{1}x{2}_{3}.png",
+            return string.Format("{0}/screenshots/screen_{1}x{2}_{3}.jpg",
                                  Application.dataPath,
                                  width, height,
-                                 System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+                                 System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-ms"));
         }
 
-        public void TakeHiResShot()//invoke this in CommClient to take photo
+        public void TakeShot(string ImgName)//invoke this in CommClient to take photo
         {
-            takeHiResShot = true;
+            takeShot = true;
+            name = ImgName;
         }
 
         void LateUpdate()
         {
-            takeHiResShot |= Input.GetKeyDown("k");
-            if (takeHiResShot)
+            takeShot |= Input.GetKeyDown("k");
+            if (takeShot)
             {
                 RenderTexture rt = new RenderTexture(resWidth, resHeight, 24);
                 worldCamera.targetTexture = rt;
@@ -51,11 +53,19 @@ namespace Rochester.ARTable.UI
                 worldCamera.targetTexture = null;
                 RenderTexture.active = null; // JC: added to avoid errors
                 Destroy(rt);
-                byte[] bytes = screenShot.EncodeToPNG();
-                string filename = ScreenShotName(resWidth, resHeight);
-                System.IO.File.WriteAllBytes(filename, bytes);
-                Debug.Log(string.Format("Took screenshot to: {0}", filename));
-                takeHiResShot = false;
+                byte[] bytes = screenShot.EncodeToJPG();
+                string filename;
+                if (name != "default")
+                {
+                    filename = (Application.dataPath + "/screenshots/" + name + ".jpg");
+                }
+                else
+                {
+                    filename = ScreenShotName(resWidth, resHeight);
+                }
+                //System.IO.File.WriteAllBytes(filename, bytes);
+                Debug.Log(string.Format("Took screenshot but did NOT save to: {0}", filename));
+                takeShot = false;
             }
         }
 
