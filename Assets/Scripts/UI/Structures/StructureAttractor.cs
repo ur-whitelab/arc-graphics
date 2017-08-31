@@ -66,9 +66,13 @@ namespace Rochester.ARTable.UI
         }
 
 
-        public virtual void StartPlace()
+        public override void StartPlace()
         {
             autoplace = false;
+            if(aIndex != -1)
+            {
+                ca.RemoveAttractor(aIndex);
+            }
         }
 
     }
