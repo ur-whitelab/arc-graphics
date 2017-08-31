@@ -105,7 +105,7 @@ namespace Rochester.ARTable.Communication
             StrobeServer.ReceiveReady += (s, a) =>
             {
                 var msg = a.Socket.ReceiveFrameString();
-                StrobeResponseTask.TrySetResult(msg);
+                while (!StrobeResponseTask.TrySetResult(msg)) ;
             };
             //start polling thread
             VisionPoller.RunAsync();
@@ -159,6 +159,7 @@ namespace Rochester.ARTable.Communication
                     StrobeResponseTask = new TaskCompletionSource<string>();
                     particleManager.Hidden = false;
                     StrobeServer.SendFrame("done");
+                    Debug.Log("Completed process with " + delays + " delays");
                 }
             }
             
