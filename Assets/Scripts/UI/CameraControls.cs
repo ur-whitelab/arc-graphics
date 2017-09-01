@@ -103,8 +103,8 @@ namespace Rochester.ARTable.UI
         {
             //coords must be scaled from 0 to 1 to use Matf.Lerp
             Vector2 ScaledCoords;
-            hextent = worldCamera.orthographicSize;
-            vextent = worldCamera.orthographicSize * Screen.height / Screen.width;
+            vextent = worldCamera.orthographicSize;
+            hextent = worldCamera.orthographicSize * Screen.width / Screen.height;
             ScaledCoords = new Vector2(Mathf.Lerp(-hextent, hextent, coords.x), Mathf.Lerp(-vextent, vextent, coords.y));
             return (ScaledCoords);
         }
@@ -161,8 +161,8 @@ namespace Rochester.ARTable.UI
 
         private void updateCameraClamp()
         {
-            hextent = worldCamera.orthographicSize;
-            vextent = worldCamera.orthographicSize * Screen.height / Screen.width;
+            vextent = worldCamera.orthographicSize;
+            hextent = worldCamera.orthographicSize * Screen.width / Screen.height;
 
             /*
              * Precompute min-max for camera. This assumes world is centered at origin
