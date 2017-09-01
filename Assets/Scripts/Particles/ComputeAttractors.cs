@@ -45,6 +45,12 @@ namespace Rochester.ARTable.Particles
             return index;
         }
 
+        public void RemoveAttractor(int index)
+        {
+            cpu_attractors.RemoveAt(index);
+            syncBuffers();
+        }
+
         public void UpdateAttractor(int index, Vector2 location, float magnitude = 0)
         {
 
