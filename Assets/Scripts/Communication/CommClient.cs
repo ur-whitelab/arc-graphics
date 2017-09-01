@@ -24,7 +24,7 @@ namespace Rochester.ARTable.Communication
         private CameraControls camera;
 
         enum StrobeModes {DELAY, START, DONE, WAIT, STROBE };
-        private StrobeModes strobe;
+        private StrobeModes strobeState;
 
 
         [Tooltip("Follows ZeroMQ syntax")]
@@ -36,7 +36,7 @@ namespace Rochester.ARTable.Communication
         private Dictionary<string, GameObject> prefabs;
         public Renderer rend;
 
-        private GameObject Strobe;
+        private GameObject strobe;
         private ParticleManager particleManager;
 
 
@@ -54,10 +54,15 @@ namespace Rochester.ARTable.Communication
         {
             //get camera functions
             camera = GameObject.Find("Main Camera").GetComponent<CameraControls>();
+            particleManager = null;
+            strobe = null;
             if (scene.name == "detection")
             {
-                Strobe = GameObject.Find("Strobe");
+                strobe = GameObject.Find("Strobe");
                 particleManager = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
+            } else if (scene.name == "strobe")
+            {
+                strobe = GameObject.Find("Strobe");
             }
 
             //clear objects if we had any
@@ -66,7 +71,14 @@ namespace Rochester.ARTable.Communication
                 managedObjects[CommObjLabels[i]].Clear();
             }
         }
-
+        
+        private void ToggleStrobe()
+        {
+            if(particleManager)            
+                particleManager.Hidden = !particleManager.Hidden;            
+            if(strobe)
+                strobe.GetComponent<MeshRenderer>().enabled = !strobe.GetComponent<MeshRenderer>().enabled;
+        }
 
         // Use this for initialization
         void Start()
@@ -147,25 +159,23 @@ namespace Rochester.ARTable.Communication
             {
                 string status = StrobeResponseTask.Task.Result;
                 if (status == "start")
-                    strobe = StrobeModes.START;
+                    strobeState = StrobeModes.START;
                 else if (status == "done")
-                    strobe = StrobeModes.DONE;
+                    strobeState = StrobeModes.DONE;
                 StrobeResponseTask = new TaskCompletionSource<string>();
             }
 
-            switch(strobe)
+            switch(strobeState)
             {
                 case StrobeModes.START:
-                    Strobe.GetComponent<MeshRenderer>().enabled = true;
-                    particleManager.Hidden = true;
-                    strobe = StrobeModes.STROBE;
+                    ToggleStrobe();
+                    strobeState = StrobeModes.STROBE;
                     StrobeServer.SendFrame("ready");
                     break;
                 case StrobeModes.DONE:
-                    Strobe.GetComponent<MeshRenderer>().enabled = false;//turn it back on when we get the go-ahead\                    
-                    particleManager.Hidden = false;
+                    ToggleStrobe();
                     StrobeServer.SendFrame("done");
-                    strobe = StrobeModes.WAIT;
+                    strobeState = StrobeModes.WAIT;
                     break;
             }
             

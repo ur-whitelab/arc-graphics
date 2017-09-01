@@ -32,6 +32,14 @@ namespace Rochester.ARTable.UI
             }
         }
 
+        private void OnDestroy()
+        {
+            if (aIndex != -1)
+            {
+                ca.RemoveAttractor(aIndex);
+            }
+        }
+
         public override bool CanPlace()
         {
 
