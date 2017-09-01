@@ -14,7 +14,7 @@ namespace Rochester.ARTable.Communication
 {
     public class CommClient : MonoBehaviour
     {
-        
+
         private Dictionary<string, Dictionary<int, GameObject>> managedObjects;
         private SubscriberSocket VisionClient, SimulationClient;
         private PairSocket StrobeServer;
@@ -23,11 +23,14 @@ namespace Rochester.ARTable.Communication
         private TaskCompletionSource<string> StrobeResponseTask;//, StrobeStopResponseTask ;
         private CameraControls camera;
 
+        enum StrobeModes {DELAY, START, DONE, WAIT, STROBE };
+        private StrobeModes strobe;
+
 
         [Tooltip("Follows ZeroMQ syntax")]
         public string ServerUri = "tcp://127.0.0.1:8076";
         public string StrobeUri = "tcp://*:8079";
-
+        
         public List<string> CommObjLabels;
         public List<GameObject> CommObjPrefabs;
         private Dictionary<string, GameObject> prefabs;
@@ -37,7 +40,7 @@ namespace Rochester.ARTable.Communication
         private ParticleManager particleManager;
 
 
-        private int delays = 0;
+        private float delay;
 
 
         void Awake()
@@ -134,33 +137,30 @@ namespace Rochester.ARTable.Communication
                 SimulationResponseTask = new TaskCompletionSource<byte[]>();
             }
 
-            delays += 1;
-            if (StrobeResponseTask.Task.IsCompleted)
+            if(StrobeResponseTask.Task.IsCompleted)
             {
                 string status = StrobeResponseTask.Task.Result;
                 if (status == "start")
-                {
-                    if (!(Strobe.GetComponent<MeshRenderer>().enabled))
-                    {
-                        Strobe.GetComponent<MeshRenderer>().enabled = true;
-                        particleManager.Hidden = true;
-                        delays = 0;
-                    }
+                    strobe = StrobeModes.START;
+                else if (status == "done")
+                    strobe = StrobeModes.DONE;
+                StrobeResponseTask = new TaskCompletionSource<string>();
+            }
 
-                    else 
-                    {
-                        StrobeResponseTask = new TaskCompletionSource<string>();
-                        StrobeServer.SendFrame("ready");
-                    }
-                }
-                else if(status == "done")
-                {
-                    Strobe.GetComponent<MeshRenderer>().enabled = false;//turn it back on when we get the go-ahead\
-                    StrobeResponseTask = new TaskCompletionSource<string>();
+            switch(strobe)
+            {
+                case StrobeModes.START:
+                    Strobe.GetComponent<MeshRenderer>().enabled = true;
+                    particleManager.Hidden = true;
+                    strobe = StrobeModes.STROBE;
+                    StrobeServer.SendFrame("ready");
+                    break;
+                case StrobeModes.DONE:
+                    Strobe.GetComponent<MeshRenderer>().enabled = false;//turn it back on when we get the go-ahead\                    
                     particleManager.Hidden = false;
                     StrobeServer.SendFrame("done");
-                    Debug.Log("Completed process with " + delays + " delays");
-                }
+                    strobe = StrobeModes.WAIT;
+                    break;
             }
             
         }
