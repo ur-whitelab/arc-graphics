@@ -50,7 +50,7 @@ namespace Rochester.ARTable.UI
 
         }
 
-        private int[] _screenshotResolution;
+        private int[] _screenshotResolution = new int[] { 100, 100 };
         private RenderTexture screenshotRT;
         private Texture2D screenshot;
         private Rect screenshotRect;
@@ -116,7 +116,7 @@ namespace Rochester.ARTable.UI
             lastPosition = startPosition;
             worldCamera = GetComponent<Camera>();
             updateCameraClamp();
-            this.ScreenshotResolution = new int[] {resWidth, resHeight};
+            ScreenshotResolution = new int[] {resWidth, resHeight};
         }
 
 

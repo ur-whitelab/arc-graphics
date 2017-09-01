@@ -142,7 +142,7 @@ namespace Rochester.ARTable.Communication
             {
                 // resolution is message
                 string[] words = ScreenshotResponseTask.Task.Result.Split('-');
-                camera.ScreenshotResolution  = new int[] {int.ParseFrom(words[0]), int.ParseFrom(words[1])};
+                camera.ScreenshotResolution  = new int[] {int.Parse(words[0]), int.Parse(words[1])};
                 camera.TakeScreenshot += sendScreenshot;
             }
 
@@ -151,8 +151,8 @@ namespace Rochester.ARTable.Communication
 
         private void sendScreenshot(object sender, CameraScreenshotModifierEventArgs e) {
             camera.TakeScreenshot -= sendScreenshot;
-            ScreenshotServer.sendFrame(e.jpg);
-            ScreenshotResponseTask = new TaskCompletionSource<string>()
+            ScreenshotServer.SendFrame(e.jpg);
+            ScreenshotResponseTask = new TaskCompletionSource<string>();
         }
 
         private void synchronizeGraph(Graph system)
