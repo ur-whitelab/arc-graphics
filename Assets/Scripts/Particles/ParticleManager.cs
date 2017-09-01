@@ -19,7 +19,7 @@ namespace Rochester.ARTable.Particles
         public float DragCoefficient = 0f;
         [Tooltip("The number of particles to display at start")]
         public int visibleStartParticles = 0;
-        
+
         public float ExplodeTime = 1f;
         public float ExplodeRadius = 2f;
         public float ExplodeMeshSize = 0.25f;
@@ -40,6 +40,7 @@ namespace Rochester.ARTable.Particles
             set
             {
                 //risky, not sure if this can really be called twice....
+                _particleNumber = value;
                 ReleaseBuffers();
                 Start();
             }
@@ -66,7 +67,7 @@ namespace Rochester.ARTable.Particles
         {
 
             integrateShader.SetFloats("boundaryLow", new float[] { low.x, low.y });
-            integrateShader.SetFloats("boundaryHigh", new float[] { high.x, high.y });        
+            integrateShader.SetFloats("boundaryHigh", new float[] { high.x, high.y });
             foreach (var c in computes)
                 c.UpdateBoundary(low, high);
         }
@@ -76,7 +77,7 @@ namespace Rochester.ARTable.Particles
 
             if (world == null)
                 world = GameObject.Find("World").GetComponent<World>();
-                
+
 
             computes = new List<Compute>();
             foreach (var c in this.GetComponentsInChildren<Compute>())
@@ -103,7 +104,7 @@ namespace Rochester.ARTable.Particles
             forces.SetData(zeros);
 
             //make positions interesting
-            int sideCount = (int) Mathf.Ceil(Mathf.Sqrt(visibleStartParticles)); 
+            int sideCount = (int) Mathf.Ceil(Mathf.Sqrt(visibleStartParticles));
             int index = 0;
             float x = 0;
             for (int j = 0; j < sideCount; j++) {
@@ -193,7 +194,7 @@ namespace Rochester.ARTable.Particles
                 int nx = Mathf.CeilToInt((float)ParticleNumber / ShaderConstants.PARTICLE_BLOCK_SIZE);
                 foreach (var c in computes)
                 {
-                    //spread them out                    
+                    //spread them out
                     StartCoroutine(c.SlowUpdate(nx, SlowUpdateTime));
                     yield return new WaitForSeconds(SlowUpdateTime);
                 }

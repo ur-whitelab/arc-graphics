@@ -1,8 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 namespace Rochester.ARTable.UI
 {
+
+    public class CameraScreenshotModifierEventArgs : EventArgs
+    {
+        public byte[] jpg {get; set;}
+    }
 
     public class CameraControls : MonoBehaviour
     {
@@ -10,6 +16,11 @@ namespace Rochester.ARTable.UI
         public Vector3 startPosition;
         public float mouseSensitivity = 0.05f;
         public float zoomSensitivity = 0.2f;
+
+        public int resWidth = 960;
+        public int resHeight = 540;
+
+        public event EventHandler<CameraScreenshotModifierEventArgs> TakeScreenshot;
 
         private World world;
         private Vector3 lastPosition;
@@ -20,11 +31,30 @@ namespace Rochester.ARTable.UI
         private float vextent, hextent;
         private float maxZoom = 0;
 
-        public int resWidth = 960;
-        public int resHeight = 540;
 
         private bool takeShot = false;
-        public string name = "default";
+
+        public int[] ScreenshotResolution {
+            get{
+                return _screenshotResolution;
+            }
+            set {
+                if (_screenshotResolution[0] != value[0] || _screenshotResolution[1] != value[1])
+                {
+                    _screenshotResolution = value;
+                    screenshotRT = new RenderTexture(_screenshotResolution[0], _screenshotResolution[1], 24);
+                    screenshot = new Texture2D(_screenshotResolution[0], _screenshotResolution[1], TextureFormat.RGB24, false);
+                    screenshotRect = new Rect(0, 0, _screenshotResolution[0], _screenshotResolution[1]);
+                }
+            }
+
+        }
+
+        private int[] _screenshotResolution;
+        private RenderTexture screenshotRT;
+        private Texture2D screenshot;
+        private Rect screenshotRect;
+
 
         public static string ScreenShotName(int width, int height)
         {
@@ -34,41 +64,27 @@ namespace Rochester.ARTable.UI
                                  System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-ms"));
         }
 
-        public void TakeShot(string ImgName)//invoke this in CommClient to take photo
-        {
-            takeShot = true;
-            name = ImgName;
-        }
 
         void LateUpdate()
         {
-            takeShot |= Input.GetKeyDown("k");
-            if (takeShot)
+            if(TakeScreenshot != null)
             {
-                RenderTexture rt = new RenderTexture(resWidth, resHeight, 24);
-                worldCamera.targetTexture = rt;
-                Texture2D screenShot = new Texture2D(resWidth, resHeight, TextureFormat.RGB24, false);
+                //set camera to render onto rt
+                worldCamera.targetTexture = screenshotRT;
+                //render
                 worldCamera.Render();
-                RenderTexture.active = rt;
-                screenShot.ReadPixels(new Rect(0, 0, resWidth, resHeight), 0, 0);
+                //set active rendertexture to be the one just rendered onto
+                RenderTexture.active = screenshotRT;
+                //read from active rendertexture into screenshot
+                screenshot.ReadPixels(screenshotRect, 0, 0);
+                //reset
                 worldCamera.targetTexture = null;
                 RenderTexture.active = null; // JC: added to avoid errors
-                Destroy(rt);
-                byte[] bytes = screenShot.EncodeToJPG();
-                string filename;
-                if (name != "default")
-                {
-                    filename = (Application.dataPath + "/screenshots/" + name + ".jpg");
-                }
-                else
-                {
-                    filename = ScreenShotName(resWidth, resHeight);
-                }
-                //System.IO.File.WriteAllBytes(filename, bytes);
-                Debug.Log(string.Format("Took screenshot but did NOT save to: {0}", filename));
-
+                byte[] bytes = screenshot.EncodeToJPG();
                 takeShot = false;
-                name = "default";
+                CameraScreenshotModifierEventArgs e = new CameraScreenshotModifierEventArgs();
+                e.jpg = bytes;
+                TakeScreenshot(this, e);
             }
         }
 
@@ -100,6 +116,7 @@ namespace Rochester.ARTable.UI
             lastPosition = startPosition;
             worldCamera = GetComponent<Camera>();
             updateCameraClamp();
+            this.ScreenshotResolution = new int[] {resWidth, resHeight};
         }
 
 

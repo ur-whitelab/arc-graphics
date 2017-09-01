@@ -17,26 +17,22 @@ namespace Rochester.ARTable.Communication
 
         private Dictionary<string, Dictionary<int, GameObject>> managedObjects;
         private SubscriberSocket VisionClient, SimulationClient;
-        private PairSocket StrobeServer;
-        private NetMQPoller VisionPoller, SimulationPoller, StrobePoller;
+        private PairSocket ScreenshotServer;
+        private NetMQPoller VisionPoller, SimulationPoller, ScreenshotPoller;
         private TaskCompletionSource<byte[]> VisionResponseTask, SimulationResponseTask;
-        private TaskCompletionSource<string> StrobeResponseTask;//, StrobeStopResponseTask ;
-        private CameraControls camera;
-
-        enum StrobeModes {DELAY, START, DONE, WAIT, STROBE };
-        private StrobeModes strobeState;
+        private TaskCompletionSource<string> ScreenshotResponseTask;//, ScreenshotStopResponseTask ;
+        new private CameraControls camera;
 
 
         [Tooltip("Follows ZeroMQ syntax")]
         public string ServerUri = "tcp://127.0.0.1:8076";
-        public string StrobeUri = "tcp://*:8079";
-        
+        public string ScreenshotUri = "tcp://*:8079";
+
         public List<string> CommObjLabels;
         public List<GameObject> CommObjPrefabs;
         private Dictionary<string, GameObject> prefabs;
         public Renderer rend;
 
-        private GameObject strobe;
         private ParticleManager particleManager;
 
 
@@ -55,14 +51,9 @@ namespace Rochester.ARTable.Communication
             //get camera functions
             camera = GameObject.Find("Main Camera").GetComponent<CameraControls>();
             particleManager = null;
-            strobe = null;
             if (scene.name == "detection")
             {
-                strobe = GameObject.Find("Strobe");
                 particleManager = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
-            } else if (scene.name == "strobe")
-            {
-                strobe = GameObject.Find("Strobe");
             }
 
             //clear objects if we had any
@@ -70,14 +61,6 @@ namespace Rochester.ARTable.Communication
             {
                 managedObjects[CommObjLabels[i]].Clear();
             }
-        }
-        
-        private void ToggleStrobe()
-        {
-            if(particleManager)            
-                particleManager.Hidden = !particleManager.Hidden;            
-            if(strobe)
-                strobe.GetComponent<MeshRenderer>().enabled = !strobe.GetComponent<MeshRenderer>().enabled;
         }
 
         // Use this for initialization
@@ -94,25 +77,25 @@ namespace Rochester.ARTable.Communication
 
 
 
-            //set-up socket and poller        
+            //set-up socket and poller
             VisionClient = new SubscriberSocket();
             SimulationClient = new SubscriberSocket();
-            StrobeServer = new PairSocket();
+            ScreenshotServer = new PairSocket();
             VisionClient.Subscribe("vision-update");
             SimulationClient.Subscribe("simulation-update");
             UnityEngine.Debug.Log("set up the subscriptions at " + ServerUri);
             VisionClient.Connect(ServerUri);
             SimulationClient.Connect(ServerUri);
-            StrobeServer.Bind(StrobeUri);
-            Debug.Log("set up rep server at " + StrobeUri);
+            ScreenshotServer.Bind(ScreenshotUri);
+            Debug.Log("set up rep server at " + ScreenshotUri);
             VisionPoller = new NetMQPoller { VisionClient };//, SimulationClient };
             SimulationPoller = new NetMQPoller { SimulationClient };
-            StrobePoller = new NetMQPoller { StrobeServer };
+            ScreenshotPoller = new NetMQPoller { ScreenshotServer };
             //set-up event to add to task
             VisionResponseTask = new TaskCompletionSource<byte[]>();
             SimulationResponseTask = new TaskCompletionSource<byte[]>();
-            StrobeResponseTask= new TaskCompletionSource<string>();
-            //StrobeStopResponseTask= new TaskCompletionSource<string[]>();
+            ScreenshotResponseTask= new TaskCompletionSource<string>();
+            //ScreenshotStopResponseTask= new TaskCompletionSource<string[]>();
             SimulationClient.ReceiveReady += (s, a) => {
                 var msg = a.Socket.ReceiveMultipartBytes();
 
@@ -123,16 +106,16 @@ namespace Rochester.ARTable.Communication
                 var msg = b.Socket.ReceiveMultipartBytes();
                 while(!VisionResponseTask.TrySetResult(msg[1]));
             };
-            StrobeServer.ReceiveReady += (s, a) =>
+            ScreenshotServer.ReceiveReady += (s, a) =>
             {
                 var msg = a.Socket.ReceiveFrameString();
-                while (!StrobeResponseTask.TrySetResult(msg)) ;
+                while (!ScreenshotResponseTask.TrySetResult(msg)) ;
             };
             //start polling thread
             VisionPoller.RunAsync();
             SimulationPoller.RunAsync();
-            StrobePoller.RunAsync();
-        }   
+            ScreenshotPoller.RunAsync();
+        }
 
         // Update is called once per frame
         void Update()
@@ -155,30 +138,21 @@ namespace Rochester.ARTable.Communication
                 SimulationResponseTask = new TaskCompletionSource<byte[]>();
             }
 
-            if(StrobeResponseTask.Task.IsCompleted)
+            if(ScreenshotResponseTask.Task.IsCompleted)
             {
-                string status = StrobeResponseTask.Task.Result;
-                if (status == "start")
-                    strobeState = StrobeModes.START;
-                else if (status == "done")
-                    strobeState = StrobeModes.DONE;
-                StrobeResponseTask = new TaskCompletionSource<string>();
+                // resolution is message
+                string[] words = ScreenshotResponseTask.Task.Result.Split('-');
+                camera.ScreenshotResolution  = new int[] {int.ParseFrom(words[0]), int.ParseFrom(words[1])};
+                camera.TakeScreenshot += sendScreenshot;
             }
 
-            switch(strobeState)
-            {
-                case StrobeModes.START:
-                    ToggleStrobe();
-                    strobeState = StrobeModes.STROBE;
-                    StrobeServer.SendFrame("ready");
-                    break;
-                case StrobeModes.DONE:
-                    ToggleStrobe();
-                    StrobeServer.SendFrame("done");
-                    strobeState = StrobeModes.WAIT;
-                    break;
-            }
-            
+        }
+
+
+        private void sendScreenshot(object sender, CameraScreenshotModifierEventArgs e) {
+            camera.TakeScreenshot -= sendScreenshot;
+            ScreenshotServer.sendFrame(e.jpg);
+            ScreenshotResponseTask = new TaskCompletionSource<string>()
         }
 
         private void synchronizeGraph(Graph system)
@@ -190,7 +164,7 @@ namespace Rochester.ARTable.Communication
                 Vector2 objectPos = new Vector2(o.Position[0], o.Position[1]);
                 Vector2 viewPos = camera.UnitToWorld(objectPos);
                 if (!currentObjs.TryGetValue(o.Id, out existing)) {
-                    var placed = (GameObject) GameObject.Instantiate(prefabs[o.Label], new Vector2(viewPos.x, viewPos.y), new Quaternion()); 
+                    var placed = (GameObject) GameObject.Instantiate(prefabs[o.Label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
                     currentObjs[o.Id] = placed;
                     UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id +" at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
                 }
@@ -201,14 +175,10 @@ namespace Rochester.ARTable.Communication
                     currentObjs.Remove(o.Id);
                 }
                 else {
-                    existing.transform.localPosition = viewPos;                    
-                    // UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" +viewPos.x + ", " + viewPos.y + ")"); 
+                    existing.transform.localPosition = viewPos;
+                    // UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" +viewPos.x + ", " + viewPos.y + ")");
                 }
-                //if(system.Time % 2 == 0)
-                {
-                    //camera.TakeShot(system.Time.ToString());
-                }
-            }            
+            }
         }
 
         private void synchronizeSimulation(SystemKinetics kinetics)
@@ -218,7 +188,7 @@ namespace Rochester.ARTable.Communication
             float sum;
             foreach(var rxr in kinetics.Kinetics)
             {
-                
+
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
                 currentObjs.TryGetValue( rxrcount, out existing);
@@ -238,7 +208,7 @@ namespace Rochester.ARTable.Communication
                         rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i] / sum));
                     }
                 }
-                
+
                 rxrcount++;
             }
         }
@@ -249,22 +219,22 @@ namespace Rochester.ARTable.Communication
             VisionClient.Dispose();
             SimulationClient.Close();
             SimulationClient.Dispose();
-            StrobeServer.Close();
-            StrobeServer.Dispose();
+            ScreenshotServer.Close();
+            ScreenshotServer.Dispose();
             try
             {
                 VisionPoller.StopAsync();
                 SimulationPoller.StopAsync();
-                StrobePoller.StopAsync();
+                ScreenshotPoller.StopAsync();
             }
-                
+
             catch (System.Exception e)
             {
                 UnityEngine.Debug.Log("Tried to stopasync while the poller wasn't running! Oops.");
             }
             VisionPoller.Dispose();
             SimulationPoller.Dispose();
-            StrobePoller.Dispose();
+            ScreenshotPoller.Dispose();
         }
     }
 
