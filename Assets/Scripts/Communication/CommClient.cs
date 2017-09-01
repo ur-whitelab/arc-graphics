@@ -187,12 +187,12 @@ namespace Rochester.ARTable.Communication
                 var o = system.Nodes[key];
                 var currentObjs = managedObjects[o.Label];
                 GameObject existing;
-                Vector2 objectPos = new Vector2(1-o.Position[0], 1-o.Position[1]);
+                Vector2 objectPos = new Vector2(o.Position[0], o.Position[1]);
                 Vector2 viewPos = camera.UnitToWorld(objectPos);
                 if (!currentObjs.TryGetValue(o.Id, out existing)) {
                     var placed = (GameObject) GameObject.Instantiate(prefabs[o.Label], new Vector2(viewPos.x, viewPos.y), new Quaternion()); 
                     currentObjs[o.Id] = placed;
-                    UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id +" at position " + viewPos.x + ", " + viewPos.y);
+                    UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id +" at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
                 }
                 else if (o.Delete)
                 {
