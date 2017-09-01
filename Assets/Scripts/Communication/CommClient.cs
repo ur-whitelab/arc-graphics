@@ -59,6 +59,12 @@ namespace Rochester.ARTable.Communication
                 Strobe = GameObject.Find("Strobe");
                 particleManager = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
             }
+
+            //clear objects if we had any
+            for (int i = 0; i < CommObjLabels.Count; i++)
+            {
+                managedObjects[CommObjLabels[i]].Clear();
+            }
         }
 
 
@@ -98,12 +104,12 @@ namespace Rochester.ARTable.Communication
             SimulationClient.ReceiveReady += (s, a) => {
                 var msg = a.Socket.ReceiveMultipartBytes();
 
-                SimulationResponseTask.TrySetResult(msg[1]);
+                while(!SimulationResponseTask.TrySetResult(msg[1]));
 
             };
             VisionClient.ReceiveReady += (z, b) => {
                 var msg = b.Socket.ReceiveMultipartBytes();
-                VisionResponseTask.TrySetResult(msg[1]);
+                while(!VisionResponseTask.TrySetResult(msg[1]));
             };
             StrobeServer.ReceiveReady += (s, a) =>
             {
@@ -182,6 +188,7 @@ namespace Rochester.ARTable.Communication
                 {
                     currentObjs.TryGetValue(o.Id, out existing);
                     Destroy(existing);
+                    currentObjs.Remove(o.Id);
                 }
                 else {
                     existing.transform.localPosition = viewPos;                    

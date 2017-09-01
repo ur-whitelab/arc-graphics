@@ -32,15 +32,21 @@ namespace Rochester.ARTable.UI
             collider = GetComponent<Collider2D>();
         }
 
+
         void Start()
         {
-            GameObject.Find("ParticleManager").GetComponent<ParticleManager>().updateParticleBoundary(boundariesLow, boundariesHigh);
-            //deal with editor placed objects
-            ComputeAttractors ca = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeAttractors>();
-            foreach (GameObject g in GameObject.FindGameObjectsWithTag("Attractor"))
+            GameObject pm = GameObject.Find("ParticleManager");
+            if(pm)
             {
-                ca.AddAttractor(new Vector2(g.transform.localPosition.x, g.transform.localPosition.y));
+                pm.GetComponent<ParticleManager>().updateParticleBoundary(boundariesLow, boundariesHigh);
+                //deal with editor placed objects
+                ComputeAttractors ca = GameObject.Find("ParticleManager").GetComponentInChildren<ComputeAttractors>();
+                foreach (GameObject g in GameObject.FindGameObjectsWithTag("Attractor"))
+                {
+                    ca.AddAttractor(new Vector2(g.transform.localPosition.x, g.transform.localPosition.y));
+                }
             }
+
 
         }
 
