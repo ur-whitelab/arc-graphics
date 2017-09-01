@@ -18,11 +18,11 @@ Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\AsyncIO.
 Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\Google.Protobuf.dll into Unity Child Domain
 Loading C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\NetMQ.dll into Unity Child Domain
 Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\System.dll (this message is harmless)
-- Completed reload, in  0.565 seconds
+- Completed reload, in  0.554 seconds
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-UnloadTime: 0.901851 ms
+UnloadTime: 0.963728 ms
 Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\System.Configuration.dll (this message is harmless)
 Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\System.Xml.dll (this message is harmless)
 Platform assembly: C:\Users\projectarco\unity-physics\exe\PROJECT_ARC_Data\Managed\Mono.Security.dll (this message is harmless)
@@ -34,14 +34,9 @@ set up the subscriptions at tcp://127.0.0.1:8076
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-Received message background from scene server.
+set up rep server at tcp://*:8079
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
-
-Scene 'background' couldn't be loaded because it has not been added to the build settings or the AssetBundle has not been loaded.
-To add a scene to the build settings use the menu File->Build Settings...
- 
-(Filename:  Line: 141)
 
 Received message detection from scene server.
  
@@ -52,31 +47,114 @@ The referenced script on this Behaviour (Game Object 'EditorWall') is missing!
 (Filename:  Line: 1758)
 
 Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 0.413575 ms
+UnloadTime: 0.224100 ms
 Max Neighbors = 256
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
 
-Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 449.
-Total: 1.212193 ms (FindLiveObjects: 0.032060 ms CreateObjectMapping: 0.011221 ms MarkObjects: 1.161859 ms  DeleteObjects: 0.006091 ms)
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 455.
+Total: 1.157692 ms (FindLiveObjects: 0.025968 ms CreateObjectMapping: 0.011862 ms MarkObjects: 1.114731 ms  DeleteObjects: 0.004167 ms)
 
-New object attractor:9
+Received message detection from scene server.
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-New object attractor:10
+Received message to change to currently active scene. Ignoring.
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 
-New object attractor:11
+Received message extent from scene server.
  
 (Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 4.720215 ms
+
+Unloading 12 unused Assets to reduce memory usage. Loaded Objects now: 391.
+Total: 1.387563 ms (FindLiveObjects: 0.109004 ms CreateObjectMapping: 0.010900 ms MarkObjects: 1.225659 ms  DeleteObjects: 0.041036 ms)
+
+NullReferenceException: Object reference not set to an instance of an object
+  at Rochester.ARTable.UI.World.Start () [0x0000a] in <9858300b8d4f406284bcfce1e3411ee8>:0 
+ 
+(Filename: <9858300b8d4f406284bcfce1e3411ee8> Line: 0)
+
+Received message detection from scene server.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+The referenced script on this Behaviour (Game Object 'EditorWall') is missing!
+ 
+(Filename:  Line: 1758)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.224741 ms
+Max Neighbors = 256
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+
+Unloading 2 unused Assets to reduce memory usage. Loaded Objects now: 488.
+Total: 1.283367 ms (FindLiveObjects: 0.023724 ms CreateObjectMapping: 0.012503 ms MarkObjects: 1.238162 ms  DeleteObjects: 0.008335 ms)
+
+Received message extent from scene server.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.658836 ms
+
+Unloading 12 unused Assets to reduce memory usage. Loaded Objects now: 391.
+Total: 1.488232 ms (FindLiveObjects: 0.197490 ms CreateObjectMapping: 0.011541 ms MarkObjects: 1.253231 ms  DeleteObjects: 0.024686 ms)
+
+NullReferenceException: Object reference not set to an instance of an object
+  at Rochester.ARTable.UI.World.Start () [0x0000a] in <9858300b8d4f406284bcfce1e3411ee8>:0 
+ 
+(Filename: <9858300b8d4f406284bcfce1e3411ee8> Line: 0)
+
+NullReferenceException
+  at (wrapper managed-to-native) UnityEngine.GameObject:GetComponentFastPath (UnityEngine.GameObject,System.Type,intptr)
+  at UnityEngine.GameObject.GetComponent[T] () [0x00020] in <9fdb371ef7fe481d8dece4e3922a49ea>:0 
+  at Rochester.ARTable.Communication.CommClient.Update () [0x000c8] in <9858300b8d4f406284bcfce1e3411ee8>:0 
+ 
+(Filename: <9fdb371ef7fe481d8dece4e3922a49ea> Line: 0)
+
+NullReferenceException
+  at (wrapper managed-to-native) UnityEngine.GameObject:GetComponentFastPath (UnityEngine.GameObject,System.Type,intptr)
+  at UnityEngine.GameObject.GetComponent[T] () [0x00020] in <9fdb371ef7fe481d8dece4e3922a49ea>:0 
+  at Rochester.ARTable.Communication.CommClient.Update () [0x000c8] in <9858300b8d4f406284bcfce1e3411ee8>:0 
+ 
+(Filename: <9fdb371ef7fe481d8dece4e3922a49ea> Line: 0)
+
+Received message detection from scene server.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+NullReferenceException
+  at (wrapper managed-to-native) UnityEngine.GameObject:GetComponentFastPath (UnityEngine.GameObject,System.Type,intptr)
+  at UnityEngine.GameObject.GetComponent[T] () [0x00020] in <9fdb371ef7fe481d8dece4e3922a49ea>:0 
+  at Rochester.ARTable.Communication.CommClient.Update () [0x000c8] in <9858300b8d4f406284bcfce1e3411ee8>:0 
+ 
+(Filename: <9fdb371ef7fe481d8dece4e3922a49ea> Line: 0)
+
+The referenced script on this Behaviour (Game Object 'EditorWall') is missing!
+ 
+(Filename:  Line: 1758)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.301686 ms
+Max Neighbors = 256
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+
+Unloading 2 unused Assets to reduce memory usage. Loaded Objects now: 488.
+Total: 1.290741 ms (FindLiveObjects: 0.031418 ms CreateObjectMapping: 0.010900 ms MarkObjects: 1.239124 ms  DeleteObjects: 0.008335 ms)
 
 Setting up 6 worker threads for Enlighten.
-  Thread -> id: 2b20 -> priority: 1 
-  Thread -> id: 1bc4 -> priority: 1 
-  Thread -> id: 1700 -> priority: 1 
-  Thread -> id: 30ec -> priority: 1 
-  Thread -> id: 125c -> priority: 1 
-  Thread -> id: 2940 -> priority: 1 
+  Thread -> id: 1f8c -> priority: 1 
+  Thread -> id: 1ad0 -> priority: 1 
+  Thread -> id: 29c4 -> priority: 1 
+  Thread -> id: 232c -> priority: 1 
+  Thread -> id: 2a7c -> priority: 1 
+  Thread -> id: 13ec -> priority: 1 

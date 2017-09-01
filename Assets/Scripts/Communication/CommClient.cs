@@ -196,25 +196,32 @@ namespace Rochester.ARTable.Communication
 
         private void synchronizeSimulation(SystemKinetics kinetics)
         {
-            int rxrcount = 0;//the kinetics protobuffer could stand to be changed...
+            int rxrcount = 1;//the kinetics protobuffer could stand to be changed...
             int count;
+            float sum;
             foreach(var rxr in kinetics.Kinetics)
             {
                 
-                var currentObjs = managedObjects["1"];//hard-coded reactor type.
+                var currentObjs = managedObjects["reactor"];
                 GameObject existing;
                 currentObjs.TryGetValue( rxrcount, out existing);
-                rend = existing.GetComponent<Renderer>();
-                rend.material.shader = Shader.Find("Custom/WedgeCircle");
-                count = 0;
-                foreach(var molefrac in rxr.MoleFraction)
+                if(existing)
                 {
-                    count++;
+                    rend = existing.GetComponent<MeshRenderer>();
+                    rend.material.shader = Shader.Find("Custom/WedgeCircle");
+                    count = 0;
+                    sum = 0;
+                    foreach (var molefrac in rxr.MoleFraction)
+                    {
+                        count++;
+                        sum += molefrac;
+                    }
+                    for (int i = 0; i < count; i++)
+                    {
+                        rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i] / sum));
+                    }
                 }
-                for(int i = 0; i < count; i++)
-                {
-                    rend.material.SetFloat("_Fraction" + (i + 1).ToString(), rxr.MoleFraction[i]);
-                }
+                
                 rxrcount++;
             }
         }

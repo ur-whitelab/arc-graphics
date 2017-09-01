@@ -12,6 +12,8 @@
 		 _Fraction6("Mole fraction species 6", Float) = 0.0
      }
      SubShader {
+		 Tags{ "RenderType" = "Opaque" }
+		 LOD 100
 		 Blend SrcAlpha OneMinusSrcAlpha
 
          Pass {
