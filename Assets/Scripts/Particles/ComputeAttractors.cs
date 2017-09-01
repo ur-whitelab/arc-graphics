@@ -64,9 +64,11 @@ namespace Rochester.ARTable.Particles
         {
             if (attractors != null)
                 attractors.Release();
-            attractors = new ComputeBuffer(cpu_attractors.Count, ShaderConstants.ATTRACTOR_STRIDE);
-            attractors.SetData(cpu_attractors.ToArray());
-            AttractorShader.SetBuffer(forceHandle, "attractors", attractors);
+            if(cpu_attractors.Count > 0) {
+                attractors = new ComputeBuffer(cpu_attractors.Count, ShaderConstants.ATTRACTOR_STRIDE);
+                attractors.SetData(cpu_attractors.ToArray());
+                AttractorShader.SetBuffer(forceHandle, "attractors", attractors);
+            }
         }
 
         public bool ValidLocation(Vector2 propLocation)

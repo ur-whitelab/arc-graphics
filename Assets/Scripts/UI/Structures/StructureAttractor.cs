@@ -25,7 +25,7 @@ namespace Rochester.ARTable.UI
                 autoplace = false;
             }
             //only check for transform updates after we have placed.
-            if (transform.hasChanged)
+            if (transform.hasChanged && aIndex > -1)
             {
                 ca.UpdateAttractor(aIndex, new Vector2(transform.localPosition.x, transform.localPosition.y));
                 transform.hasChanged = false;
