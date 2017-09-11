@@ -66,6 +66,16 @@ namespace Rochester.ARTable.Particles
 
         }
 
+        public struct Color
+        {
+            public Vector4 color;
+
+            public Color(Vector4 color)
+            {
+                this.color = color;
+            }
+        }
+
         public struct Prop
         {
             public uint state;

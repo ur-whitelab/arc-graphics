@@ -25,6 +25,9 @@
 
 #define NLIST_INDEX(i,j) ((j) * NP + (i))
 
+struct ColorBlock {
+	float4 color;
+};
 
 struct ParticleProperties {
 	uint state;
