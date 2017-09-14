@@ -57,10 +57,14 @@ namespace Rochester.ARTable.Communication
             }
 
             //clear objects if we had any
-            for (int i = 0; i < CommObjLabels.Count; i++)
+            if (scene.name != "default")
             {
-                managedObjects[CommObjLabels[i]].Clear();
+                for (int i = 0; i < CommObjLabels.Count; i++)
+                {
+                    managedObjects[CommObjLabels[i]].Clear();
+                }
             }
+ 
         }
 
         // Use this for initialization
