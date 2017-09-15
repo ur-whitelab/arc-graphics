@@ -146,8 +146,14 @@ namespace Rochester.ARTable.Communication
             {
                 // resolution is message
                 string[] words = ScreenshotResponseTask.Task.Result.Split('-');
-                camera.ScreenshotResolution  = new int[] {int.Parse(words[0]), int.Parse(words[1])};
-                camera.TakeScreenshot += sendScreenshot;
+                if (camera != null)
+                {
+                    camera.ScreenshotResolution = new int[] { int.Parse(words[0]), int.Parse(words[1]) };
+                    camera.TakeScreenshot += sendScreenshot;
+                } else
+                {
+                    ScreenshotResponseTask = new TaskCompletionSource<string>();
+                }
             }
 
         }
