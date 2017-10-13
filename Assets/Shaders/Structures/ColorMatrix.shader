@@ -25,7 +25,6 @@ Shader "Custom/ColorMatrix" {
 		struct v2f {
 			float4 pos : SV_POSITION;
 			float2 uv : TEXCOORD0;
-			float4 color : COLOR;
 		};
 
 		v2f vert(appdata_base v, uint inst : SV_InstanceID)
