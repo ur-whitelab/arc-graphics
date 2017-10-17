@@ -61,6 +61,9 @@ namespace Rochester.ARTable.UI
             {
                 //set camera to render onto rt
                 worldCamera.targetTexture = screenshotRT;
+                //set background to black
+                Color temp = worldCamera.backgroundColor;
+                worldCamera.backgroundColor = Color.black;
                 //render
                 worldCamera.Render();
                 //set active rendertexture to be the one just rendered onto
@@ -69,6 +72,7 @@ namespace Rochester.ARTable.UI
                 screenshot.ReadPixels(screenshotRect, 0, 0);
                 //reset
                 worldCamera.targetTexture = null;
+                worldCamera.backgroundColor = temp;
                 RenderTexture.active = null; // JC: added to avoid errors
                 byte[] bytes = screenshot.EncodeToJPG(97);
                 takeShot = false;
