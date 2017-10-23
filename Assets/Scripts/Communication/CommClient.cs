@@ -9,6 +9,7 @@ using Rochester.Physics.Communication;
 using Rochester.ARTable.UI;
 using UnityEngine.SceneManagement;
 using Rochester.ARTable.Particles;
+using System.Linq;
 
 namespace Rochester.ARTable.Communication
 {
@@ -128,7 +129,7 @@ namespace Rochester.ARTable.Communication
             {
                 //UnityEngine.Debug.Log("THE MESSAGE TASK RESULT WAS " + VisionResponseTask.Task.Result);
                 Graph system = Graph.Parser.ParseFrom(VisionResponseTask.Task.Result);
-                // UnityEngine.Debug.Log("Received message " +  system + " from graph.");
+                UnityEngine.Debug.Log("Received message " +  system + " from graph.");
                 synchronizeGraph(system);
                 //this is how you reset?
                 VisionResponseTask = new TaskCompletionSource<byte[]>();
@@ -188,6 +189,42 @@ namespace Rochester.ARTable.Communication
                     existing.transform.localPosition = viewPos;
                     // UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" +viewPos.x + ", " + viewPos.y + ")");
                 }
+            }
+            foreach(var key in system.Edges.Keys)
+            {
+                var edge = system.Edges[key];
+                GameObject A, B;
+                int IdA = edge.IdA;//first node
+                int typeA = edge.TypeA;//index of node A type 
+                int IdB = edge.IdB;//second node
+                int typeB = edge.TypeB;//index of node B type
+
+
+                //Protobuf gives ints, need string keys...
+                string[] objkeys = managedObjects.Keys.ToArray();
+                //Use keys to get the right dict(s) of gameobjects. Might be the same, that's ok.
+                UnityEngine.Debug.Log("Type of A: " + objkeys[typeA] + " and type of B: " + objkeys[typeB]);
+                A = managedObjects[(objkeys[typeA])][IdA];
+                B = managedObjects[(objkeys[typeB])][IdB];
+                //get the specific ones we're looking at
+                //A = currentObjectsA[IdA];
+                //B = currentObjectsB[IdB];
+
+                UnityEngine.Debug.Log("Trying to draw line between GameObject type " + objkeys[typeA] + " at " + A.transform.position[0] + ", " + A.transform.position[1] + " and type " + objkeys[typeB] + " at " + B.transform.position[0] + ", " + B.transform.position[1] + ".");
+
+                //now draw the line between them!
+                LineRenderer line = A.GetComponent<LineRenderer>();
+                if(line == null)
+                {
+                    //line doesn't yet exist. Attach a linerenderer to A
+                    line = A.AddComponent<LineRenderer>();
+                }
+                //add the origin and the destination to its vertices.
+                int oldPositionCount = line.positionCount;
+                line.positionCount += 2;
+                line.SetPosition(oldPositionCount, A.transform.position);
+                line.SetPosition(oldPositionCount + 1, B.transform.position);
+
             }
         }
 

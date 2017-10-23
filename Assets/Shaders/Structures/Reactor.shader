@@ -57,13 +57,13 @@
 				 float angles[6];//the actual angle cutoffs
 
 				 //color map pulled from colorbrewer2.org
-				 colors[0] = float4(228.0f / 255.0f, 26.0f / 255.0f, 28.0f / 255.0f, 1);
-				 colors[1] = float4(55.0f / 255.0f, 126.0f / 255.0f, 184.0f / 255.0f, 1);
-				 colors[2] = float4(77.0f / 255.0f, 175.0f / 255.0f, 74.0f / 255.0f, 1);
-				 colors[3] = float4(152.0f / 255.0f, 78.0f / 255.0f, 163.0f / 255.0f, 1);
-				 colors[4] = float4(255.0f / 255.0f, 127.0f / 255.0f, 0, 1);
-				 colors[5] = float4(255.0f / 255.0f, 255.0f / 255.0f, 51.0f / 255.0f, 1);
-				 colors[6] = float4(166.0f / 255.0f, 86.0f / 255.0f, 40.0f / 255.0f, 1);
+				 colors[0] = float4(228.0f / 255.0f, 26.0f / 255.0f, 28.0f / 255.0f, 0.6);
+				 colors[1] = float4(55.0f / 255.0f, 126.0f / 255.0f, 184.0f / 255.0f, 0.6);
+				 colors[2] = float4(77.0f / 255.0f, 175.0f / 255.0f, 74.0f / 255.0f, 0.6);
+				 colors[3] = float4(152.0f / 255.0f, 78.0f / 255.0f, 163.0f / 255.0f, 0.6);
+				 colors[4] = float4(255.0f / 255.0f, 127.0f / 255.0f, 0, 0.6);
+				 colors[5] = float4(255.0f / 255.0f, 255.0f / 255.0f, 51.0f / 255.0f, 0.6);
+				 colors[6] = float4(166.0f / 255.0f, 86.0f / 255.0f, 40.0f / 255.0f, 0.6);
 
 				 fractions[0] = _Fraction1;
 				 fractions[1] = _Fraction2;
@@ -80,10 +80,10 @@
 
                  
 				 if (distance < 0.2f) {
-					 return colors[6];
+					 return fixed4(0, 0, 0, 0);
 				 }
 
-                 else if (distance > 0.3f && distance < 0.5f){
+                 else if (distance > 0.35f && distance < 0.5f){
 					 
 				 for (j = 0; j < 6; j++) {
 					 if (angle < angles[j]) {

@@ -29,10 +29,10 @@ class StateServer:
         #create some reactors
         for i in range(3):
             a = self.graph.nodes[i]
-            a.label = str(1)
+            a.label = 'reactor'
             a.id = i
-            a.position.append((i-1) * 10.0)
-            a.position.append(0.0)
+            a.position.append((i+1) * 0.2)
+            a.position.append(0.5)
 
             b = self.kinetic_system.kinetics.add()
             b.temperature = 100.0
@@ -41,6 +41,14 @@ class StateServer:
             b.mole_fraction.append(0.2)
             b.mole_fraction.append(0.2 + 0.1*i)
             b.mole_fraction.append(0.4 - i*0.1)
+
+        for i in range(2):
+            e = self.graph.edges[i]
+            e.idA = i
+            e.typeA = int(1)#this is the reactor index currently...
+            e.idB = i+1
+            e.typeB = int(1)
+            e.weight.append((0))
 
 
     async def update_gamestate(self):
