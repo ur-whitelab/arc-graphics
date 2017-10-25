@@ -4,6 +4,7 @@ import asyncio
 import State_pb2
 import kinetics_pb2
 import graph_pb2
+import numpy as np
 
 
 class StateServer:
@@ -27,20 +28,22 @@ class StateServer:
         self.kinetic_system.time = 0
 
         #create some reactors
-        for i in range(3):
+        for i in range(6):
             a = self.graph.nodes[i]
             a.label = 'reactor'
             a.id = i
-            a.position.append((i+1) * 0.2)
-            a.position.append(0.5)
+            a.position.append((i+1) * 0.15)
+            a.position.append((0.25 if(i%2 != 1) else (0.75 - (i%3)*0.15)))
 
             b = self.kinetic_system.kinetics.add()
             b.temperature = 100.0
             b.pressure = 100.0
-            b.mole_fraction.append(0.2)
-            b.mole_fraction.append(0.2)
-            b.mole_fraction.append(0.2 + 0.1*i)
-            b.mole_fraction.append(0.4 - i*0.1)
+            b.mole_fraction.append(np.random.uniform() * 0.5)
+            for j in range(1,3):
+                b.mole_fraction.append(np.random.uniform() * (1.0 - np.sum(b.mole_fraction[:j])))
+            b.mole_fraction.append(1.0 - np.sum(b.mole_fraction[:4]))
+
+
 
         for i in range(2):
             e = self.graph.edges[i]
@@ -50,17 +53,49 @@ class StateServer:
             e.typeB = int(1)
             e.weight.append((0))
 
+        e = self.graph.edges[2]
+        e.idA = 1
+        e.typeA = int(1)#this is the reactor index currently...
+        e.idB = 3
+        e.typeB = int(1)
+        e.weight.append((0))
+
+        e = self.graph.edges[3]
+        e.idA = 2
+        e.typeA = int(1)#this is the reactor index currently...
+        e.idB = 4
+        e.typeB = int(1)
+        e.weight.append((0))
+
+        e = self.graph.edges[4]
+        e.idA = 3
+        e.typeA = int(1)#this is the reactor index currently...
+        e.idB = 5
+        e.typeB = int(1)
+        e.weight.append((0))
+
+        e = self.graph.edges[5]
+        e.idA = 4
+        e.typeA = int(1)#this is the reactor index currently...
+        e.idB = 5
+        e.typeB = int(1)
+        e.weight.append((0))
+
+
 
     async def update_gamestate(self):
         self.graph.time += 1
         self.kinetic_system.time+=1
-        for i in range(3):
-            holdout = self.kinetic_system.kinetics[i].mole_fraction[0]
-            for j in range(len(self.kinetic_system.kinetics[i].mole_fraction)):
-                if(j is not len(self.kinetic_system.kinetics[i].mole_fraction)-1):
-                    self.kinetic_system.kinetics[i].mole_fraction[j] = self.kinetic_system.kinetics[i].mole_fraction[(j+1)]
-                else:
-                    self.kinetic_system.kinetics[i].mole_fraction[j] = holdout
+        #this part is for checking movement
+        #for i in range(6):
+            #a = self.graph.nodes[i]
+            #a.position[1] = (0.75 - 0.5 * ((self.graph.time)%2)) if(i%2 != 1) else 0.75
+        #    holdout = self.kinetic_system.kinetics[i].mole_fraction[0]
+        #    for j in range(len(self.kinetic_system.kinetics[i].mole_fraction)):
+        #        if(j is not len(self.kinetic_system.kinetics[i].mole_fraction)-1):
+        #            self.kinetic_system.kinetics[i].mole_fraction[j] = self.kinetic_system.kinetics[i].mole_fraction[(j+1)]
+        #        else:
+        #            self.kinetic_system.kinetics[i].mole_fraction[j] = holdout
         print(self.kinetic_system)
         for key in self.graph.nodes:
             a = self.graph.nodes[key]

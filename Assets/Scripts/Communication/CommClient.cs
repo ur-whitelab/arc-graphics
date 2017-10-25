@@ -17,6 +17,7 @@ namespace Rochester.ARTable.Communication
     {
 
         private Dictionary<string, Dictionary<int, GameObject>> managedObjects;
+        private Dictionary<string, Dictionary<int, HashSet<KeyValuePair<string, int>>>> edgeList;//stores OUTGOING edges of each node, as a set of DESTINATION type-index pairs. no double-edges for now...
         private SubscriberSocket VisionClient, SimulationClient;
         private PairSocket ScreenshotServer;
         private NetMQPoller VisionPoller, SimulationPoller, ScreenshotPoller;
@@ -35,7 +36,7 @@ namespace Rochester.ARTable.Communication
         public Renderer rend;
 
         private ParticleManager particleManager;
-
+        private Material linemat;
 
         private float delay;
 
@@ -72,15 +73,17 @@ namespace Rochester.ARTable.Communication
         void Start()
         {
 
-            //build prefab dict
+            //build prefab and edge list dicts
             prefabs = new Dictionary<string, GameObject>();
             managedObjects = new Dictionary<string, Dictionary<int, GameObject>>();
-            for(int i = 0; i < CommObjLabels.Count; i++) {
+            edgeList = new Dictionary<string, Dictionary<int, HashSet<KeyValuePair<string, int>>>>();
+            for (int i = 0; i < CommObjLabels.Count; i++) {
                 prefabs[CommObjLabels[i]] = CommObjPrefabs[i];
                 managedObjects[CommObjLabels[i]] = new Dictionary<int, GameObject>();
+                edgeList[CommObjLabels[i]] = new Dictionary<int, HashSet<KeyValuePair<string, int>>>();
             }
-
-
+            //For rendering lines
+            linemat = new Material(Shader.Find("Unlit/Texture"));
 
             //set-up socket and poller
             VisionClient = new SubscriberSocket();
@@ -129,7 +132,7 @@ namespace Rochester.ARTable.Communication
             {
                 //UnityEngine.Debug.Log("THE MESSAGE TASK RESULT WAS " + VisionResponseTask.Task.Result);
                 Graph system = Graph.Parser.ParseFrom(VisionResponseTask.Task.Result);
-                UnityEngine.Debug.Log("Received message " +  system + " from graph.");
+                //UnityEngine.Debug.Log("Received message " +  system + " from graph.");
                 synchronizeGraph(system);
                 //this is how you reset?
                 VisionResponseTask = new TaskCompletionSource<byte[]>();
@@ -138,7 +141,7 @@ namespace Rochester.ARTable.Communication
             if (SimulationResponseTask.Task.IsCompleted)
             {
                 SystemKinetics kinetics = SystemKinetics.Parser.ParseFrom(SimulationResponseTask.Task.Result);
-                // UnityEngine.Debug.Log("Received message " + kinetics + " from kinetics.");
+                //UnityEngine.Debug.Log("Received message " + kinetics + " from kinetics.");
                 synchronizeSimulation(kinetics);
                 SimulationResponseTask = new TaskCompletionSource<byte[]>();
             }
@@ -186,14 +189,23 @@ namespace Rochester.ARTable.Communication
                     currentObjs.Remove(o.Id);
                 }
                 else {
-                    existing.transform.localPosition = viewPos;
-                    // UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" +viewPos.x + ", " + viewPos.y + ")");
+                    double dist = Mathf.Sqrt(Mathf.Pow(Mathf.Abs(viewPos[0] - currentObjs[o.Id].transform.position[0]), 2) + Mathf.Pow(Mathf.Abs(viewPos[1] - currentObjs[o.Id].transform.position[1]), 2));
+                    Debug.Log("Asked to move reactor this distance: " + dist);
+                    if( dist < 3.0 || o.Label == "calibration-point")
+                    {
+                        existing.transform.localPosition = viewPos;
+                        UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
+                    }
+                    
                 }
             }
-            foreach(var key in system.Edges.Keys)
+
+            //first we build the edge list up
+            int numEdges = system.Edges.Count;
+            GameObject A, B;
+            for (int i = 0; i < numEdges; i++)
             {
-                var edge = system.Edges[key];
-                GameObject A, B;
+                var edge = system.Edges[i];
                 int IdA = edge.IdA;//first node
                 int typeA = edge.TypeA;//index of node A type 
                 int IdB = edge.IdB;//second node
@@ -203,39 +215,67 @@ namespace Rochester.ARTable.Communication
                 //Protobuf gives ints, need string keys...
                 string[] objkeys = managedObjects.Keys.ToArray();
                 //Use keys to get the right dict(s) of gameobjects. Might be the same, that's ok.
-                UnityEngine.Debug.Log("Type of A: " + objkeys[typeA] + " and type of B: " + objkeys[typeB]);
+                //UnityEngine.Debug.Log("Type of A: " + objkeys[typeA] + " and type of B: " + objkeys[typeB]);
                 A = managedObjects[(objkeys[typeA])][IdA];
                 B = managedObjects[(objkeys[typeB])][IdB];
-                //get the specific ones we're looking at
-                //A = currentObjectsA[IdA];
-                //B = currentObjectsB[IdB];
 
-                UnityEngine.Debug.Log("Trying to draw line between GameObject type " + objkeys[typeA] + " at " + A.transform.position[0] + ", " + A.transform.position[1] + " and type " + objkeys[typeB] + " at " + B.transform.position[0] + ", " + B.transform.position[1] + ".");
+                KeyValuePair<string, int> newEdge = new KeyValuePair<string, int>((objkeys[typeB]), IdB);
 
-                //now draw the line between them!
-                LineRenderer line = A.GetComponent<LineRenderer>();
-                if(line == null)
+                if (edgeList[objkeys[typeA]].ContainsKey(IdA))
                 {
-                    //line doesn't yet exist. Attach a linerenderer to A
-                    line = A.AddComponent<LineRenderer>();
+                    edgeList[(objkeys[typeA])][IdA].Add(newEdge);
                 }
-                //add the origin and the destination to its vertices.
-                int oldPositionCount = line.positionCount;
-                line.positionCount += 2;
-                line.SetPosition(oldPositionCount, A.transform.position);
-                line.SetPosition(oldPositionCount + 1, B.transform.position);
+                else
+                {
+                    edgeList[(objkeys[typeA])].Add(IdA, new HashSet<KeyValuePair<string, int>>());
+                    edgeList[objkeys[typeA]][IdA].Add(newEdge);
+                }
+                                
+
+                //UnityEngine.Debug.Log("Trying to draw line between GameObject type " + objkeys[typeA] + " at " + A.transform.position[0] + ", " + A.transform.position[1] + " and type " + objkeys[typeB] + " at " + B.transform.position[0] + ", " + B.transform.position[1] + ".");
+            }
+            string BLabel;
+            int BIndex;
+            foreach(var key in edgeList.Keys)//iterate through labels
+            {
+                foreach(int itemkey in edgeList[key].Keys)//iterate through indices to get each edge from this specific node
+                {
+                    A = managedObjects[key][itemkey];
+                    LineRenderer line = A.GetComponent<LineRenderer>();
+                    if (line == null)
+                    {
+                        //line doesn't yet exist. Attach a linerenderer to A
+                        line = A.AddComponent<LineRenderer>();
+                        line.positionCount = 2 * edgeList[key][itemkey].Count;//this is the number of outgoing edges from A. Need 2 line coords each.
+                        line.startColor = Color.white;
+                        line.endColor = Color.black;
+                        line.material = linemat;
+                    }
+                    int i = 0;
+                    foreach (var edgePair in edgeList[key][itemkey])
+                    {
+                        BLabel = edgePair.Key;
+                        BIndex = edgePair.Value;
+                        B = managedObjects[BLabel][BIndex];
+
+                        //now draw the line between them!
+                        line.SetPosition(i, A.transform.position);
+                        line.SetPosition(i + 1, B.transform.position);
+                        i += 2;
+                    }
+                }
 
             }
         }
 
         private void synchronizeSimulation(SystemKinetics kinetics)
         {
-            int rxrcount = 1;//the kinetics protobuffer could stand to be changed...
+            int rxrcount = 0;
             int count;
             float sum;
             foreach(var rxr in kinetics.Kinetics)
             {
-
+                //TODO: change kinetics protobuffers to include reactor type!
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
                 currentObjs.TryGetValue( rxrcount, out existing);
@@ -254,6 +294,10 @@ namespace Rochester.ARTable.Communication
                     {
                         rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i] / sum));
                     }
+                }
+                else
+                {
+                    Debug.Log("Got a reactor that doesn't exist! rxrcount = " + rxrcount);
                 }
 
                 rxrcount++;
