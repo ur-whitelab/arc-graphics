@@ -48,37 +48,37 @@ class StateServer:
         for i in range(2):
             e = self.graph.edges[i]
             e.idA = i
-            e.typeA = int(1)#this is the reactor index currently...
+            e.labelA = "reactor"#this is the reactor index currently...
             e.idB = i+1
-            e.typeB = int(1)
+            e.labelB = "reactor"
             e.weight.append((0))
 
         e = self.graph.edges[2]
         e.idA = 1
-        e.typeA = int(1)#this is the reactor index currently...
+        e.labelA = "reactor"#this is the reactor index currently...
         e.idB = 3
-        e.typeB = int(1)
+        e.labelB = "reactor"
         e.weight.append((0))
 
         e = self.graph.edges[3]
         e.idA = 2
-        e.typeA = int(1)#this is the reactor index currently...
+        e.labelA = "reactor"#this is the reactor index currently...
         e.idB = 4
-        e.typeB = int(1)
+        e.labelB = "reactor"
         e.weight.append((0))
 
         e = self.graph.edges[4]
         e.idA = 3
-        e.typeA = int(1)#this is the reactor index currently...
+        e.labelA = "reactor"#this is the reactor index currently...
         e.idB = 5
-        e.typeB = int(1)
+        e.labelB = "reactor"
         e.weight.append((0))
 
         e = self.graph.edges[5]
         e.idA = 4
-        e.typeA = int(1)#this is the reactor index currently...
+        e.labelA = "reactor"#this is the reactor index currently...
         e.idB = 5
-        e.typeB = int(1)
+        e.labelB = "reactor"
         e.weight.append((0))
 
 

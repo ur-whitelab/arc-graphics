@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='kinetics.proto',
   package='reactors',
   syntax='proto3',
-  serialized_pb=_b('\n\x0ekinetics.proto\x12\x08reactors\"O\n\x0fReactorKinetics\x12\x13\n\x0btemperature\x18\x01 \x01(\x02\x12\x10\n\x08pressure\x18\x02 \x01(\x02\x12\x15\n\rmole_fraction\x18\x03 \x03(\x02\"K\n\x0eSystemKinetics\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12+\n\x08kinetics\x18\x02 \x03(\x0b\x32\x19.reactors.ReactorKineticsB\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
+  serialized_pb=_b('\n\x0ekinetics.proto\x12\x08reactors\"j\n\x0fReactorKinetics\x12\x13\n\x0btemperature\x18\x01 \x01(\x02\x12\x10\n\x08pressure\x18\x02 \x01(\x02\x12\r\n\x05label\x18\x03 \x01(\t\x12\n\n\x02id\x18\x04 \x01(\x05\x12\x15\n\rmole_fraction\x18\x05 \x03(\x02\"K\n\x0eSystemKinetics\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12+\n\x08kinetics\x18\x02 \x03(\x0b\x32\x19.reactors.ReactorKineticsB\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
 )
 
 
@@ -47,8 +47,22 @@ _REACTORKINETICS = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='mole_fraction', full_name='reactors.ReactorKinetics.mole_fraction', index=2,
-      number=3, type=2, cpp_type=6, label=3,
+      name='label', full_name='reactors.ReactorKinetics.label', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='id', full_name='reactors.ReactorKinetics.id', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='mole_fraction', full_name='reactors.ReactorKinetics.mole_fraction', index=4,
+      number=5, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -66,7 +80,7 @@ _REACTORKINETICS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=28,
-  serialized_end=107,
+  serialized_end=134,
 )
 
 
@@ -103,8 +117,8 @@ _SYSTEMKINETICS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=109,
-  serialized_end=184,
+  serialized_start=136,
+  serialized_end=211,
 )
 
 _SYSTEMKINETICS.fields_by_name['kinetics'].message_type = _REACTORKINETICS

@@ -18,6 +18,8 @@ namespace Rochester.ARTable.Communication
 
         private Dictionary<string, Dictionary<int, GameObject>> managedObjects;
         private Dictionary<string, Dictionary<int, HashSet<KeyValuePair<string, int>>>> edgeList;//stores OUTGOING edges of each node, as a set of DESTINATION type-index pairs. no double-edges for now...
+
+        private Dictionary<string, Dictionary<int, Dictionary<string, Dictionary<int, GameObject>>>> managedLines;//store the actual line gameobjects
         private SubscriberSocket VisionClient, SimulationClient;
         private PairSocket ScreenshotServer;
         private NetMQPoller VisionPoller, SimulationPoller, ScreenshotPoller;
@@ -65,8 +67,14 @@ namespace Rochester.ARTable.Communication
                 {
                     managedObjects[CommObjLabels[i]].Clear();
                 }
+                foreach (var key in edgeList.Keys){
+                    edgeList[key].Clear();
+                }
+                foreach(var key in managedLines.Keys){
+                    managedLines[key].Clear();
+                }
             }
- 
+
         }
 
         // Use this for initialization
@@ -76,11 +84,13 @@ namespace Rochester.ARTable.Communication
             //build prefab and edge list dicts
             prefabs = new Dictionary<string, GameObject>();
             managedObjects = new Dictionary<string, Dictionary<int, GameObject>>();
+            managedLines = new Dictionary<string, Dictionary<int, Dictionary<string, Dictionary<int, GameObject>>>>();
             edgeList = new Dictionary<string, Dictionary<int, HashSet<KeyValuePair<string, int>>>>();
             for (int i = 0; i < CommObjLabels.Count; i++) {
                 prefabs[CommObjLabels[i]] = CommObjPrefabs[i];
                 managedObjects[CommObjLabels[i]] = new Dictionary<int, GameObject>();
                 edgeList[CommObjLabels[i]] = new Dictionary<int, HashSet<KeyValuePair<string, int>>>();
+                managedLines[CommObjLabels[i]] = new Dictionary<int, Dictionary<string, Dictionary<int, GameObject>>>();
             }
             //For rendering lines
             linemat = new Material(Shader.Find("Unlit/Texture"));
@@ -186,6 +196,25 @@ namespace Rochester.ARTable.Communication
                 {
                     currentObjs.TryGetValue(o.Id, out existing);
                     Destroy(existing);
+                    //scan dict of line gameobjects for the lines attached to this node, destroy them.
+                    foreach(var type1 in managedLines.Keys){
+                        foreach(var idx1 in managedLines[type1].Keys){
+                            foreach(var type2 in managedLines[type1][idx1].Keys){
+                                foreach(var idx2 in managedLines[type1][idx1][type2].Keys){
+                                    if( (type1 == o.Label && idx1 == o.Id) ){
+                                        Destroy(managedLines[type1][idx1][type2][idx2]);
+                                        managedLines[type1][idx1].Clear();
+                                        managedLines[type1].Remove(idx1);
+                                    }
+                                    else if((type2 == o.Label && idx2 == o.Id)){
+                                        Destroy(managedLines[type1][idx1][type2][idx2]);
+                                        managedLines[type2][idx2].Clear();
+                                        managedLines[type2].Remove(idx2);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     currentObjs.Remove(o.Id);
                 }
                 else {
@@ -196,7 +225,7 @@ namespace Rochester.ARTable.Communication
                         existing.transform.localPosition = viewPos;
                         UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
                     }
-                    
+
                 }
             }
 
@@ -207,65 +236,81 @@ namespace Rochester.ARTable.Communication
             {
                 var edge = system.Edges[i];
                 int IdA = edge.IdA;//first node
-                int typeA = edge.TypeA;//index of node A type 
+                string labelA = edge.LabelA;//index of node A type
                 int IdB = edge.IdB;//second node
-                int typeB = edge.TypeB;//index of node B type
+                string labelB = edge.LabelB;//index of node B type
 
 
-                //Protobuf gives ints, need string keys...
-                string[] objkeys = managedObjects.Keys.ToArray();
                 //Use keys to get the right dict(s) of gameobjects. Might be the same, that's ok.
-                //UnityEngine.Debug.Log("Type of A: " + objkeys[typeA] + " and type of B: " + objkeys[typeB]);
-                A = managedObjects[(objkeys[typeA])][IdA];
-                B = managedObjects[(objkeys[typeB])][IdB];
+                //UnityEngine.Debug.Log("Type of A: " + labelA + " and type of B: " + labelB);
+                A = managedObjects[labelA][IdA];
+                B = managedObjects[labelB][IdB];
 
-                KeyValuePair<string, int> newEdge = new KeyValuePair<string, int>((objkeys[typeB]), IdB);
+                KeyValuePair<string, int> newEdge = new KeyValuePair<string, int>(labelB, IdB);
 
-                if (edgeList[objkeys[typeA]].ContainsKey(IdA))
+                if (edgeList[labelA].ContainsKey(IdA))
                 {
-                    edgeList[(objkeys[typeA])][IdA].Add(newEdge);
+                    edgeList[labelA][IdA].Add(newEdge);
                 }
                 else
                 {
-                    edgeList[(objkeys[typeA])].Add(IdA, new HashSet<KeyValuePair<string, int>>());
-                    edgeList[objkeys[typeA]][IdA].Add(newEdge);
+                    edgeList[labelA].Add(IdA, new HashSet<KeyValuePair<string, int>>());
+                    edgeList[labelA][IdA].Add(newEdge);
                 }
-                                
 
-                //UnityEngine.Debug.Log("Trying to draw line between GameObject type " + objkeys[typeA] + " at " + A.transform.position[0] + ", " + A.transform.position[1] + " and type " + objkeys[typeB] + " at " + B.transform.position[0] + ", " + B.transform.position[1] + ".");
+                if(!managedLines[labelA].ContainsKey(IdA)){
+                    managedLines[labelA].Add(IdA, new Dictionary<string, Dictionary<int, GameObject>>());
+                }
+                if(!managedLines[labelA][IdA].ContainsKey(labelB)){
+                    managedLines[labelA][IdA].Add(labelB, new Dictionary<int, GameObject>());
+                }
+                if(!managedLines[labelA][IdA][labelB].ContainsKey(IdB)){
+                    managedLines[labelA][IdA][labelB][IdB] = new GameObject();
+                }
+
+
+                //UnityEngine.Debug.Log("Trying to draw line between GameObject type " + labelA + " at " + A.transform.position[0] + ", " + A.transform.position[1] + " and type " + labelB + " at " + B.transform.position[0] + ", " + B.transform.position[1] + ".");
             }
             string BLabel;
             int BIndex;
-            foreach(var key in edgeList.Keys)//iterate through labels
-            {
-                foreach(int itemkey in edgeList[key].Keys)//iterate through indices to get each edge from this specific node
+            Vector3 AtoB;
+            float reactorBoxSize;//size of the gameobject A and B (should be same)
+            if(edgeList.Keys.Count > 0) {
+                foreach (var key in edgeList.Keys)//iterate through labels
                 {
-                    A = managedObjects[key][itemkey];
-                    LineRenderer line = A.GetComponent<LineRenderer>();
-                    if (line == null)
+                    foreach (int itemkey in edgeList[key].Keys)//iterate through indices to get each edge from this specific node
                     {
-                        //line doesn't yet exist. Attach a linerenderer to A
-                        line = A.AddComponent<LineRenderer>();
-                        line.positionCount = 2 * edgeList[key][itemkey].Count;//this is the number of outgoing edges from A. Need 2 line coords each.
-                        line.startColor = Color.white;
-                        line.endColor = Color.black;
-                        line.material = linemat;
-                    }
-                    int i = 0;
-                    foreach (var edgePair in edgeList[key][itemkey])
-                    {
-                        BLabel = edgePair.Key;
-                        BIndex = edgePair.Value;
-                        B = managedObjects[BLabel][BIndex];
 
-                        //now draw the line between them!
-                        line.SetPosition(i, A.transform.position);
-                        line.SetPosition(i + 1, B.transform.position);
-                        i += 2;
+                        A = managedObjects[key][itemkey];
+
+                        foreach (var edgePair in edgeList[key][itemkey])
+                        {
+                            GameObject line = managedLines[key][itemkey][edgePair.Key][edgePair.Value];
+                            LineRenderer renderer = line.GetComponent<LineRenderer>();
+                            if (renderer == null)
+                            {
+                                //renderer doesn't yet exist. Attach a linerenderer to A
+                                renderer = line.AddComponent<LineRenderer>();
+                                renderer.positionCount = 2;//Need only 2 line coords each.
+                                renderer.startColor = Color.white;
+                                renderer.endColor = Color.white;
+                                renderer.material = linemat;
+                            }
+                            BLabel = edgePair.Key;
+                            BIndex = edgePair.Value;
+                            B = managedObjects[BLabel][BIndex];
+                            AtoB = B.transform.position - A.transform.position;//get vector between A and B
+                            reactorBoxSize = A.GetComponent<Renderer>().bounds.size.x;//get offset based on box size (so lines don't *quite* hit reactors)
+                            //now draw the line between them!
+                            renderer.SetPosition(0, A.transform.position + (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
+                            renderer.SetPosition(1, B.transform.position - (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
+
+                        }
                     }
+
                 }
-
             }
+
         }
 
         private void synchronizeSimulation(SystemKinetics kinetics)

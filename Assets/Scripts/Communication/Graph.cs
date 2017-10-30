@@ -24,20 +24,20 @@ namespace Rochester.Physics.Communication {
           string.Concat(
             "CgtncmFwaC5wcm90bxIGZ3JhcGhzIlMKBE5vZGUSCgoCaWQYASABKAUSDQoF",
             "bGFiZWwYAiABKAkSDgoGZGVsZXRlGAMgASgIEhAKCHBvc2l0aW9uGAQgAygC",
-            "Eg4KBndlaWdodBgFIAMoAiJOCgRFZGdlEgsKA2lkQRgBIAEoBRINCgV0eXBl",
-            "QRgCIAEoBRILCgNpZEIYAyABKAUSDQoFdHlwZUIYBCABKAUSDgoGd2VpZ2h0",
-            "GAUgAygCIt8BCgVHcmFwaBIMCgR0aW1lGAEgASgDEicKBW5vZGVzGAIgAygL",
-            "MhguZ3JhcGhzLkdyYXBoLk5vZGVzRW50cnkSJwoFZWRnZXMYAyADKAsyGC5n",
-            "cmFwaHMuR3JhcGguRWRnZXNFbnRyeRo6CgpOb2Rlc0VudHJ5EgsKA2tleRgB",
-            "IAEoBRIbCgV2YWx1ZRgCIAEoCzIMLmdyYXBocy5Ob2RlOgI4ARo6CgpFZGdl",
-            "c0VudHJ5EgsKA2tleRgBIAEoBRIbCgV2YWx1ZRgCIAEoCzIMLmdyYXBocy5F",
-            "ZGdlOgI4AUIiqgIfUm9jaGVzdGVyLlBoeXNpY3MuQ29tbXVuaWNhdGlvbmIG",
-            "cHJvdG8z"));
+            "Eg4KBndlaWdodBgFIAMoAiJQCgRFZGdlEgsKA2lkQRgBIAEoBRIOCgZsYWJl",
+            "bEEYAiABKAkSCwoDaWRCGAMgASgFEg4KBmxhYmVsQhgEIAEoCRIOCgZ3ZWln",
+            "aHQYBSADKAIi3wEKBUdyYXBoEgwKBHRpbWUYASABKAMSJwoFbm9kZXMYAiAD",
+            "KAsyGC5ncmFwaHMuR3JhcGguTm9kZXNFbnRyeRInCgVlZGdlcxgDIAMoCzIY",
+            "LmdyYXBocy5HcmFwaC5FZGdlc0VudHJ5GjoKCk5vZGVzRW50cnkSCwoDa2V5",
+            "GAEgASgFEhsKBXZhbHVlGAIgASgLMgwuZ3JhcGhzLk5vZGU6AjgBGjoKCkVk",
+            "Z2VzRW50cnkSCwoDa2V5GAEgASgFEhsKBXZhbHVlGAIgASgLMgwuZ3JhcGhz",
+            "LkVkZ2U6AjgBQiKqAh9Sb2NoZXN0ZXIuUGh5c2ljcy5Db21tdW5pY2F0aW9u",
+            "YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.Node), global::Rochester.Physics.Communication.Node.Parser, new[]{ "Id", "Label", "Delete", "Position", "Weight" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.Edge), global::Rochester.Physics.Communication.Edge.Parser, new[]{ "IdA", "TypeA", "IdB", "TypeB", "Weight" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.Edge), global::Rochester.Physics.Communication.Edge.Parser, new[]{ "IdA", "LabelA", "IdB", "LabelB", "Weight" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.Graph), global::Rochester.Physics.Communication.Graph.Parser, new[]{ "Time", "Nodes", "Edges" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, null, })
           }));
     }
@@ -288,9 +288,9 @@ namespace Rochester.Physics.Communication {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public Edge(Edge other) : this() {
       idA_ = other.idA_;
-      typeA_ = other.typeA_;
+      labelA_ = other.labelA_;
       idB_ = other.idB_;
-      typeB_ = other.typeB_;
+      labelB_ = other.labelB_;
       weight_ = other.weight_.Clone();
     }
 
@@ -313,17 +313,17 @@ namespace Rochester.Physics.Communication {
       }
     }
 
-    /// <summary>Field number for the "typeA" field.</summary>
-    public const int TypeAFieldNumber = 2;
-    private int typeA_;
+    /// <summary>Field number for the "labelA" field.</summary>
+    public const int LabelAFieldNumber = 2;
+    private string labelA_ = "";
     /// <summary>
     ///need both for Unity dict, otherwise can't connect different node types
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int TypeA {
-      get { return typeA_; }
+    public string LabelA {
+      get { return labelA_; }
       set {
-        typeA_ = value;
+        labelA_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -341,14 +341,14 @@ namespace Rochester.Physics.Communication {
       }
     }
 
-    /// <summary>Field number for the "typeB" field.</summary>
-    public const int TypeBFieldNumber = 4;
-    private int typeB_;
+    /// <summary>Field number for the "labelB" field.</summary>
+    public const int LabelBFieldNumber = 4;
+    private string labelB_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int TypeB {
-      get { return typeB_; }
+    public string LabelB {
+      get { return labelB_; }
       set {
-        typeB_ = value;
+        labelB_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -379,9 +379,9 @@ namespace Rochester.Physics.Communication {
         return true;
       }
       if (IdA != other.IdA) return false;
-      if (TypeA != other.TypeA) return false;
+      if (LabelA != other.LabelA) return false;
       if (IdB != other.IdB) return false;
-      if (TypeB != other.TypeB) return false;
+      if (LabelB != other.LabelB) return false;
       if(!weight_.Equals(other.weight_)) return false;
       return true;
     }
@@ -390,9 +390,9 @@ namespace Rochester.Physics.Communication {
     public override int GetHashCode() {
       int hash = 1;
       if (IdA != 0) hash ^= IdA.GetHashCode();
-      if (TypeA != 0) hash ^= TypeA.GetHashCode();
+      if (LabelA.Length != 0) hash ^= LabelA.GetHashCode();
       if (IdB != 0) hash ^= IdB.GetHashCode();
-      if (TypeB != 0) hash ^= TypeB.GetHashCode();
+      if (LabelB.Length != 0) hash ^= LabelB.GetHashCode();
       hash ^= weight_.GetHashCode();
       return hash;
     }
@@ -408,17 +408,17 @@ namespace Rochester.Physics.Communication {
         output.WriteRawTag(8);
         output.WriteInt32(IdA);
       }
-      if (TypeA != 0) {
-        output.WriteRawTag(16);
-        output.WriteInt32(TypeA);
+      if (LabelA.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteString(LabelA);
       }
       if (IdB != 0) {
         output.WriteRawTag(24);
         output.WriteInt32(IdB);
       }
-      if (TypeB != 0) {
-        output.WriteRawTag(32);
-        output.WriteInt32(TypeB);
+      if (LabelB.Length != 0) {
+        output.WriteRawTag(34);
+        output.WriteString(LabelB);
       }
       weight_.WriteTo(output, _repeated_weight_codec);
     }
@@ -429,14 +429,14 @@ namespace Rochester.Physics.Communication {
       if (IdA != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(IdA);
       }
-      if (TypeA != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TypeA);
+      if (LabelA.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(LabelA);
       }
       if (IdB != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(IdB);
       }
-      if (TypeB != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(TypeB);
+      if (LabelB.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(LabelB);
       }
       size += weight_.CalculateSize(_repeated_weight_codec);
       return size;
@@ -450,14 +450,14 @@ namespace Rochester.Physics.Communication {
       if (other.IdA != 0) {
         IdA = other.IdA;
       }
-      if (other.TypeA != 0) {
-        TypeA = other.TypeA;
+      if (other.LabelA.Length != 0) {
+        LabelA = other.LabelA;
       }
       if (other.IdB != 0) {
         IdB = other.IdB;
       }
-      if (other.TypeB != 0) {
-        TypeB = other.TypeB;
+      if (other.LabelB.Length != 0) {
+        LabelB = other.LabelB;
       }
       weight_.Add(other.weight_);
     }
@@ -474,16 +474,16 @@ namespace Rochester.Physics.Communication {
             IdA = input.ReadInt32();
             break;
           }
-          case 16: {
-            TypeA = input.ReadInt32();
+          case 18: {
+            LabelA = input.ReadString();
             break;
           }
           case 24: {
             IdB = input.ReadInt32();
             break;
           }
-          case 32: {
-            TypeB = input.ReadInt32();
+          case 34: {
+            LabelB = input.ReadString();
             break;
           }
           case 42:

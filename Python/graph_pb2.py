@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='graph.proto',
   package='graphs',
   syntax='proto3',
-  serialized_pb=_b('\n\x0bgraph.proto\x12\x06graphs\"S\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05label\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x65lete\x18\x03 \x01(\x08\x12\x10\n\x08position\x18\x04 \x03(\x02\x12\x0e\n\x06weight\x18\x05 \x03(\x02\"N\n\x04\x45\x64ge\x12\x0b\n\x03idA\x18\x01 \x01(\x05\x12\r\n\x05typeA\x18\x02 \x01(\x05\x12\x0b\n\x03idB\x18\x03 \x01(\x05\x12\r\n\x05typeB\x18\x04 \x01(\x05\x12\x0e\n\x06weight\x18\x05 \x03(\x02\"\xdf\x01\n\x05Graph\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\'\n\x05nodes\x18\x02 \x03(\x0b\x32\x18.graphs.Graph.NodesEntry\x12\'\n\x05\x65\x64ges\x18\x03 \x03(\x0b\x32\x18.graphs.Graph.EdgesEntry\x1a:\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.graphs.Node:\x02\x38\x01\x1a:\n\nEdgesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.graphs.Edge:\x02\x38\x01\x42\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
+  serialized_pb=_b('\n\x0bgraph.proto\x12\x06graphs\"S\n\x04Node\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05label\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x65lete\x18\x03 \x01(\x08\x12\x10\n\x08position\x18\x04 \x03(\x02\x12\x0e\n\x06weight\x18\x05 \x03(\x02\"P\n\x04\x45\x64ge\x12\x0b\n\x03idA\x18\x01 \x01(\x05\x12\x0e\n\x06labelA\x18\x02 \x01(\t\x12\x0b\n\x03idB\x18\x03 \x01(\x05\x12\x0e\n\x06labelB\x18\x04 \x01(\t\x12\x0e\n\x06weight\x18\x05 \x03(\x02\"\xdf\x01\n\x05Graph\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\'\n\x05nodes\x18\x02 \x03(\x0b\x32\x18.graphs.Graph.NodesEntry\x12\'\n\x05\x65\x64ges\x18\x03 \x03(\x0b\x32\x18.graphs.Graph.EdgesEntry\x1a:\n\nNodesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.graphs.Node:\x02\x38\x01\x1a:\n\nEdgesEntry\x12\x0b\n\x03key\x18\x01 \x01(\x05\x12\x1b\n\x05value\x18\x02 \x01(\x0b\x32\x0c.graphs.Edge:\x02\x38\x01\x42\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
 )
 
 
@@ -99,9 +99,9 @@ _EDGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='typeA', full_name='graphs.Edge.typeA', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='labelA', full_name='graphs.Edge.labelA', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -113,9 +113,9 @@ _EDGE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='typeB', full_name='graphs.Edge.typeB', index=3,
-      number=4, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='labelB', full_name='graphs.Edge.labelB', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -139,7 +139,7 @@ _EDGE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=108,
-  serialized_end=186,
+  serialized_end=188,
 )
 
 
@@ -176,8 +176,8 @@ _GRAPH_NODESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=294,
-  serialized_end=352,
+  serialized_start=296,
+  serialized_end=354,
 )
 
 _GRAPH_EDGESENTRY = _descriptor.Descriptor(
@@ -213,8 +213,8 @@ _GRAPH_EDGESENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=354,
-  serialized_end=412,
+  serialized_start=356,
+  serialized_end=414,
 )
 
 _GRAPH = _descriptor.Descriptor(
@@ -257,8 +257,8 @@ _GRAPH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=189,
-  serialized_end=412,
+  serialized_start=191,
+  serialized_end=414,
 )
 
 _GRAPH_NODESENTRY.fields_by_name['value'].message_type = _NODE

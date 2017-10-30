@@ -21,7 +21,6 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_pb=_b('\n\x11\x63\x61libration.proto\x12\x08reactors\"(\n\x11\x43\x61librationStatus\x12\x13\n\x0b\x43\x61librating\x18\x01 \x01(\x08\"\xae\x01\n\x0c\x43heckerboard\x12\x10\n\x08TopLeftx\x18\x01 \x01(\x02\x12\x10\n\x08TopLefty\x18\x02 \x01(\x02\x12\x11\n\tTopRightx\x18\x03 \x01(\x02\x12\x11\n\tTopRighty\x18\x04 \x01(\x02\x12\x13\n\x0b\x42ottomLeftx\x18\x05 \x01(\x02\x12\x13\n\x0b\x42ottomLefty\x18\x06 \x01(\x02\x12\x14\n\x0c\x42ottomRightx\x18\x07 \x01(\x02\x12\x14\n\x0c\x42ottomRighty\x18\x08 \x01(\x02\x62\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -138,6 +137,7 @@ _CHECKERBOARD = _descriptor.Descriptor(
 
 DESCRIPTOR.message_types_by_name['CalibrationStatus'] = _CALIBRATIONSTATUS
 DESCRIPTOR.message_types_by_name['Checkerboard'] = _CHECKERBOARD
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 CalibrationStatus = _reflection.GeneratedProtocolMessageType('CalibrationStatus', (_message.Message,), dict(
   DESCRIPTOR = _CALIBRATIONSTATUS,
