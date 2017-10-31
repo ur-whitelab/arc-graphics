@@ -6,6 +6,7 @@ import kinetics_pb2
 import graph_pb2
 import numpy as np
 
+'''This file is used for testing Unity's ability to receive and deal with messages without involving the vision or C&C code.'''
 
 class StateServer:
 
@@ -48,35 +49,35 @@ class StateServer:
         for i in range(2):
             e = self.graph.edges[i]
             e.idA = i
-            e.labelA = "reactor"#this is the reactor index currently...
+            e.labelA = "reactor"
             e.idB = i+1
             e.labelB = "reactor"
             e.weight.append((0))
 
         e = self.graph.edges[2]
         e.idA = 1
-        e.labelA = "reactor"#this is the reactor index currently...
+        e.labelA = "reactor"
         e.idB = 3
         e.labelB = "reactor"
         e.weight.append((0))
 
         e = self.graph.edges[3]
         e.idA = 2
-        e.labelA = "reactor"#this is the reactor index currently...
+        e.labelA = "reactor"
         e.idB = 4
         e.labelB = "reactor"
         e.weight.append((0))
 
         e = self.graph.edges[4]
         e.idA = 3
-        e.labelA = "reactor"#this is the reactor index currently...
+        e.labelA = "reactor"
         e.idB = 5
         e.labelB = "reactor"
         e.weight.append((0))
 
         e = self.graph.edges[5]
         e.idA = 4
-        e.labelA = "reactor"#this is the reactor index currently...
+        e.labelA = "reactor"
         e.idB = 5
         e.labelB = "reactor"
         e.weight.append((0))
@@ -96,10 +97,16 @@ class StateServer:
         #            self.kinetic_system.kinetics[i].mole_fraction[j] = self.kinetic_system.kinetics[i].mole_fraction[(j+1)]
         #        else:
         #            self.kinetic_system.kinetics[i].mole_fraction[j] = holdout
+        #check handling deleted node after some time...
+        if(self.graph.time == 10):
+            self.graph.nodes[5].delete = True
+            del self.graph.edges[4]
+            del self.graph.edges[5]
         print(self.kinetic_system)
         for key in self.graph.nodes:
             a = self.graph.nodes[key]
-            #a.position[1] += 3*(a.id+1)*(1 if self.graph.time%2 else -1)
+            if(not a.delete):
+                a.position[1] += 0.01*(1 if self.graph.time%2==0 else -1)
         await asyncio.sleep(1.0)
         return (self.graph, self.kinetic_system)
 

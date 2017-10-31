@@ -187,7 +187,7 @@ namespace Rochester.ARTable.Communication
                 GameObject existing;
                 Vector2 objectPos = new Vector2(o.Position[0], o.Position[1]);
                 Vector2 viewPos = camera.UnitToWorld(objectPos);
-                if (!currentObjs.TryGetValue(o.Id, out existing)) {
+                if (!currentObjs.TryGetValue(o.Id, out existing) && !o.Delete) {
                     var placed = (GameObject) GameObject.Instantiate(prefabs[o.Label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
                     currentObjs[o.Id] = placed;
                     UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id +" at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
@@ -203,13 +203,13 @@ namespace Rochester.ARTable.Communication
                                 foreach(var idx2 in managedLines[type1][idx1][type2].Keys){
                                     if( (type1 == o.Label && idx1 == o.Id) ){
                                         Destroy(managedLines[type1][idx1][type2][idx2]);
-                                        managedLines[type1][idx1].Clear();
-                                        managedLines[type1].Remove(idx1);
+                                        //managedLines[type1][idx1].Clear();
+                                        //managedLines[type1].Remove(idx1);
                                     }
                                     else if((type2 == o.Label && idx2 == o.Id)){
                                         Destroy(managedLines[type1][idx1][type2][idx2]);
-                                        managedLines[type2][idx2].Clear();
-                                        managedLines[type2].Remove(idx2);
+                                        //managedLines[type2][idx2].Clear();
+                                        //managedLines[type2].Remove(idx2);
                                     }
                                 }
                             }
@@ -285,25 +285,30 @@ namespace Rochester.ARTable.Communication
 
                         foreach (var edgePair in edgeList[key][itemkey])
                         {
-                            GameObject line = managedLines[key][itemkey][edgePair.Key][edgePair.Value];
-                            LineRenderer renderer = line.GetComponent<LineRenderer>();
-                            if (renderer == null)
-                            {
-                                //renderer doesn't yet exist. Attach a linerenderer to A
-                                renderer = line.AddComponent<LineRenderer>();
-                                renderer.positionCount = 2;//Need only 2 line coords each.
-                                renderer.startColor = Color.white;
-                                renderer.endColor = Color.white;
-                                renderer.material = linemat;
+                            if(managedLines[key][itemkey][edgePair.Key][edgePair.Value] != null){
+                                GameObject line = managedLines[key][itemkey][edgePair.Key][edgePair.Value];
+                                LineRenderer renderer = line.GetComponent<LineRenderer>();
+                                if (renderer == null)
+                                {
+                                    //renderer doesn't yet exist. Attach a linerenderer to A
+                                    renderer = line.AddComponent<LineRenderer>();
+                                    renderer.positionCount = 2;//Need only 2 line coords each.
+                                    renderer.startColor = Color.white;
+                                    renderer.endColor = Color.white;
+                                    renderer.material = linemat;
+                                }
+                                BLabel = edgePair.Key;
+                                BIndex = edgePair.Value;
+                                if(managedObjects[BLabel].ContainsKey(BIndex)){
+                                    B = managedObjects[BLabel][BIndex];
+
+                                AtoB = B.transform.position - A.transform.position;//get vector between A and B
+                                reactorBoxSize = A.GetComponent<Renderer>().bounds.size.x;//get offset based on box size (so lines don't *quite* hit reactors)
+                                //now draw the line between them!
+                                renderer.SetPosition(0, A.transform.position + (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
+                                renderer.SetPosition(1, B.transform.position - (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
+                                }
                             }
-                            BLabel = edgePair.Key;
-                            BIndex = edgePair.Value;
-                            B = managedObjects[BLabel][BIndex];
-                            AtoB = B.transform.position - A.transform.position;//get vector between A and B
-                            reactorBoxSize = A.GetComponent<Renderer>().bounds.size.x;//get offset based on box size (so lines don't *quite* hit reactors)
-                            //now draw the line between them!
-                            renderer.SetPosition(0, A.transform.position + (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
-                            renderer.SetPosition(1, B.transform.position - (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
 
                         }
                     }
