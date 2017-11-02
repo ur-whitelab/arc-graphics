@@ -29,7 +29,9 @@ namespace Rochester.ARTable.Communication
         new private CameraControls camera;
 
         private GameObject temperatureValue;
+        private string temperatureText;
         private GameObject pressureValue;
+        private string pressureText;
 
 
         [Tooltip("Follows ZeroMQ syntax")]
@@ -86,9 +88,9 @@ namespace Rochester.ARTable.Communication
         {
             //these are the fixed text objects that display the next-placed reactor's temperature and pressure
             temperatureValue = GameObject.Find("TemperatureValue");
-            Debug.Log("temperatureValue's text field is: " + temperatureValue.GetComponent<Text>().text);
             pressureValue = GameObject.Find("PressureValue");
-            Debug.Log("temperatureValue's text field is: " + pressureValue.GetComponent<Text>().text);
+            //Debug.Log("temperatureValue's text field is: " + temperatureText);
+            //Debug.Log("temperatureValue's text field is: " + pressureText);
             //build prefab and edge list dicts
             prefabs = new Dictionary<string, GameObject>();
             managedObjects = new Dictionary<string, Dictionary<int, GameObject>>();
@@ -189,57 +191,80 @@ namespace Rochester.ARTable.Communication
 
         private void synchronizeGraph(Graph system)
         {
-            foreach(var key in system.Nodes.Keys) {
+            foreach(var key in system.Nodes.Keys)
+            {
                 var o = system.Nodes[key];
-                var currentObjs = managedObjects[o.Label];
-                GameObject existing;
-                Vector2 objectPos = new Vector2(o.Position[0], o.Position[1]);
-                Vector2 viewPos = camera.UnitToWorld(objectPos);
-                if (!currentObjs.TryGetValue(o.Id, out existing) && !o.Delete) {
-                    string label = o.Label;
-                    if(label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
-                    {
-                        label = "reactor";
-                    }
-                    var placed = (GameObject) GameObject.Instantiate(prefabs[label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
-                    currentObjs[o.Id] = placed;
-                    UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id +" at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
-                }
-                else if (o.Delete)
+
+                string label = o.Label;
+                if (label == "conditions")//temperature and pressure updates are passed as a special 'node'
                 {
-                    currentObjs.TryGetValue(o.Id, out existing);
-                    Destroy(existing);
-                    //scan dict of line gameobjects for the lines attached to this node, destroy them.
-                    foreach(var type1 in managedLines.Keys){
-                        foreach(var idx1 in managedLines[type1].Keys){
-                            foreach(var type2 in managedLines[type1][idx1].Keys){
-                                foreach(var idx2 in managedLines[type1][idx1][type2].Keys){
-                                    if( (type1 == o.Label && idx1 == o.Id) ){
-                                        Destroy(managedLines[type1][idx1][type2][idx2]);
-                                        //managedLines[type1][idx1].Clear();
-                                        //managedLines[type1].Remove(idx1);
-                                    }
-                                    else if((type2 == o.Label && idx2 == o.Id)){
-                                        Destroy(managedLines[type1][idx1][type2][idx2]);
-                                        //managedLines[type2][idx2].Clear();
-                                        //managedLines[type2].Remove(idx2);
+                    temperatureValue = GameObject.Find("Backend/Canvas/TemperatureValue");
+                    pressureValue = GameObject.Find("Backend/Canvas/PressureValue");
+                    Debug.Log("received conditions message: " + o);
+                    temperatureValue.GetComponent<Text>().text = "" + o.Weight[0] + " K";
+                    pressureValue.GetComponent<Text>().text = "" + o.Weight[1] + " atm";
+                }
+                else
+                {
+                    Debug.Log("o.Label is: " + o.Label);
+                    var currentObjs = managedObjects[o.Label];
+                    GameObject existing;
+                    Vector2 objectPos = new Vector2(o.Position[0], o.Position[1]);
+                    Vector2 viewPos = camera.UnitToWorld(objectPos);
+                    if (!currentObjs.TryGetValue(o.Id, out existing) && !o.Delete)
+                    {
+                        if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                        {
+                            label = "reactor";
+                        }
+                        var placed = (GameObject)GameObject.Instantiate(prefabs[label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
+                        currentObjs[o.Id] = placed;
+                        UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id + " at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
+                    }
+                    else if (o.Delete)
+                    {
+                        currentObjs.TryGetValue(o.Id, out existing);
+                        Destroy(existing);
+                        //scan dict of line gameobjects for the lines attached to this node, destroy them.
+                        foreach (var type1 in managedLines.Keys)
+                        {
+                            foreach (var idx1 in managedLines[type1].Keys)
+                            {
+                                foreach (var type2 in managedLines[type1][idx1].Keys)
+                                {
+                                    foreach (var idx2 in managedLines[type1][idx1][type2].Keys)
+                                    {
+                                        if ((type1 == o.Label && idx1 == o.Id))
+                                        {
+                                            Destroy(managedLines[type1][idx1][type2][idx2]);
+                                            //managedLines[type1][idx1].Clear();
+                                            //managedLines[type1].Remove(idx1);
+                                        }
+                                        else if ((type2 == o.Label && idx2 == o.Id))
+                                        {
+                                            Destroy(managedLines[type1][idx1][type2][idx2]);
+                                            //managedLines[type2][idx2].Clear();
+                                            //managedLines[type2].Remove(idx2);
+                                        }
                                     }
                                 }
                             }
                         }
+                        currentObjs.Remove(o.Id);
                     }
-                    currentObjs.Remove(o.Id);
-                }
-                else {
-                    double dist = Mathf.Sqrt(Mathf.Pow(Mathf.Abs(viewPos[0] - currentObjs[o.Id].transform.position[0]), 2) + Mathf.Pow(Mathf.Abs(viewPos[1] - currentObjs[o.Id].transform.position[1]), 2));
-                    Debug.Log("Asked to move reactor this distance: " + dist);
-                    if( dist < 3.0 || o.Label == "calibration-point")
+                    else
                     {
-                        existing.transform.localPosition = viewPos;
-                        UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
-                    }
+                        double dist = Mathf.Sqrt(Mathf.Pow(Mathf.Abs(viewPos[0] - currentObjs[o.Id].transform.position[0]), 2) + Mathf.Pow(Mathf.Abs(viewPos[1] - currentObjs[o.Id].transform.position[1]), 2));
+                        Debug.Log("Asked to move reactor this distance: " + dist);
+                        if (dist < 3.0 || o.Label == "calibration-point")
+                        {
+                            existing.transform.localPosition = viewPos;
+                            UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
+                        }
 
+                    }
                 }
+                
             }
 
             //first we build the edge list up

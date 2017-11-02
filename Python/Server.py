@@ -44,6 +44,13 @@ class StateServer:
                 b.mole_fraction.append(np.random.uniform() * (1.0 - np.sum(b.mole_fraction[:j])))
             b.mole_fraction.append(1.0 - np.sum(b.mole_fraction[:4]))
 
+        a = self.graph.nodes[6]
+        a.label = "conditions"
+        a.id = 0
+        a.position.append(0)
+        a.position.append(0)
+        a.weight.append(380)
+        a.weight.append(2)
 
 
         for i in range(2):
@@ -107,6 +114,9 @@ class StateServer:
             a = self.graph.nodes[key]
             if(not a.delete):
                 a.position[1] += 0.01*(1 if self.graph.time%2==0 else -1)
+                if(len(a.weight) > 1):
+                    a.weight[0] += 1
+                    a.weight[1] += 0.05
         await asyncio.sleep(1.0)
         return (self.graph, self.kinetic_system)
 
