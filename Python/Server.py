@@ -31,7 +31,7 @@ class StateServer:
         #create some reactors
         for i in range(6):
             a = self.graph.nodes[i]
-            a.label = 'reactor'
+            a.label = 'cstr' if(i%2==0) else 'pfr'
             a.id = i
             a.position.append((i+1) * 0.15)
             a.position.append((0.25 if(i%2 != 1) else (0.75 - (i%3)*0.15)))

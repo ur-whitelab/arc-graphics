@@ -207,16 +207,17 @@ namespace Rochester.ARTable.Communication
                 else
                 {
                     Debug.Log("o.Label is: " + o.Label);
-                    var currentObjs = managedObjects[o.Label];
+                    Debug.Log("o.Id is " + o.Id);
+                    if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                    {
+                        label = "reactor";
+                    }
+                    var currentObjs = managedObjects[label];
                     GameObject existing;
                     Vector2 objectPos = new Vector2(o.Position[0], o.Position[1]);
                     Vector2 viewPos = camera.UnitToWorld(objectPos);
                     if (!currentObjs.TryGetValue(o.Id, out existing) && !o.Delete)
                     {
-                        if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
-                        {
-                            label = "reactor";
-                        }
                         var placed = (GameObject)GameObject.Instantiate(prefabs[label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
                         currentObjs[o.Id] = placed;
                         UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id + " at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
@@ -234,13 +235,13 @@ namespace Rochester.ARTable.Communication
                                 {
                                     foreach (var idx2 in managedLines[type1][idx1][type2].Keys)
                                     {
-                                        if ((type1 == o.Label && idx1 == o.Id))
+                                        if ((type1 == label && idx1 == o.Id))
                                         {
                                             Destroy(managedLines[type1][idx1][type2][idx2]);
                                             //managedLines[type1][idx1].Clear();
                                             //managedLines[type1].Remove(idx1);
                                         }
-                                        else if ((type2 == o.Label && idx2 == o.Id))
+                                        else if ((type2 == label && idx2 == o.Id))
                                         {
                                             Destroy(managedLines[type1][idx1][type2][idx2]);
                                             //managedLines[type2][idx2].Clear();
@@ -264,7 +265,7 @@ namespace Rochester.ARTable.Communication
 
                     }
                 }
-                
+
             }
 
             //first we build the edge list up
@@ -277,8 +278,14 @@ namespace Rochester.ARTable.Communication
                 string labelA = edge.LabelA;//index of node A type
                 int IdB = edge.IdB;//second node
                 string labelB = edge.LabelB;//index of node B type
-
-
+                if (labelA == "cstr" || labelA == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                {
+                    labelA = "reactor";
+                }
+                if (labelB == "cstr" || labelB == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                {
+                    labelB = "reactor";
+                }
                 //Use keys to get the right dict(s) of gameobjects. Might be the same, that's ok.
                 //UnityEngine.Debug.Log("Type of A: " + labelA + " and type of B: " + labelB);
                 A = managedObjects[labelA][IdA];
