@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Rochester.Physics.Communication;
 using Rochester.ARTable.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Rochester.ARTable.Particles;
 using System.Linq;
 
@@ -26,6 +27,9 @@ namespace Rochester.ARTable.Communication
         private TaskCompletionSource<byte[]> VisionResponseTask, SimulationResponseTask;
         private TaskCompletionSource<string> ScreenshotResponseTask;//, ScreenshotStopResponseTask ;
         new private CameraControls camera;
+
+        private GameObject temperatureValue;
+        private GameObject pressureValue;
 
 
         [Tooltip("Follows ZeroMQ syntax")]
@@ -80,7 +84,11 @@ namespace Rochester.ARTable.Communication
         // Use this for initialization
         void Start()
         {
-
+            //these are the fixed text objects that display the next-placed reactor's temperature and pressure
+            temperatureValue = GameObject.Find("TemperatureValue");
+            Debug.Log("temperatureValue's text field is: " + temperatureValue.GetComponent<Text>().text);
+            pressureValue = GameObject.Find("PressureValue");
+            Debug.Log("temperatureValue's text field is: " + pressureValue.GetComponent<Text>().text);
             //build prefab and edge list dicts
             prefabs = new Dictionary<string, GameObject>();
             managedObjects = new Dictionary<string, Dictionary<int, GameObject>>();
