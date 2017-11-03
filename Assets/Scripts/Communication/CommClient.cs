@@ -102,6 +102,7 @@ namespace Rochester.ARTable.Communication
                 edgeList[CommObjLabels[i]] = new Dictionary<int, HashSet<KeyValuePair<string, int>>>();
                 managedLines[CommObjLabels[i]] = new Dictionary<int, Dictionary<string, Dictionary<int, GameObject>>>();
             }
+            managedObjects["source"][0] = GameObject.Find("source");
             //For rendering lines
             linemat = new Material(Shader.Find("Unlit/Texture"));
 
@@ -206,8 +207,8 @@ namespace Rochester.ARTable.Communication
                 }
                 else
                 {
-                    Debug.Log("o.Label is: " + o.Label);
-                    Debug.Log("o.Id is " + o.Id);
+                    //Debug.Log("o.Label is: " + o.Label);
+                    //Debug.Log("o.Id is " + o.Id);
                     if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
                     {
                         label = "reactor";
@@ -256,11 +257,11 @@ namespace Rochester.ARTable.Communication
                     else
                     {
                         double dist = Mathf.Sqrt(Mathf.Pow(Mathf.Abs(viewPos[0] - currentObjs[o.Id].transform.position[0]), 2) + Mathf.Pow(Mathf.Abs(viewPos[1] - currentObjs[o.Id].transform.position[1]), 2));
-                        Debug.Log("Asked to move reactor this distance: " + dist);
+                        //Debug.Log("Asked to move reactor this distance: " + dist);
                         if (dist < 3.0 || o.Label == "calibration-point")
                         {
                             existing.transform.localPosition = viewPos;
-                            UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
+                            //UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
                         }
 
                     }
@@ -274,6 +275,7 @@ namespace Rochester.ARTable.Communication
             for (int i = 0; i < numEdges; i++)
             {
                 var edge = system.Edges[i];
+                Debug.Log("An edge!: " + edge);
                 int IdA = edge.IdA;//first node
                 string labelA = edge.LabelA;//index of node A type
                 int IdB = edge.IdB;//second node
@@ -288,7 +290,15 @@ namespace Rochester.ARTable.Communication
                 }
                 //Use keys to get the right dict(s) of gameobjects. Might be the same, that's ok.
                 //UnityEngine.Debug.Log("Type of A: " + labelA + " and type of B: " + labelB);
-                A = managedObjects[labelA][IdA];
+                if (IdA == 0)
+                {
+                    A = GameObject.Find("source");
+                }
+                else
+                {
+                    A = managedObjects[labelA][IdA];
+                }
+
                 B = managedObjects[labelB][IdB];
 
                 KeyValuePair<string, int> newEdge = new KeyValuePair<string, int>(labelB, IdB);
@@ -325,37 +335,50 @@ namespace Rochester.ARTable.Communication
                 {
                     foreach (int itemkey in edgeList[key].Keys)//iterate through indices to get each edge from this specific node
                     {
+                        if(managedObjects[key].ContainsKey(itemkey) || itemkey == 0){
+                            if(itemkey != 0)
+                            {
+                                A = managedObjects[key][itemkey];
+                            }
+                            else
+                            {
+                                A = GameObject.Find("source");
+                            }
 
-                        A = managedObjects[key][itemkey];
+                            foreach (var edgePair in edgeList[key][itemkey])
+                            {
+                                if(managedLines[key][itemkey][edgePair.Key][edgePair.Value] != null){
+                                    GameObject line = managedLines[key][itemkey][edgePair.Key][edgePair.Value];
+                                    LineRenderer renderer = line.GetComponent<LineRenderer>();
+                                    if (renderer == null)
+                                    {
+                                        //renderer doesn't yet exist. Attach a linerenderer to A
+                                        renderer = line.AddComponent<LineRenderer>();
+                                        renderer.positionCount = 2;//Need only 2 line coords each.
+                                        renderer.startColor = Color.white;
+                                        renderer.endColor = Color.white;
+                                        renderer.material = linemat;
+                                    }
+                                    BLabel = edgePair.Key;
+                                    BIndex = edgePair.Value;
+                                    if(managedObjects[BLabel].ContainsKey(BIndex)){
+                                        B = managedObjects[BLabel][BIndex];
 
-                        foreach (var edgePair in edgeList[key][itemkey])
-                        {
-                            if(managedLines[key][itemkey][edgePair.Key][edgePair.Value] != null){
-                                GameObject line = managedLines[key][itemkey][edgePair.Key][edgePair.Value];
-                                LineRenderer renderer = line.GetComponent<LineRenderer>();
-                                if (renderer == null)
-                                {
-                                    //renderer doesn't yet exist. Attach a linerenderer to A
-                                    renderer = line.AddComponent<LineRenderer>();
-                                    renderer.positionCount = 2;//Need only 2 line coords each.
-                                    renderer.startColor = Color.white;
-                                    renderer.endColor = Color.white;
-                                    renderer.material = linemat;
+                                        AtoB = B.transform.position - A.transform.position;//get vector between A and B
+                                        reactorBoxSize = A.GetComponent<Renderer>().bounds.size.x;//get offset based on box size (so lines don't *quite* hit reactors)
+                                        //now draw the line between them!
+                                        renderer.SetPosition(0, A.transform.position + (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
+                                        renderer.SetPosition(1, B.transform.position - (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
+                                    }
                                 }
-                                BLabel = edgePair.Key;
-                                BIndex = edgePair.Value;
-                                if(managedObjects[BLabel].ContainsKey(BIndex)){
-                                    B = managedObjects[BLabel][BIndex];
 
-                                AtoB = B.transform.position - A.transform.position;//get vector between A and B
-                                reactorBoxSize = A.GetComponent<Renderer>().bounds.size.x;//get offset based on box size (so lines don't *quite* hit reactors)
-                                //now draw the line between them!
-                                renderer.SetPosition(0, A.transform.position + (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
-                                renderer.SetPosition(1, B.transform.position - (AtoB * reactorBoxSize / (float)1.5)/(AtoB.magnitude));
-                                }
                             }
 
                         }
+                        else{
+                            Debug.Log("The key " + itemkey + " does not exist in managedObjects!");
+                        }
+
                     }
 
                 }
