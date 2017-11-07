@@ -32,21 +32,22 @@ class StateServer:
         for i in range(6):
             a = self.graph.nodes[i]
             a.label = 'cstr' if(i%2==0) else 'pfr'
-            a.id = i
+            a.id = i+1
             a.position.append((i+1) * 0.15)
             a.position.append((0.25 if(i%2 != 1) else (0.75 - (i%3)*0.15)))
 
             b = self.kinetic_system.kinetics.add()
+            b.id = i+1
             b.temperature = 100.0
             b.pressure = 100.0
             b.mole_fraction.append(np.random.uniform() * 0.5)
-            for j in range(1,3):
+            for j in range(1,2):
                 b.mole_fraction.append(np.random.uniform() * (1.0 - np.sum(b.mole_fraction[:j])))
             b.mole_fraction.append(1.0 - np.sum(b.mole_fraction[:4]))
 
         a = self.graph.nodes[6]
         a.label = "conditions"
-        a.id = 0
+        a.id = 7
         a.position.append(0)
         a.position.append(0)
         a.weight.append(380)
@@ -89,6 +90,15 @@ class StateServer:
         e.labelB = "reactor"
         e.weight.append((0))
 
+        e = self.graph.edges[6]
+        e.idA = 5
+        e.labelA = "reactor"
+        e.idB = 6
+        e.labelB = "reactor"
+        e.weight.append((0))
+
+
+
 
 
     async def update_gamestate(self):
@@ -106,9 +116,10 @@ class StateServer:
         #            self.kinetic_system.kinetics[i].mole_fraction[j] = holdout
         #check handling deleted node after some time...
         if(self.graph.time == 10):
+            pass
             self.graph.nodes[5].delete = True
-            del self.graph.edges[4]
-            del self.graph.edges[5]
+            #del self.graph.edges[4]
+            #del self.graph.edges[5]
         print(self.kinetic_system)
         for key in self.graph.nodes:
             a = self.graph.nodes[key]
