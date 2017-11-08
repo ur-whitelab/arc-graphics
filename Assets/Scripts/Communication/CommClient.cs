@@ -33,6 +33,8 @@ namespace Rochester.ARTable.Communication
         private GameObject pressureValue;
         private string pressureText;
 
+        private GameObject colorKey;
+
 
         [Tooltip("Follows ZeroMQ syntax")]
         public string ServerUri = "tcp://127.0.0.1:8076";
@@ -66,6 +68,15 @@ namespace Rochester.ARTable.Communication
                 particleManager = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
             }
 
+            colorKey = GameObject.Find("ColorKey");
+            if(scene.name == "calibration")
+            {
+                colorKey.SetActive(false);
+            }
+            else
+            {
+                colorKey.SetActive(true);
+            }
             //clear objects if we had any
             if (scene.name != "default")
             {
