@@ -33,7 +33,7 @@ namespace Rochester.ARTable.Communication
         private GameObject pressureValue;
         private string pressureText;
 
-        private GameObject colorKey;
+        private GameObject backend;
 
 
         [Tooltip("Follows ZeroMQ syntax")]
@@ -68,14 +68,16 @@ namespace Rochester.ARTable.Communication
                 particleManager = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
             }
 
-            colorKey = GameObject.Find("ColorKey");
+            backend = GameObject.Find("Backend");
+            DontDestroyOnLoad(backend);
             if(scene.name == "calibration")
             {
-                colorKey.SetActive(false);
+                backend.transform.Find("ColorKey").gameObject.SetActive(false);
             }
             else
             {
-                colorKey.SetActive(true);
+                Debug.Log("Attempting to re-enable the ColorKey...");
+                backend.transform.Find("ColorKey").gameObject.SetActive(true);
             }
             //clear objects if we had any
             if (scene.name != "default")
@@ -206,10 +208,10 @@ namespace Rochester.ARTable.Communication
                 var o = system.Nodes[key];
 
                 string label = o.Label;
-                if (label == "conditions")//temperature and pressure updates are passed as a special 'node'
+                if (label == "conditions" && GameObject.Find("Backend/ColorKey/TemperatureValue") != null)//temperature and pressure updates are passed as a special 'node'
                 {
-                    temperatureValue = GameObject.Find("Backend/Canvas/TemperatureValue");
-                    pressureValue = GameObject.Find("Backend/Canvas/PressureValue");
+                    temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
+                    pressureValue = GameObject.Find("Backend/ColorKey/PressureValue");
                     Debug.Log("received conditions message: " + o);
                     temperatureValue.GetComponent<Text>().text = "" + o.Weight[0] + " K";
                     pressureValue.GetComponent<Text>().text = "" + o.Weight[1] + " atm";
