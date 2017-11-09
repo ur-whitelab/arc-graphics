@@ -212,13 +212,13 @@ namespace Rochester.ARTable.Communication
                 {
                     temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
                     pressureValue = GameObject.Find("Backend/ColorKey/PressureValue");
-                    Debug.Log("received conditions message: " + o);
+                    //Debug.Log("received conditions message: " + o);
                     temperatureValue.GetComponent<Text>().text = "" + o.Weight[0] + " K";
                     pressureValue.GetComponent<Text>().text = "" + o.Weight[1] + " atm";
                 }
                 else
                 {
-                    Debug.Log("o.Label is: " + o.Label +". o.Id is " + o.Id);
+                    //Debug.Log("Processing node: " + o);
                     if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
                     {
                         label = "reactor";
@@ -231,7 +231,7 @@ namespace Rochester.ARTable.Communication
                     {
                         var placed = (GameObject)GameObject.Instantiate(prefabs[label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
                         currentObjs[o.Id] = placed;
-                        UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id + " at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
+                        //UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id + " at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
                     }
                     else if (o.Delete)
                     {
@@ -275,9 +275,9 @@ namespace Rochester.ARTable.Communication
             GameObject A, B;
             for (int i = 0; i < numEdges; i++)
             {
-                Debug.Log("Looking at edge index " + i);
+                //Debug.Log("Looking at edge index " + i);
                 var edge = system.Edges[i];
-                Debug.Log("An edge!: " + edge);
+                //Debug.Log("An edge!: " + edge);
                 int IdA = edge.IdA;//first node
                 string labelA = edge.LabelA;//index of node A type
                 int IdB = edge.IdB;//second node
@@ -327,10 +327,12 @@ namespace Rochester.ARTable.Communication
                     edgeList[IdA] = new List<int>(IdB);
                 }
 
-                if(!managedLines.ContainsKey(IdA)){
+                if(!managedLines.ContainsKey(IdA))
+                {
                     managedLines[IdA] =  new Dictionary<int, GameObject>();
                 }
-                if(!managedLines[IdA].ContainsKey(IdB)){
+                if(!managedLines[IdA].ContainsKey(IdB))
+                {
                     managedLines[IdA][IdB] = new GameObject();
                 }
                 //UnityEngine.Debug.Log("Trying to draw line between GameObject type " + labelA + " at " + A.transform.position[0] + ", " + A.transform.position[1] + " and type " + labelB + " at " + B.transform.position[0] + ", " + B.transform.position[1] + ".");
@@ -354,6 +356,10 @@ namespace Rochester.ARTable.Communication
                             else
                             {
                                 A = GameObject.Find("source");
+                            }
+                            if(!managedLines.ContainsKey(IdA))
+                            {
+                                managedLines[IdA] = new Dictionary<int, GameObject>();
                             }
                             if(managedLines[IdA].ContainsKey(IdB))
                             {
@@ -429,7 +435,7 @@ namespace Rochester.ARTable.Communication
             {
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
-                Debug.Log("Got a kinetics message for ID " + rxr.Id + ": " + rxr);//Seeing a kinetics object with ID 0 for some reason...
+                //Debug.Log("Got a kinetics message for ID " + rxr.Id + ": " + rxr);//Seeing a kinetics object with ID 0 for some reason...
                 currentObjs.TryGetValue( rxr.Id, out existing);
                 if(existing)
                 {
