@@ -218,8 +218,7 @@ namespace Rochester.ARTable.Communication
                 }
                 else
                 {
-                    Debug.Log("o.Label is: " + o.Label);
-                    Debug.Log("o.Id is " + o.Id);
+                    Debug.Log("o.Label is: " + o.Label +". o.Id is " + o.Id);
                     if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
                     {
                         label = "reactor";
@@ -356,29 +355,60 @@ namespace Rochester.ARTable.Communication
                             {
                                 A = GameObject.Find("source");
                             }
-                            if(managedLines[IdA][IdB] != null){
-                                GameObject line = managedLines[IdA][IdB];//get the gameobject we're using for this line
-                                LineRenderer renderer = line.GetComponent<LineRenderer>();
-                                if (renderer == null)
+                            if(managedLines[IdA].ContainsKey(IdB))
+                            {
+                                if(managedLines[IdA][IdB] != null)
                                 {
-                                    //renderer doesn't yet exist. Attach a linerenderer
-                                    renderer = line.AddComponent<LineRenderer>();
-                                    renderer.positionCount = 2;//Need only 2 line coords each.
-                                    renderer.startColor = Color.white;
-                                    renderer.endColor = Color.white;
-                                    renderer.material = linemat;
-                                }
-                                if(managedObjects["reactor"].ContainsKey(IdB)){
-                                    B = managedObjects["reactor"][IdB];
+                                    GameObject line = managedLines[IdA][IdB];//get the gameobject we're using for this line
+                                    LineRenderer renderer = line.GetComponent<LineRenderer>();
+                                    if (renderer == null)
+                                    {
+                                        //renderer doesn't yet exist. Attach a linerenderer
+                                        renderer = line.AddComponent<LineRenderer>();
+                                        renderer.positionCount = 2;//Need only 2 line coords each.
+                                        renderer.startColor = Color.white;
+                                        renderer.endColor = Color.white;
+                                        renderer.material = linemat;
+                                    }
+                                    if(managedObjects["reactor"].ContainsKey(IdB)){
+                                        B = managedObjects["reactor"][IdB];
 
-                                    AtoB = B.transform.position - A.transform.position;//get vector between A and B
-                                    //get offset based on box size (so lines don't *quite* hit reactors)
-                                    leftBoxSize = A.GetComponent<Renderer>().bounds.size.x;
-                                    rightBoxSize = B.GetComponent<Renderer>().bounds.size.x;
-                                    //now draw the line between them!
-                                    renderer.SetPosition(0, A.transform.position + (AtoB * leftBoxSize / (float)1.5)/(AtoB.magnitude));//this 1/1.5 prefactor is just an empirically-found scaling that works well
-                                    renderer.SetPosition(1, B.transform.position - (AtoB * rightBoxSize / (float)1.5)/(AtoB.magnitude));//  to give space between end of lines and reactors
+                                        AtoB = B.transform.position - A.transform.position;//get vector between A and B
+                                        //get offset based on box size (so lines don't *quite* hit reactors)
+                                        leftBoxSize = A.GetComponent<Renderer>().bounds.size.x;
+                                        rightBoxSize = B.GetComponent<Renderer>().bounds.size.x;
+                                        //now draw the line between them!
+                                        renderer.SetPosition(0, A.transform.position + (AtoB * leftBoxSize / (float)1.5)/(AtoB.magnitude));//this 1/1.5 prefactor is just an empirically-found scaling that works well
+                                        renderer.SetPosition(1, B.transform.position - (AtoB * rightBoxSize / (float)1.5)/(AtoB.magnitude));//  to give space between end of lines and reactors
+                                    }
                                 }
+                                else//key is there but gameobject isn't. Re-draw line.
+                                {
+                                    managedLines[IdA][IdB] = new GameObject();
+                                    GameObject line = managedLines[IdA][IdB];
+                                    LineRenderer renderer = line.GetComponent<LineRenderer>();
+                                    if (renderer == null)
+                                    {
+                                        //renderer doesn't yet exist. Attach a linerenderer
+                                        renderer = line.AddComponent<LineRenderer>();
+                                        renderer.positionCount = 2;//Need only 2 line coords each.
+                                        renderer.startColor = Color.white;
+                                        renderer.endColor = Color.white;
+                                        renderer.material = linemat;
+                                    }
+                                    if(managedObjects["reactor"].ContainsKey(IdB)){
+                                        B = managedObjects["reactor"][IdB];
+
+                                        AtoB = B.transform.position - A.transform.position;//get vector between A and B
+                                        //get offset based on box size (so lines don't *quite* hit reactors)
+                                        leftBoxSize = A.GetComponent<Renderer>().bounds.size.x;
+                                        rightBoxSize = B.GetComponent<Renderer>().bounds.size.x;
+                                        //now draw the line between them!
+                                        renderer.SetPosition(0, A.transform.position + (AtoB * leftBoxSize / (float)1.5)/(AtoB.magnitude));//this 1/1.5 prefactor is just an empirically-found scaling that works well
+                                        renderer.SetPosition(1, B.transform.position - (AtoB * rightBoxSize / (float)1.5)/(AtoB.magnitude));//  to give space between end of lines and reactors
+                                    }
+                                }
+
                             }
 
                         }
@@ -399,7 +429,7 @@ namespace Rochester.ARTable.Communication
             {
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
-                Debug.Log("Got a kinetics message for ID " + rxr.Id);//Seeing a kinetics object with ID 0 for some reason...
+                Debug.Log("Got a kinetics message for ID " + rxr.Id + ": " + rxr);//Seeing a kinetics object with ID 0 for some reason...
                 currentObjs.TryGetValue( rxr.Id, out existing);
                 if(existing)
                 {
