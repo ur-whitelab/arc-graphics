@@ -115,8 +115,7 @@ namespace Rochester.ARTable.Communication
             }
             managedObjects["source"][0] = GameObject.Find("source");
             //For rendering lines
-            linemat = new Material(Shader.Find("Unlit/Texture"));
-
+            linemat = Resources.Load("ReactorLineMaterial", typeof(Material)) as Material;
             //set-up socket and poller
             VisionClient = new SubscriberSocket();
             SimulationClient = new SubscriberSocket();
@@ -259,7 +258,7 @@ namespace Rochester.ARTable.Communication
                     {
                         double dist = Mathf.Sqrt(Mathf.Pow(Mathf.Abs(viewPos[0] - currentObjs[o.Id].transform.position[0]), 2) + Mathf.Pow(Mathf.Abs(viewPos[1] - currentObjs[o.Id].transform.position[1]), 2));
                         //Debug.Log("Asked to move reactor this distance: " + dist);
-                        if (dist < 3.0 || o.Label == "calibration-point")
+                        if (dist < 13.0 || o.Label == "calibration-point")
                         {
                             existing.transform.localPosition = viewPos;
                             //UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
@@ -272,6 +271,7 @@ namespace Rochester.ARTable.Communication
 
             //first we build the edge list up
             int numEdges = system.Edges.Count;
+            Debug.Log("System.Edges was " + system.Edges);
             GameObject A, B;
             for (int i = 0; i < numEdges; i++)
             {
@@ -372,9 +372,9 @@ namespace Rochester.ARTable.Communication
                                         //renderer doesn't yet exist. Attach a linerenderer
                                         renderer = line.AddComponent<LineRenderer>();
                                         renderer.positionCount = 2;//Need only 2 line coords each.
-                                        renderer.startColor = Color.white;
-                                        renderer.endColor = Color.white;
                                         renderer.material = linemat;
+                                        renderer.startColor = new Color(110f/255f,110f/255f,200f/255f,0.5f);
+                                        renderer.endColor = renderer.startColor;
                                     }
                                     if(managedObjects["reactor"].ContainsKey(IdB)){
                                         B = managedObjects["reactor"][IdB];
@@ -435,7 +435,7 @@ namespace Rochester.ARTable.Communication
             {
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
-                //Debug.Log("Got a kinetics message for ID " + rxr.Id + ": " + rxr);//Seeing a kinetics object with ID 0 for some reason...
+                Debug.Log("Got a kinetics message for ID " + rxr.Id + ": " + rxr);//Seeing a kinetics object with ID 0 for some reason...
                 currentObjs.TryGetValue( rxr.Id, out existing);
                 if(existing)
                 {
