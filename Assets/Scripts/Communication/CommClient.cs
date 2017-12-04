@@ -448,10 +448,21 @@ namespace Rochester.ARTable.Communication
                         count++;
                         sum += molefrac;
                     }
-                    for (int i = 0; i < count; i++)
+                    if(sum > 0)
                     {
+                        for (int i = 0; i < count; i++)
+                        {
                         rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i] / sum));
                         Debug.Log("Setting fraction " + i + " of reactor " + rxr.Id + " to " + rxr.MoleFraction[i]/sum);
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("Got a reactor message with all zero concentrations; using default fractions: " + rxr);
+                        for (int i = 0; i < count; i++)
+                        {
+                            rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: ((float)1 / (float)count));
+                        }
                     }
                 }
                 else

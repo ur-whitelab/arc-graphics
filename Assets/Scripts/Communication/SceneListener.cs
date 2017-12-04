@@ -28,7 +28,7 @@ namespace Rochester.ARTable.Communication
         void Start()
         {
 
-            //set-up socket and poller      
+            //set-up socket and poller
             SceneClient = new SubscriberSocket();
             SceneClient.Subscribe("vision-mode");//vision-update, but "any" for testing
             UnityEngine.Debug.Log("set up the subscription at " + server_uri);
@@ -59,9 +59,9 @@ namespace Rochester.ARTable.Communication
             }
             else
             {
-                
+
                 //else //it's a valid scene, so switch to it
-                
+
                 {
                     SceneManager.LoadScene(name, LoadSceneMode.Single);
                 }
@@ -88,6 +88,8 @@ namespace Rochester.ARTable.Communication
                 //this is how you reset?
                 SceneResponseTask = new TaskCompletionSource<string>();
             }
+            if (Input.GetKey("escape"))//actually exit if we need to...
+                Application.Quit();
         }
 
         void OnApplicationQuit()//cleanup
