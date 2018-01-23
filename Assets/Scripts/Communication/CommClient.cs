@@ -44,6 +44,7 @@ namespace Rochester.ARTable.Communication
         public List<GameObject> CommObjPrefabs;
         private Dictionary<string, GameObject> prefabs;
         public Renderer rend;
+        public bool training;
 
         private ParticleManager particleManager;
         private Material linemat;
@@ -159,6 +160,17 @@ namespace Rochester.ARTable.Communication
         // Update is called once per frame
         void Update()
         {
+            if(Input.GetKeyDown("l")){
+                training = !training;
+                if (training)
+                {
+                    backend.transform.Find("ColorKey").gameObject.SetActive(false);
+                }
+                else
+                {
+                    backend.transform.Find("ColorKey").gameObject.SetActive(true);
+                }
+            }
             if (VisionResponseTask.Task.IsCompleted )
             {
                 //UnityEngine.Debug.Log("THE MESSAGE TASK RESULT WAS " + VisionResponseTask.Task.Result);
