@@ -1,12 +1,12 @@
 import zmq
 import zmq.asyncio
 import asyncio
-import State_pb2
+#import State_pb2
 import kinetics_pb2
 import graph_pb2
 import numpy as np
 
-'''This file is used for testing Unity's ability to receive and deal with messages without involving the vision or C&C code.'''
+'''This file is a dummy server used for testing Unity's ability to receive and deal with messages without involving the vision or C&C code.'''
 
 class StateServer:
 
@@ -31,7 +31,7 @@ class StateServer:
         #create some reactors
         for i in range(6):
             a = self.graph.nodes[i]
-            a.label = 'cstr' if(i%2==0) else 'pfr'
+            a.label = 'cstr' #if(i%2==0) else 'pfr'
             a.id = i+1
             a.position.append((i+1) * 0.15)
             a.position.append((0.25 if(i%2 != 1) else (0.75 - (i%3)*0.15)))
@@ -41,7 +41,7 @@ class StateServer:
             b.temperature = 100.0
             b.pressure = 100.0
             b.mole_fraction.append(np.random.uniform() * 0.5)
-            for j in range(1,2):
+            for j in range(1,3):
                 b.mole_fraction.append(np.random.uniform() * (1.0 - np.sum(b.mole_fraction[:j])))
             b.mole_fraction.append(1.0 - np.sum(b.mole_fraction[:4]))
 
@@ -57,44 +57,44 @@ class StateServer:
         for i in range(2):
             e = self.graph.edges[i]
             e.idA = i
-            e.labelA = "reactor"
+            e.labelA = "cstr"
             e.idB = i+1
-            e.labelB = "reactor"
+            e.labelB = "cstr"
             e.weight.append((0))
 
         e = self.graph.edges[2]
         e.idA = 1
-        e.labelA = "reactor"
+        e.labelA = "cstr"
         e.idB = 3
-        e.labelB = "reactor"
+        e.labelB = "cstr"
         e.weight.append((0))
 
         e = self.graph.edges[3]
         e.idA = 2
-        e.labelA = "reactor"
+        e.labelA = "cstr"
         e.idB = 4
-        e.labelB = "reactor"
+        e.labelB = "cstr"
         e.weight.append((0))
 
         e = self.graph.edges[4]
         e.idA = 3
-        e.labelA = "reactor"
+        e.labelA = "cstr"
         e.idB = 5
-        e.labelB = "reactor"
+        e.labelB = "cstr"
         e.weight.append((0))
 
         e = self.graph.edges[5]
         e.idA = 4
-        e.labelA = "reactor"
+        e.labelA = "cstr"
         e.idB = 5
-        e.labelB = "reactor"
+        e.labelB = "cstr"
         e.weight.append((0))
 
         e = self.graph.edges[6]
         e.idA = 5
-        e.labelA = "reactor"
+        e.labelA = "cstr"
         e.idB = 6
-        e.labelB = "reactor"
+        e.labelB = "cstr"
         e.weight.append((0))
 
 
@@ -120,7 +120,7 @@ class StateServer:
             self.graph.nodes[5].delete = True
             #del self.graph.edges[4]
             #del self.graph.edges[5]
-        print(self.kinetic_system)
+        #print(self.kinetic_system)
         for key in self.graph.nodes:
             a = self.graph.nodes[key]
             if(not a.delete):
