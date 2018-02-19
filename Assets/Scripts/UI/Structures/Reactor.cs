@@ -32,11 +32,26 @@ namespace Rochester.ARTable.Structures
             int num_wedges = rend.material.GetInt("_NumWedges");
             float frac = 0;
             float sum = 0;
+            float prev_frac = 1;
+            float next_frac = 1;
             float offset = Mathf.PI;//need to add half a circle to rendre in right place
             for(int i = 0; i < num_wedges; i++)
             {
+                offset = Mathf.PI;
                 frac = rend.material.GetFloat("_Fraction" + (i + 1));
                 sum += frac/(float)2.0;//get this center
+                if(prev_frac *100 < 3.0 && frac * 100 < 3.0)
+                {
+                    offset += Mathf.PI * (float)0.03;//compensate away
+                }
+                if(i < num_wedges - 1)
+                {
+                    next_frac = rend.material.GetFloat("_Fraction" + (i + 2));
+                }
+                if(frac * 100 < 3.0 && next_frac * 100 < 3.0)
+                {
+                    offset -= Mathf.PI * (float)0.03;//compensate away and treat the triple-sandwich
+                }
                 //SET POSITIONS OF TEXTS HERE
                 if (!fraction_dict.ContainsKey(i))
                 {
@@ -54,6 +69,8 @@ namespace Rochester.ARTable.Structures
                     existing_text.GetComponent<Text>().text = "" + (frac * 100).ToString("F2") + "%";
                 }
                 sum += frac / (float)2.0;
+                prev_frac = frac;
+                next_frac = 1;
             }
             for(int i = 0; i < fraction_dict.Count; i++)
             {
