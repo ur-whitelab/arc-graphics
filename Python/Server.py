@@ -123,11 +123,25 @@ class StateServer:
         #print(self.kinetic_system)
         for key in self.graph.nodes:
             a = self.graph.nodes[key]
+            #print("key is {}".format(key))
+            #if(key > 0):
+            #    b = self.kinetic_system.kinetics[key-1]
             if(not a.delete):
                 a.position[1] += 0.01*(1 if self.graph.time%2==0 else -1)
                 if(len(a.weight) > 1):
                     a.weight[0] += 1
+                    #b.temperature = a.weight[0]
                     a.weight[1] += 0.05
+                    #b.pressure = a.weight[1]
+        if(self.graph.time == 20):
+            a = self.graph.nodes[8]
+            a.label = "cstr"
+            a.id = 9
+            a.position.append(0.5)
+            a.position.append(0.5)
+            a.weight.append(380)
+            a.weight.append(2)
+
         await asyncio.sleep(1.0)
         return (self.graph, self.kinetic_system)
 

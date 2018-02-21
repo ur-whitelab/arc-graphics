@@ -241,6 +241,11 @@ namespace Rochester.ARTable.Communication
                     if (!currentObjs.TryGetValue(o.Id, out existing) && !o.Delete)
                     {
                         var placed = (GameObject)GameObject.Instantiate(prefabs[label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
+                        if(label == "reactor")
+                        {
+                            Renderer rend = placed.GetComponent<MeshRenderer>();
+                            rend.material.SetFloat("_Temperature", value: float.Parse(temperatureValue.GetComponent<Text>().text.Split(" "[0])[0]));
+                        }
                         currentObjs[o.Id] = placed;
                         //UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id + " at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
                     }
@@ -475,7 +480,7 @@ namespace Rochester.ARTable.Communication
                         {
                             rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: ((float)1 / (float)count));
                         }
-                    }
+                    } 
                 }
                 else
                 {

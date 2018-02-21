@@ -9,6 +9,7 @@ namespace Rochester.ARTable.Structures
     {
         private Dictionary<int, Transform> fraction_dict;
         private float r;
+        private int temperature;
 
         // Use this for initialization
         void Start()
@@ -23,12 +24,23 @@ namespace Rochester.ARTable.Structures
             rend.material.SetFloat("_Fraction2", 0.25f);
             rend.material.SetFloat("_Fraction3", 0.25f);
             rend.material.SetFloat("_Fraction4", 0.25f);
+            GameObject temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
+            Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
+            temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text;//default to currently-displayed temperature -- should actually only need this? 
+        }
+
+        public void set_temp(int temp)
+        {
+            temperature = temp;
         }
 
         // Update is called once per frame
         void Update()
         {
             Renderer rend = this.GetComponent<Renderer>();
+            float temp = rend.material.GetFloat("_Temperature");//get the temp anyway in case we got it wrong the first time...
+            Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
+            temp_canvas.GetComponent<Text>().text = "" + (int)temp + " K";
             int num_wedges = rend.material.GetInt("_NumWedges");
             float frac = 0;
             float sum = 0;

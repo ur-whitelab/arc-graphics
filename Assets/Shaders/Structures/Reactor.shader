@@ -2,6 +2,7 @@
 
  Shader "Custom/WedgeCircle" {
 	 Properties{
+		 _Temperature("Temp of the Reactor", Float) = 0.0
 		 _NumWedges("Number of Sections", Int) = 4
 		 //have to do these out manually due to shader restrictions
 		 _Fraction1("Mole fraction species 1", Float) = 0.0
