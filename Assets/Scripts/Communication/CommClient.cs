@@ -30,8 +30,8 @@ namespace Rochester.ARTable.Communication
 
         private GameObject temperatureValue;
         private string temperatureText;
-        private GameObject pressureValue;
-        private string pressureText;
+        private GameObject timeValue;
+        private string timeText;
 
         private GameObject backend;
 
@@ -50,12 +50,13 @@ namespace Rochester.ARTable.Communication
         private Material linemat;
 
         private float delay;
-
+        private bool calibrating;
 
         void Awake()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
             DontDestroyOnLoad(gameObject);
+            calibrating = false;
         }
 
         // called second
@@ -73,10 +74,12 @@ namespace Rochester.ARTable.Communication
             DontDestroyOnLoad(backend);
             if(scene.name == "calibration")
             {
+                calibrating = true;
                 backend.transform.Find("ColorKey").gameObject.SetActive(false);
             }
             else
             {
+                calibrating = false;
                 Debug.Log("Attempting to re-enable the ColorKey...");
                 backend.transform.Find("ColorKey").gameObject.SetActive(true);
             }
@@ -102,7 +105,6 @@ namespace Rochester.ARTable.Communication
         {
             //these are the fixed text objects that display the next-placed reactor's temperature and pressure
             temperatureValue = GameObject.Find("TemperatureValue");
-            pressureValue = GameObject.Find("PressureValue");
             //Debug.Log("temperatureValue's text field is: " + temperatureText);
             //Debug.Log("temperatureValue's text field is: " + pressureText);
             //build prefab and edge list dicts
@@ -181,7 +183,7 @@ namespace Rochester.ARTable.Communication
                 VisionResponseTask = new TaskCompletionSource<byte[]>();
             }
 
-            if (SimulationResponseTask.Task.IsCompleted)
+            if (SimulationResponseTask.Task.IsCompleted && !calibrating)
             {
                 SystemKinetics kinetics = SystemKinetics.Parser.ParseFrom(SimulationResponseTask.Task.Result);
                 //UnityEngine.Debug.Log("Received message " + kinetics + " from kinetics.");
@@ -222,10 +224,8 @@ namespace Rochester.ARTable.Communication
                 if (label == "conditions" && GameObject.Find("Backend/ColorKey/TemperatureValue") != null)//temperature and pressure updates are passed as a special 'node'
                 {
                     temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
-                    pressureValue = GameObject.Find("Backend/ColorKey/PressureValue");
                     //Debug.Log("received conditions message: " + o);
                     temperatureValue.GetComponent<Text>().text = "" + o.Weight[0] + " K";
-                    pressureValue.GetComponent<Text>().text = "" + o.Weight[1] + " atm";
                 }
                 else
                 {
@@ -234,6 +234,7 @@ namespace Rochester.ARTable.Communication
                     {
                         label = "reactor";
                     }
+                    Debug.Log("Received a node with label " + label);
                     var currentObjs = managedObjects[label];
                     GameObject existing;
                     Vector2 objectPos = new Vector2(o.Position[0], o.Position[1]);
@@ -448,6 +449,9 @@ namespace Rochester.ARTable.Communication
             int rxrcount = 1;//start at 1 because "source" has special ID 0
             int count;
             float sum;
+            long system_time = kinetics.Time;
+            timeValue = GameObject.Find("Backend/ColorKey/TimeValue");
+            timeValue.GetComponent<Text>().text = "" + system_time + " s";
             foreach(var rxr in kinetics.Kinetics)
             {
                 var currentObjs = managedObjects["reactor"];
@@ -480,7 +484,7 @@ namespace Rochester.ARTable.Communication
                         {
                             rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: ((float)1 / (float)count));
                         }
-                    } 
+                    }
                 }
                 else
                 {
