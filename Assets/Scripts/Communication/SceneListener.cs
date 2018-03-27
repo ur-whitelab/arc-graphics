@@ -84,6 +84,9 @@ namespace Rochester.ARTable.Communication
                 //UnityEngine.Debug.Log("THE MESSAGE TASK RESULT WAS " + SceneResponseTask.Task.Result);
                 string newscene = SceneResponseTask.Task.Result;//I think this is how it works?
                 UnityEngine.Debug.Log("Received message " + newscene + " from scene server.");
+                if(newscene == "darkflow"){
+                    newscene = "detection";//just use detection for darkflow scene
+                }
                 OpenScene(newscene);
                 //this is how you reset?
                 SceneResponseTask = new TaskCompletionSource<string>();

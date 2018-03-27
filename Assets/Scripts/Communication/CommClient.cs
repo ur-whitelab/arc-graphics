@@ -65,7 +65,7 @@ namespace Rochester.ARTable.Communication
             //get camera functions
             camera = GameObject.Find("Main Camera").GetComponent<CameraControls>();
             particleManager = null;
-            if (scene.name == "detection")
+            if (scene.name == "detection" || scene.name == "darkflow")
             {
                 particleManager = GameObject.Find("ParticleManager").GetComponent<ParticleManager>();
             }
@@ -276,11 +276,11 @@ namespace Rochester.ARTable.Communication
                     {
                         double dist = Mathf.Sqrt(Mathf.Pow(Mathf.Abs(viewPos[0] - currentObjs[o.Id].transform.position[0]), 2) + Mathf.Pow(Mathf.Abs(viewPos[1] - currentObjs[o.Id].transform.position[1]), 2));
                         //Debug.Log("Asked to move reactor this distance: " + dist);
-                        if (dist < 13.0 || o.Label == "calibration-point")
-                        {
+                        //if (dist < 13.0 || o.Label == "calibration-point")
+                       // {
                             existing.transform.localPosition = viewPos;
                             //UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
-                        }
+                        //}
 
                     }
                 }
