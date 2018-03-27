@@ -162,7 +162,8 @@ namespace Rochester.ARTable.Communication
         // Update is called once per frame
         void Update()
         {
-            if(Input.GetKeyDown("l")){
+            if(Input.GetKeyDown("l"))
+            {
                 training = !training;
                 if (training)
                 {
@@ -171,6 +172,18 @@ namespace Rochester.ARTable.Communication
                 else
                 {
                     backend.transform.Find("ColorKey").gameObject.SetActive(true);
+                }
+            }
+            if(Input.GetKeyDown(KeyCode.Backspace))
+            {
+                List<KeyValuePair<int, string>> toDelete = new List<KeyValuePair<int, string>>();
+                foreach(var label in managedObjects.Keys){
+                    foreach(int id in managedObjects[label].Keys){
+                        toDelete.Add(new KeyValuePair<int,string>(id, label));
+                    }
+                }
+                foreach(var pair in toDelete){
+                    deleteObject(pair.Key, pair.Value);
                 }
             }
             if (VisionResponseTask.Task.IsCompleted )
@@ -214,6 +227,38 @@ namespace Rochester.ARTable.Communication
             ScreenshotResponseTask = new TaskCompletionSource<string>();
         }
 
+
+        private void deleteObject(int Id, string label){
+            GameObject existing;
+            var currentObjs = getManagedObjects(label);
+            currentObjs.TryGetValue(Id, out existing);
+            Destroy(existing);
+            //scan dict of line gameobjects for the lines attached to this node, destroy them.
+            foreach (var idx1 in managedLines.Keys)
+            {
+                if(managedLines[idx1].ContainsKey(Id)){
+                    Destroy(managedLines[idx1][Id]);//destroy all lines that go TO deleted node
+                    managedLines[idx1].Remove(Id);//take that key out of this dict.
+                }
+            }
+            if(managedLines.ContainsKey(Id))
+                {
+                    foreach(var idx2 in managedLines[Id].Keys)
+                    {
+                        Destroy(managedLines[Id][idx2]);//destroy all lines that go FROM deleted node
+                    }
+                    managedLines.Remove(Id);
+                }
+            currentObjs.Remove(Id);
+        }
+
+        private Dictionary<int, GameObject> getManagedObjects(string label){
+            if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+            {
+                label = "reactor";
+            }
+            return managedObjects[label];
+        }
         private void synchronizeGraph(Graph system)
         {
             foreach(var key in system.Nodes.Keys)
@@ -234,8 +279,7 @@ namespace Rochester.ARTable.Communication
                     {
                         label = "reactor";
                     }
-                    Debug.Log("Received a node with label " + label);
-                    var currentObjs = managedObjects[label];
+                    var currentObjs = getManagedObjects(o.Label);
                     GameObject existing;
                     Vector2 objectPos = new Vector2(o.Position[0], o.Position[1]);
                     Vector2 viewPos = camera.UnitToWorld(objectPos);
@@ -252,25 +296,7 @@ namespace Rochester.ARTable.Communication
                     }
                     else if (o.Delete)
                     {
-                        currentObjs.TryGetValue(o.Id, out existing);
-                        Destroy(existing);
-                        //scan dict of line gameobjects for the lines attached to this node, destroy them.
-                        foreach (var idx1 in managedLines.Keys)
-                        {
-                            if(managedLines[idx1].ContainsKey(o.Id)){
-                                Destroy(managedLines[idx1][o.Id]);//destroy all lines that go TO deleted node
-                                managedLines[idx1].Remove(o.Id);//take that key out of this dict.
-                            }
-                        }
-                        if(managedLines.ContainsKey(o.Id))
-                            {
-                                foreach(var idx2 in managedLines[o.Id].Keys)
-                                {
-                                    Destroy(managedLines[o.Id][idx2]);//destroy all lines that go FROM deleted node
-                                }
-                                managedLines.Remove(o.Id);
-                            }
-                        currentObjs.Remove(o.Id);
+                        deleteObject(o.Id, label);
                     }
                     else
                     {
