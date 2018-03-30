@@ -3,13 +3,13 @@
  Shader "Custom/WedgeCircle" {
 	 Properties{
 		 _Temperature("Temp of the Reactor", Float) = 0.0
-		 _NumWedges("Number of Sections", Int) = 4
+		 _NumWedges("Number of Sections", Int) = 5
 		 //have to do these out manually due to shader restrictions
 		 _Fraction1("Mole fraction species 1", Float) = 0.0
 		 _Fraction2("Mole fraction species 2", Float) = 0.0
 		 _Fraction3("Mole fraction species 3", Float) = 0.0
 		 _Fraction4("Mole fraction species 4", Float) = 0.0
-		 _Fraction5("Mole fraction species 5", Float) = 0.0
+		 _Fraction5("Mole fraction species 5", Float) = 1.0
 		 _Fraction6("Mole fraction species 6", Float) = 0.0
      }
      SubShader {
@@ -63,7 +63,7 @@
 				 colors[1] = float4(228.0f / 255.0f, 26.0f / 255.0f, 28.0f / 255.0f, 0.6); //red
 				 colors[2] = float4(77.0f / 255.0f, 175.0f / 255.0f, 74.0f / 255.0f, 0.6); //green
 				 colors[3] = float4(55.0f / 255.0f, 126.0f / 255.0f, 184.0f / 255.0f, 0.6); //blue
-				 colors[4] = float4(255.0f / 255.0f, 127.0f / 255.0f, 0, 0.6); //orange?
+				 colors[4] = float4(80.0f / 255.0f, 80.0f / 255.0f, 80.0f / 255.0f, 0.6); //gray for when we have no fractions
 				 colors[5] = float4(255.0f / 255.0f, 255.0f / 255.0f, 51.0f / 255.0f, 0.6);
 				 colors[6] = float4(166.0f / 255.0f, 86.0f / 255.0f, 40.0f / 255.0f, 0.6);
 

@@ -19,14 +19,15 @@ namespace Rochester.ARTable.Structures
             //update color proportions
             Renderer rend = this.GetComponent<Renderer>();
             rend.material.shader = Shader.Find("Custom/WedgeCircle");
-            rend.material.SetInt("_NumWedges", 4); //default to 4 species, in quarters 
-            rend.material.SetFloat("_Fraction1", 0.25f);
-            rend.material.SetFloat("_Fraction2", 0.25f);
-            rend.material.SetFloat("_Fraction3", 0.25f);
-            rend.material.SetFloat("_Fraction4", 0.25f);
+            rend.material.SetInt("_NumWedges", 5); //default to 4 species, in quarters
+            rend.material.SetFloat("_Fraction1", 0.0f);
+            rend.material.SetFloat("_Fraction2", 0.0f);
+            rend.material.SetFloat("_Fraction3", 0.0f);
+            rend.material.SetFloat("_Fraction4", 0.0f);
+            rend.material.SetFloat("_Fraction5", 1.0f);
             GameObject temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
-            temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text;//default to currently-displayed temperature -- should actually only need this? 
+            temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text;//default to currently-displayed temperature -- should actually only need this?
         }
 
         public void set_temp(int temp)

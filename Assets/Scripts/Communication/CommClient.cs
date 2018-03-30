@@ -80,7 +80,7 @@ namespace Rochester.ARTable.Communication
             else
             {
                 calibrating = false;
-                Debug.Log("Attempting to re-enable the ColorKey...");
+                //Debug.Log("Attempting to re-enable the ColorKey...");
                 backend.transform.Find("ColorKey").gameObject.SetActive(true);
             }
             //clear objects if we had any
@@ -315,7 +315,7 @@ namespace Rochester.ARTable.Communication
 
             //first we build the edge list up
             int numEdges = system.Edges.Count;
-            Debug.Log("System.Edges was " + system.Edges);
+            //Debug.Log("System.Edges was " + system.Edges);
             GameObject A, B;
             for (int i = 0; i < numEdges; i++)
             {
@@ -475,14 +475,14 @@ namespace Rochester.ARTable.Communication
             int rxrcount = 1;//start at 1 because "source" has special ID 0
             int count;
             float sum;
-            long system_time = kinetics.Time;
+            float system_time = (float)kinetics.Time / (float) 3.25;//divide by 3.25 to go from FPS to accelerated seconds
             timeValue = GameObject.Find("Backend/ColorKey/TimeValue");
-            timeValue.GetComponent<Text>().text = "" + system_time + " s";
+            timeValue.GetComponent<Text>().text = System.String.Format("{0:0.00} s", system_time);
             foreach(var rxr in kinetics.Kinetics)
             {
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
-                Debug.Log("Got a kinetics message for ID " + rxr.Id + ": " + rxr);//Seeing a kinetics object with ID 0 for some reason...
+                //Debug.Log("Got a kinetics message for ID " + rxr.Id + ": " + rxr);//Seeing a kinetics object with ID 0 for some reason...
                 currentObjs.TryGetValue( rxr.Id, out existing);
                 if(existing)
                 {
@@ -497,24 +497,27 @@ namespace Rochester.ARTable.Communication
                     }
                     if(sum > 0)
                     {
+                        rend.material.SetInt("_NumWedges", value:count);
                         for (int i = 0; i < count; i++)
                         {
                         rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i] / sum));
-                        Debug.Log("Setting fraction " + i + " of reactor " + rxr.Id + " to " + rxr.MoleFraction[i]/sum);
+                        //Debug.Log("Setting fraction " + i + " of reactor " + rxr.Id + " to " + rxr.MoleFraction[i]/sum);
                         }
                     }
                     else
                     {
-                        Debug.Log("Got a reactor message with all zero concentrations; using default fractions: " + rxr);
+                        //Debug.Log("Got a reactor message with all zero concentrations; using default fractions: " + rxr);
+                        rend.material.SetInt("_NumWedges", value:5);
                         for (int i = 0; i < count; i++)
                         {
-                            rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: ((float)1 / (float)count));
+                            rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: ((float)0));
                         }
+                        rend.material.SetFloat("_Fraction5", value: ((float)1));
                     }
                 }
                 else
                 {
-                    Debug.Log("Got a reactor that doesn't exist! rxrcount = " + rxrcount);
+                    Debug.Log("Got a reactor that doesn't exist! rxrcount = " + rxrcount +", rxr ID = " + rxr.Id);
                 }
 
                 rxrcount++;
