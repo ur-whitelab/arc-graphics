@@ -80,7 +80,6 @@ namespace Rochester.ARTable.Communication
             else
             {
                 calibrating = false;
-                //Debug.Log("Attempting to re-enable the ColorKey...");
                 backend.transform.Find("ColorKey").gameObject.SetActive(true);
             }
             //clear objects if we had any
@@ -105,8 +104,6 @@ namespace Rochester.ARTable.Communication
         {
             //these are the fixed text objects that display the next-placed reactor's temperature and pressure
             temperatureValue = GameObject.Find("TemperatureValue");
-            //Debug.Log("temperatureValue's text field is: " + temperatureText);
-            //Debug.Log("temperatureValue's text field is: " + pressureText);
             //build prefab and edge list dicts
             prefabs = new Dictionary<string, GameObject>();
             managedObjects = new Dictionary<string, Dictionary<int, GameObject>>();
@@ -188,9 +185,7 @@ namespace Rochester.ARTable.Communication
             }
             if (VisionResponseTask.Task.IsCompleted )
             {
-                //UnityEngine.Debug.Log("THE MESSAGE TASK RESULT WAS " + VisionResponseTask.Task.Result);
                 Graph system = Graph.Parser.ParseFrom(VisionResponseTask.Task.Result);
-                //UnityEngine.Debug.Log("Received message " +  system + " from graph.");
                 synchronizeGraph(system);
                 //this is how you reset?
                 VisionResponseTask = new TaskCompletionSource<byte[]>();
@@ -199,7 +194,6 @@ namespace Rochester.ARTable.Communication
             if (SimulationResponseTask.Task.IsCompleted && !calibrating)
             {
                 SystemKinetics kinetics = SystemKinetics.Parser.ParseFrom(SimulationResponseTask.Task.Result);
-                //UnityEngine.Debug.Log("Received message " + kinetics + " from kinetics.");
                 synchronizeSimulation(kinetics);
                 SimulationResponseTask = new TaskCompletionSource<byte[]>();
             }
@@ -269,12 +263,10 @@ namespace Rochester.ARTable.Communication
                 if (label == "conditions" && GameObject.Find("Backend/ColorKey/TemperatureValue") != null)//temperature and pressure updates are passed as a special 'node'
                 {
                     temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
-                    //Debug.Log("received conditions message: " + o);
                     temperatureValue.GetComponent<Text>().text = "" + o.Weight[0] + " K";
                 }
                 else
                 {
-                    //Debug.Log("Processing node: " + o);
                     if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
                     {
                         label = "reactor";
@@ -292,7 +284,6 @@ namespace Rochester.ARTable.Communication
                             rend.material.SetFloat("_Temperature", value: float.Parse(temperatureValue.GetComponent<Text>().text.Split(" "[0])[0]));
                         }
                         currentObjs[o.Id] = placed;
-                        //UnityEngine.Debug.Log("New object " + o.Label + ":" + o.Id + " at position " + viewPos.x + ", " + viewPos.y + "(" + objectPos.x + ", " + objectPos.y + ")");
                     }
                     else if (o.Delete)
                     {
@@ -301,13 +292,7 @@ namespace Rochester.ARTable.Communication
                     else
                     {
                         double dist = Mathf.Sqrt(Mathf.Pow(Mathf.Abs(viewPos[0] - currentObjs[o.Id].transform.position[0]), 2) + Mathf.Pow(Mathf.Abs(viewPos[1] - currentObjs[o.Id].transform.position[1]), 2));
-                        //Debug.Log("Asked to move reactor this distance: " + dist);
-                        //if (dist < 13.0 || o.Label == "calibration-point")
-                       // {
                             existing.transform.localPosition = viewPos;
-                            //UnityEngine.Debug.Log("Moving object " + o.Label + ":" + o.Id + " to (" + viewPos.x + ", " + viewPos.y + ")");
-                        //}
-
                     }
                 }
 
@@ -315,13 +300,10 @@ namespace Rochester.ARTable.Communication
 
             //first we build the edge list up
             int numEdges = system.Edges.Count;
-            //Debug.Log("System.Edges was " + system.Edges);
             GameObject A, B;
             for (int i = 0; i < numEdges; i++)
             {
-                //Debug.Log("Looking at edge index " + i);
                 var edge = system.Edges[i];
-                //Debug.Log("An edge!: " + edge);
                 int IdA = edge.IdA;//first node
                 string labelA = edge.LabelA;//index of node A type
                 int IdB = edge.IdB;//second node
@@ -335,7 +317,6 @@ namespace Rochester.ARTable.Communication
                     labelB = "reactor";
                 }
                 //Use keys to get the right dict(s) of gameobjects. Might be the same, that's ok.
-                //UnityEngine.Debug.Log("Type of A: " + labelA + " and type of B: " + labelB);
                 if (IdA == 0)
                 {
                     A = GameObject.Find("source");
@@ -379,7 +360,7 @@ namespace Rochester.ARTable.Communication
                 {
                     managedLines[IdA][IdB] = new GameObject();
                 }
-                //UnityEngine.Debug.Log("Trying to draw line between GameObject type " + labelA + " at " + A.transform.position[0] + ", " + A.transform.position[1] + " and type " + labelB + " at " + B.transform.position[0] + ", " + B.transform.position[1] + ".");
+
             }
             string BLabel;
             int BIndex;
@@ -482,7 +463,6 @@ namespace Rochester.ARTable.Communication
             {
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
-                //Debug.Log("Got a kinetics message for ID " + rxr.Id + ": " + rxr);//Seeing a kinetics object with ID 0 for some reason...
                 currentObjs.TryGetValue( rxr.Id, out existing);
                 if(existing)
                 {
@@ -500,13 +480,11 @@ namespace Rochester.ARTable.Communication
                         rend.material.SetInt("_NumWedges", value:count);
                         for (int i = 0; i < count; i++)
                         {
-                        rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i] / sum));
-                        //Debug.Log("Setting fraction " + i + " of reactor " + rxr.Id + " to " + rxr.MoleFraction[i]/sum);
+                        rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i]));
                         }
                     }
                     else
                     {
-                        //Debug.Log("Got a reactor message with all zero concentrations; using default fractions: " + rxr);
                         rend.material.SetInt("_NumWedges", value:5);
                         for (int i = 0; i < count; i++)
                         {

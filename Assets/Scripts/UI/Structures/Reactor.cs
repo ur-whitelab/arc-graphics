@@ -48,10 +48,16 @@ namespace Rochester.ARTable.Structures
             float prev_frac = 1;
             float next_frac = 1;
             float offset = Mathf.PI;//need to add half a circle to rendre in right place
+            float[] flow_rates = new float[num_wedges];//to store the raw numbers for flow rates
+            float flow_rate_sum = (float) 0.0;
+            for(int i =0; i < num_wedges; i++){
+                flow_rates[i] = rend.material.GetFloat("_Fraction" + (i + 1).ToString());
+                flow_rate_sum += flow_rates[i];
+            }
             for(int i = 0; i < num_wedges; i++)
             {
                 offset = Mathf.PI;
-                frac = rend.material.GetFloat("_Fraction" + (i + 1));
+                frac = flow_rates[i] / flow_rate_sum;
                 sum += frac/(float)2.0;//get this center
                 if(prev_frac *100 < 3.0 && frac * 100 < 3.0)
                 {
@@ -59,7 +65,7 @@ namespace Rochester.ARTable.Structures
                 }
                 if(i < num_wedges - 1)
                 {
-                    next_frac = rend.material.GetFloat("_Fraction" + (i + 2));
+                    next_frac = flow_rates[i+1] / flow_rate_sum;
                 }
                 if(frac * 100 < 3.0 && next_frac * 100 < 3.0)
                 {
@@ -70,16 +76,25 @@ namespace Rochester.ARTable.Structures
                 {
                     Transform new_text = Instantiate(this.gameObject.transform.GetChild(0).transform.GetChild(0), this.gameObject.transform.GetChild(0));//get the text grandchild and clone it, making sure to put it in the canvas
                     fraction_dict.Add(i, new_text);//keep track of it -- need both transform and its text for positioning...
-                    new_text.SetPositionAndRotation(new Vector3(this.transform.position.x + r * Mathf.Cos(sum * 2 * Mathf.PI + offset ), this.transform.position.y + r * Mathf.Sin(sum * 2 * Mathf.PI + offset ), 0), Quaternion.identity);
-                    Debug.Log("Set position of new label to " + new_text.transform.position.x + ", " + new_text.transform.position.y + ".\n");
-                    new_text.GetComponent<Text>().text = "" + (frac * 100).ToString("F2") + "%";
-                    Debug.Log("Set mole fraction of new label to " + (frac * 100).ToString("F2") + "%.");
+                    if(frac != 1.0 && frac != 0.0){
+                        new_text.SetPositionAndRotation(new Vector3(this.transform.position.x + r * Mathf.Cos(sum * 2 * Mathf.PI + offset ), this.transform.position.y + r * Mathf.Sin(sum * 2 * Mathf.PI + offset ), 0), Quaternion.identity);
+                        new_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F2") + "mol/s";
+                    }
+                    else{
+                        new_text.GetComponent<Text>().text = "";
+                    }
                 }
                 else//dict entry already exists, so just change the label
                 {
                     Transform existing_text = fraction_dict[i];
                     existing_text.SetPositionAndRotation(new Vector3(this.transform.position.x + r * Mathf.Cos(sum * 2 * Mathf.PI + offset ), this.transform.position.y + r * Mathf.Sin(sum * 2 * Mathf.PI + offset ), 0), Quaternion.identity);
-                    existing_text.GetComponent<Text>().text = "" + (frac * 100).ToString("F2") + "%";
+                    if(frac == 1.0 || frac == 0.0){
+                        existing_text.GetComponent<Text>().text = "";
+                    }
+                    else{
+                        existing_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F2") + "mol/s";
+                    }
+
                 }
                 sum += frac / (float)2.0;
                 prev_frac = frac;

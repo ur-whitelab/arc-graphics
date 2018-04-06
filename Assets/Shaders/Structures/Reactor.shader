@@ -50,12 +50,13 @@
 
              fixed4 frag(fragmentInput i) : SV_Target {
                  float distance = sqrt(pow(i.uv.x, 2) + pow(i.uv.y,2));
-				 float pi = 3.141593;//close enough
+				 float pi = 3.1415927;//close enough
 				 float angle = (atan2(i.uv.y, i.uv.x) + pi);//this atan returns from -pi to pi
 				 float tau = 2*pi;//easier to do mole fractions in tau
 				 float4 colors[7];
 				 float fractions[6];//the mole fractions
 				 float angles[6];//the actual angle cutoffs
+				 int num_wedges = _NumWedges;
 
 				 //color map pulled from colorbrewer2.org
 
@@ -75,9 +76,14 @@
 				 fractions[5] = _Fraction6;
 				 int j = 0;
 				 float tot_frac = 0.0f;
-				 for (j = 0; j < 6; j++) {
+				 //Need to track the CUMULATIVE starting angle for each fraction.
+				 for (j = 0; j < num_wedges; j++) {
 					 tot_frac += fractions[j];
-					 angles[j] = tau*tot_frac;
+					 fractions[j] = tot_frac;
+				 }
+
+				 for(j = 0; j < num_wedges; j++){
+					 angles[j] = tau*fractions[j]/tot_frac;
 				 }
 
 
@@ -87,7 +93,7 @@
 
                  else if (distance > 0.35f && distance < 0.5f){
 
-				 for (j = 0; j < 6; j++) {
+				 for (j = 0; j < num_wedges; j++) {
 					 if (angle < angles[j]) {
 						 return colors[j];
 					 }
