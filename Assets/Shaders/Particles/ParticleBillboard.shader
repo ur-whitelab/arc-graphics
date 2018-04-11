@@ -66,8 +66,10 @@ Shader "Custom/ParticleBillboard"
 			float explodeRadius;
 			int particleNumber;
 
-			float badNoise(float n, float min, float max)
+			float badNoise(float n)
 			{
+				float min = 0.5;
+				float max = 2.5;
 				//returns noise between 0.5 and 2.5 (supposed to be psuedo-log)
 				return sin(n * 4324.3435) * (max - min) + max;
 			}
