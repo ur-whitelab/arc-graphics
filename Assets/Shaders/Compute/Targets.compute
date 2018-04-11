@@ -23,6 +23,8 @@ void Targets(uint3 id : SV_DispatchThreadID)
 		if (dot(r, r) < targets[j].radius * targets[j].radius) {
 			//process intersection
 			properties[i].state = PARTICLE_STATE_DEAD;
+			properties[i].lastModifier = PARTICLE_MODIFIER_TARGET;
+			properties[i].lastModifierIndex = j;
 			InterlockedAdd(targetCounts[j], 1);
 			break;
 		}

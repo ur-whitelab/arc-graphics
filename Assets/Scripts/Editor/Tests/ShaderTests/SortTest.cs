@@ -1,23 +1,30 @@
 ﻿using UnityEngine;
 using System.Collections;
 using NUnit.Framework;
+using Rochester.ARTable.Particles;
 
 [TestFixture]
 public class ComputeSortTest : MonoBehaviour {
 
-    ComputeSort cs;
+    ParticleSorter cs;
 
     [SetUp]
     public void Init()
     {
-        cs = GameObject.Find("ComputeSort").GetComponent<ComputeSort>();
-        cs.Awake();
+        cs = new ParticleSorter();
     }
+
+    [TearDown]
+    public void OnDestroy()
+    {
+        cs.ReleaseBuffers();
+    }
+
     [Test]
     public void GPUScan()
     {
         //make an array to test
-        int N = ComputeSort.MAX_SCAN_SIZE;
+        int N = ParticleSorter.MAX_SCAN_SIZE;
         int[] array = new int[N];
         int[] expected = new int[N];
         for (int i = 0; i < 125; i++)
@@ -40,7 +47,7 @@ public class ComputeSortTest : MonoBehaviour {
     public void GPUCount()
     {
         //make an array to test
-        uint N = ComputeSort.MAX_SCAN_SIZE;
+        uint N = ParticleSorter.MAX_SCAN_SIZE;
         int[] input = new int[N];
         int[] gpu = new int[N];
         int[] cpu = new int[N];
@@ -69,7 +76,7 @@ public class ComputeSortTest : MonoBehaviour {
         
         for (int i = 0; i < N; i++)
         {
-            gpu[i] = Random.Range(0, ComputeSort.MAX_SCAN_SIZE);
+            gpu[i] = Random.Range(0, ParticleSorter.MAX_SCAN_SIZE);
             cpu[i] = gpu[i];
         }
 
@@ -101,7 +108,7 @@ public class ComputeSortTest : MonoBehaviour {
         {
             for (int i = 0; i < N; i++)
             {
-                gpu[i] = Random.Range(0, ComputeSort.MAX_SCAN_SIZE);
+                gpu[i] = Random.Range(0, ParticleSorter.MAX_SCAN_SIZE);
                 cpu[i] = gpu[i];
             }
 
