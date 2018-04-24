@@ -473,7 +473,8 @@ namespace Rochester.ARTable.Communication
                     foreach (var molefrac in rxr.MoleFraction)
                     {
                         count++;
-                        // sum += molefrac;
+                        sum += molefrac;
+                        //test
                     }
                     if(sum > 0)
                     {

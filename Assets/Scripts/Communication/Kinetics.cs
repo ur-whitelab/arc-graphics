@@ -22,16 +22,17 @@ namespace Rochester.Physics.Communication {
     static KineticsReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5raW5ldGljcy5wcm90bxIIcmVhY3RvcnMiagoPUmVhY3RvcktpbmV0aWNz",
-            "EhMKC3RlbXBlcmF0dXJlGAEgASgCEhAKCHByZXNzdXJlGAIgASgCEg0KBWxh",
-            "YmVsGAMgASgJEgoKAmlkGAQgASgFEhUKDW1vbGVfZnJhY3Rpb24YBSADKAIi",
-            "SwoOU3lzdGVtS2luZXRpY3MSDAoEdGltZRgBIAEoAxIrCghraW5ldGljcxgC",
-            "IAMoCzIZLnJlYWN0b3JzLlJlYWN0b3JLaW5ldGljc0IiqgIfUm9jaGVzdGVy",
-            "LlBoeXNpY3MuQ29tbXVuaWNhdGlvbmIGcHJvdG8z"));
+            "Cg5raW5ldGljcy5wcm90bxIIcmVhY3RvcnMinQEKD1JlYWN0b3JLaW5ldGlj",
+            "cxITCgt0ZW1wZXJhdHVyZRgBIAEoAhIQCghwcmVzc3VyZRgCIAEoAhINCgVs",
+            "YWJlbBgDIAEoCRIKCgJpZBgEIAEoBRIVCg1tb2xlX2ZyYWN0aW9uGAUgAygC",
+            "EhgKEGNoZW1pY2FsX3NwZWNpZXMYBiADKAkSFwoPbW9sYXJfZmxvd19yYXRl",
+            "GAcgAygCIksKDlN5c3RlbUtpbmV0aWNzEgwKBHRpbWUYASABKAMSKwoIa2lu",
+            "ZXRpY3MYAiADKAsyGS5yZWFjdG9ycy5SZWFjdG9yS2luZXRpY3NCIqoCH1Jv",
+            "Y2hlc3Rlci5QaHlzaWNzLkNvbW11bmljYXRpb25iBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.ReactorKinetics), global::Rochester.Physics.Communication.ReactorKinetics.Parser, new[]{ "Temperature", "Pressure", "Label", "Id", "MoleFraction" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.ReactorKinetics), global::Rochester.Physics.Communication.ReactorKinetics.Parser, new[]{ "Temperature", "Pressure", "Label", "Id", "MoleFraction", "ChemicalSpecies", "MolarFlowRate" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.SystemKinetics), global::Rochester.Physics.Communication.SystemKinetics.Parser, new[]{ "Time", "Kinetics" }, null, null, null)
           }));
     }
@@ -68,6 +69,8 @@ namespace Rochester.Physics.Communication {
       label_ = other.label_;
       id_ = other.id_;
       moleFraction_ = other.moleFraction_.Clone();
+      chemicalSpecies_ = other.chemicalSpecies_.Clone();
+      molarFlowRate_ = other.molarFlowRate_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -129,6 +132,26 @@ namespace Rochester.Physics.Communication {
       get { return moleFraction_; }
     }
 
+    /// <summary>Field number for the "chemical_species" field.</summary>
+    public const int ChemicalSpeciesFieldNumber = 6;
+    private static readonly pb::FieldCodec<string> _repeated_chemicalSpecies_codec
+        = pb::FieldCodec.ForString(50);
+    private readonly pbc::RepeatedField<string> chemicalSpecies_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<string> ChemicalSpecies {
+      get { return chemicalSpecies_; }
+    }
+
+    /// <summary>Field number for the "molar_flow_rate" field.</summary>
+    public const int MolarFlowRateFieldNumber = 7;
+    private static readonly pb::FieldCodec<float> _repeated_molarFlowRate_codec
+        = pb::FieldCodec.ForFloat(58);
+    private readonly pbc::RepeatedField<float> molarFlowRate_ = new pbc::RepeatedField<float>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<float> MolarFlowRate {
+      get { return molarFlowRate_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ReactorKinetics);
@@ -147,6 +170,8 @@ namespace Rochester.Physics.Communication {
       if (Label != other.Label) return false;
       if (Id != other.Id) return false;
       if(!moleFraction_.Equals(other.moleFraction_)) return false;
+      if(!chemicalSpecies_.Equals(other.chemicalSpecies_)) return false;
+      if(!molarFlowRate_.Equals(other.molarFlowRate_)) return false;
       return true;
     }
 
@@ -158,6 +183,8 @@ namespace Rochester.Physics.Communication {
       if (Label.Length != 0) hash ^= Label.GetHashCode();
       if (Id != 0) hash ^= Id.GetHashCode();
       hash ^= moleFraction_.GetHashCode();
+      hash ^= chemicalSpecies_.GetHashCode();
+      hash ^= molarFlowRate_.GetHashCode();
       return hash;
     }
 
@@ -185,6 +212,8 @@ namespace Rochester.Physics.Communication {
         output.WriteInt32(Id);
       }
       moleFraction_.WriteTo(output, _repeated_moleFraction_codec);
+      chemicalSpecies_.WriteTo(output, _repeated_chemicalSpecies_codec);
+      molarFlowRate_.WriteTo(output, _repeated_molarFlowRate_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -203,6 +232,8 @@ namespace Rochester.Physics.Communication {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
       }
       size += moleFraction_.CalculateSize(_repeated_moleFraction_codec);
+      size += chemicalSpecies_.CalculateSize(_repeated_chemicalSpecies_codec);
+      size += molarFlowRate_.CalculateSize(_repeated_molarFlowRate_codec);
       return size;
     }
 
@@ -224,6 +255,8 @@ namespace Rochester.Physics.Communication {
         Id = other.Id;
       }
       moleFraction_.Add(other.moleFraction_);
+      chemicalSpecies_.Add(other.chemicalSpecies_);
+      molarFlowRate_.Add(other.molarFlowRate_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -253,6 +286,15 @@ namespace Rochester.Physics.Communication {
           case 42:
           case 45: {
             moleFraction_.AddEntriesFrom(input, _repeated_moleFraction_codec);
+            break;
+          }
+          case 50: {
+            chemicalSpecies_.AddEntriesFrom(input, _repeated_chemicalSpecies_codec);
+            break;
+          }
+          case 58:
+          case 61: {
+            molarFlowRate_.AddEntriesFrom(input, _repeated_molarFlowRate_codec);
             break;
           }
         }
