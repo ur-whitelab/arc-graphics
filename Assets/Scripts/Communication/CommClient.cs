@@ -457,6 +457,27 @@ namespace Rochester.ARTable.Communication
             int count;
             float sum;
             float system_time = (float)kinetics.Time / (float) 3.25;//divide by 3.25 to go from FPS to accelerated seconds
+            string[] chemical_species_list = kinetics.ChemicalSpecies;
+            
+            //The following for loop will cycle through all chemical species (from chemical_species_list) and edit the 
+            //chem_spec_str that is used later on as a command when accessing the particular species name for display via Unity.
+            for (int i=0; i < chemical_species_list.Length; i++)
+            {
+                string chem_spec_str = "Backend/ColorKey/Species#Text";
+                char[] chem_spec_array = chem_spec_str.ToCharArray();
+                for (int q=0; q < chem_spec_array.Length; q++)
+                {
+                    char letter = chem_spec_array[q];
+                    if (letter.Equals('#'))
+                    {
+                        chem_spec_array[q] = Convert.ToChar((i+1).ToString());
+                    }
+                }
+                chem_spec_str = new string(chem_spec_array);
+                chemical_species = GameObject.Find(chem_spec_str)
+                chemical_species.GetComponent<Text>().text = System.String.Format(chemical_species_list[i]);
+            }
+
             timeValue = GameObject.Find("Backend/ColorKey/TimeValue");
             timeValue.GetComponent<Text>().text = System.String.Format("{0:0.00} s", system_time);
             foreach(var rxr in kinetics.Kinetics)
