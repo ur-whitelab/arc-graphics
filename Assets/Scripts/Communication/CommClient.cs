@@ -33,6 +33,8 @@ namespace Rochester.ARTable.Communication
         private GameObject timeValue;
         private string timeText;
 
+        private GameObject chemical_species;
+
         private GameObject backend;
 
 
@@ -457,11 +459,11 @@ namespace Rochester.ARTable.Communication
             int count;
             float sum;
             float system_time = (float)kinetics.Time / (float) 3.25;//divide by 3.25 to go from FPS to accelerated seconds
-            string[] chemical_species_list = kinetics.ChemicalSpecies;
+            string[] chemical_species_list = kinetics.ChemicalSpecies.ToArray<string>();
             
             for (int i = 0; i < chemical_species_list.Length; i++)
             {
-                string chem_spec_str = "Backend/ColorKey/Species" + i + "Text";
+                string chem_spec_str = "Backend/ColorKey/Species" + (i+1) + "Text";
                 chemical_species = GameObject.Find(chem_spec_str);
                 chemical_species.GetComponent<Text>().text = System.String.Format(chemical_species_list[i]);
             }
