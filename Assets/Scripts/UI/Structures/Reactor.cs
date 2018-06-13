@@ -31,7 +31,7 @@ namespace Rochester.ARTable.Structures
             rend.material.SetFloat("_FlowRate2", 0.0f);
             rend.material.SetFloat("_FlowRate3", 0.0f);
             rend.material.SetFloat("_FlowRate4", 0.0f);
-            rend.material.SetFloat("_FlowRate5", 1.0f);
+            rend.material.SetFloat("_FlowRate5", 0.0f);
             GameObject temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
             temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text;//default to currently-displayed temperature -- should actually only need this?
@@ -58,10 +58,8 @@ namespace Rochester.ARTable.Structures
             float[] flow_rates = new float[num_wedges];//to store the raw numbers for molar flow rate
             float flow_rate_sum = (float) 0.0;
             float[] mole_frac = new float[num_wedges];
-            float mole_frac_sum = (float) 0.0;
             for(int i =0; i < num_wedges; i++){
                 mole_frac[i] = rend.material.GetFloat("_Fraction" + (i + 1).ToString());
-                mole_frac_sum += mole_frac[i];
                 
                 flow_rates[i] = rend.material.GetFloat("_FlowRate" + (i+1).ToString());
                 flow_rate_sum += flow_rates[i]
@@ -69,7 +67,7 @@ namespace Rochester.ARTable.Structures
             for(int i = 0; i < num_wedges; i++)
             {
                 offset = Mathf.PI;
-                frac = mole_frac[i] / mole_frac_sum;
+                frac = mole_frac[i];
                 sum += frac/(float)2.0;//get this center
                 if(prev_frac *100 < 3.0 && frac * 100 < 3.0)
                 {
@@ -77,7 +75,7 @@ namespace Rochester.ARTable.Structures
                 }
                 if(i < num_wedges - 1)
                 {
-                    next_frac = mole_frac[i+1] / mole_frac_sum;
+                    next_frac = mole_frac[i+1];
                 }
                 if(frac * 100 < 3.0 && next_frac * 100 < 3.0)
                 {

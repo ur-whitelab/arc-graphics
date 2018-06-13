@@ -487,12 +487,13 @@ namespace Rochester.ARTable.Communication
                         sum += molefrac;
                         //test
                     }
-                    if(sum > 0)
+                    if(sum > 0 && sum <= 1.0)
                     {
                         rend.material.SetInt("_NumWedges", value:count);
                         for (int i = 0; i < count; i++)
                         {
                         rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i]));
+                        rend.material.SetFloat("_FlowRate" + (i + 1).ToString(), value: (rxr.MolarFlowRate[i]));
                         }
                     }
                     else
@@ -501,6 +502,7 @@ namespace Rochester.ARTable.Communication
                         for (int i = 0; i < count; i++)
                         {
                             rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: ((float)0));
+                            rend.material.SetFloat("_FlowRate" + (i+1).ToString(), value: ((float)0));
                         }
                         rend.material.SetFloat("_Fraction5", value: ((float)1));
                     }
