@@ -62,7 +62,7 @@ namespace Rochester.ARTable.Structures
                 mole_frac[i] = rend.material.GetFloat("_Fraction" + (i + 1).ToString());
                 
                 flow_rates[i] = rend.material.GetFloat("_FlowRate" + (i+1).ToString());
-                flow_rate_sum += flow_rates[i]
+                flow_rate_sum += flow_rates[i];
             }
             for(int i = 0; i < num_wedges; i++)
             {
