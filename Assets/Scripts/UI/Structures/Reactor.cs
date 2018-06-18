@@ -44,12 +44,14 @@ namespace Rochester.ARTable.Structures
 
         public void set_molefrac(int i, float mole_frac)
         {
-            rend.material.SetFloat("_Fraction" + (i+1).ToString(), value: this.mole_frac)
+            Renderer rend = this.GetComponent<Renderer>();
+            rend.material.SetFloat("_Fraction" + (i+1).ToString(), value: this.mole_frac);
         }
 
         public void set_flowrate (int i, float flow_rate)
         {
-            rend.material.SetFloat("_FlowRate" + (i+1).ToString(), value: this.flow_rate)
+            Renderer rend = this.GetComponent<Renderer>();
+            rend.material.SetFloat("_FlowRate" + (i+1).ToString(), value: this.flow_rate);
         }
 
         // Update is called once per frame
