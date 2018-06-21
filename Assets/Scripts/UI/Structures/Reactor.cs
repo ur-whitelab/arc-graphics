@@ -52,6 +52,11 @@ namespace Rochester.ARTable.Structures
             rend.material.SetFloat("_FlowRate" + (i+1).ToString(), value: flow_rate);
         }
 
+        public void set_numwedges(Renderer rend, int num)
+        {
+            rend.material.SetInt("_NumWedges", value: num);
+        }
+
         // Update is called once per frame
         void Update()
         {

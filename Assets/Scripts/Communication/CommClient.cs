@@ -256,6 +256,7 @@ namespace Rochester.ARTable.Communication
             }
             return managedObjects[label];
         }
+        
         private void synchronizeGraph(Graph system)
         {
             foreach(var key in system.Nodes.Keys)
@@ -490,7 +491,7 @@ namespace Rochester.ARTable.Communication
                     }
                     if(sum > 0 && sum <= 1.0)
                     {
-                        rend.material.SetInt("_NumWedges", value:count);
+                        reactor.set_numwedges(rend, count);
                         for (int i = 0; i < count; i++)
                         {
                         reactor.set_molefrac(i, rend, rxr.MoleFraction[i]);
@@ -499,7 +500,7 @@ namespace Rochester.ARTable.Communication
                     }
                     else
                     {
-                        rend.material.SetInt("_NumWedges", value:5);
+                        reactor.set_numwedges(rend, 5);
                         for (int i = 0; i < count; i++)
                         {
                             reactor.set_molefrac(i, rend, (float)0);
