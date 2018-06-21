@@ -479,8 +479,7 @@ namespace Rochester.ARTable.Communication
                 currentObjs.TryGetValue( rxr.Id, out existing);
                 if(existing)
                 {
-                    rend = existing.GetComponent<Renderer>();
-                    //rend.material.shader = Shader.Find("Custom/WedgeCircle");
+                    rend = existing.GetComponent<MeshRenderer>();
                     count = 0;
                     sum = 0;
                     foreach (var molefrac in rxr.MoleFraction)
@@ -494,10 +493,8 @@ namespace Rochester.ARTable.Communication
                         rend.material.SetInt("_NumWedges", value:count);
                         for (int i = 0; i < count; i++)
                         {
-                        //rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i]));
-                        //rend.material.SetFloat("_FlowRate" + (i + 1).ToString(), value: (rxr.MolarFlowRate[i]));
-                        reactor.set_molefrac(i, rxr.MoleFraction[i]);
-                        reactor.set_flowrate(i, rxr.MolarFlowRate[i]);
+                        reactor.set_molefrac(i, rend, rxr.MoleFraction[i]);
+                        reactor.set_flowrate(i, rend, rxr.MolarFlowRate[i]);
                         }
                     }
                     else
@@ -505,13 +502,10 @@ namespace Rochester.ARTable.Communication
                         rend.material.SetInt("_NumWedges", value:5);
                         for (int i = 0; i < count; i++)
                         {
-                            //rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: ((float)0));
-                            //rend.material.SetFloat("_FlowRate" + (i+1).ToString(), value: ((float)0));
-                            reactor.set_molefrac(i, (float)0);
-                            reactor.set_flowrate(i, (float)0);
+                            reactor.set_molefrac(i, rend, (float)0);
+                            reactor.set_flowrate(i, rend, (float)0);
                         }
-                        //rend.material.SetFloat("_Fraction5", value: ((float)1));
-                        reactor.set_flowrate(5, (float)1);
+                        reactor.set_flowrate(5, rend, (float)1);
                     }
                 }
                 else
