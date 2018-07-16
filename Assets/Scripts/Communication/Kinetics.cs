@@ -22,18 +22,18 @@ namespace Rochester.Physics.Communication {
     static KineticsReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5raW5ldGljcy5wcm90bxIIcmVhY3RvcnMinQEKD1JlYWN0b3JLaW5ldGlj",
+            "Cg5raW5ldGljcy5wcm90bxIIcmVhY3RvcnMigwEKD1JlYWN0b3JLaW5ldGlj",
             "cxITCgt0ZW1wZXJhdHVyZRgBIAEoAhIQCghwcmVzc3VyZRgCIAEoAhINCgVs",
             "YWJlbBgDIAEoCRIKCgJpZBgEIAEoBRIVCg1tb2xlX2ZyYWN0aW9uGAUgAygC",
-            "EhgKEGNoZW1pY2FsX3NwZWNpZXMYBiADKAkSFwoPbW9sYXJfZmxvd19yYXRl",
-            "GAcgAygCIksKDlN5c3RlbUtpbmV0aWNzEgwKBHRpbWUYASABKAMSKwoIa2lu",
-            "ZXRpY3MYAiADKAsyGS5yZWFjdG9ycy5SZWFjdG9yS2luZXRpY3NCIqoCH1Jv",
+            "EhcKD21vbGFyX2Zsb3dfcmF0ZRgGIAMoAiJlCg5TeXN0ZW1LaW5ldGljcxIM",
+            "CgR0aW1lGAEgASgDEhgKEGNoZW1pY2FsX3NwZWNpZXMYAiADKAkSKwoIa2lu",
+            "ZXRpY3MYAyADKAsyGS5yZWFjdG9ycy5SZWFjdG9yS2luZXRpY3NCIqoCH1Jv",
             "Y2hlc3Rlci5QaHlzaWNzLkNvbW11bmljYXRpb25iBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.ReactorKinetics), global::Rochester.Physics.Communication.ReactorKinetics.Parser, new[]{ "Temperature", "Pressure", "Label", "Id", "MoleFraction", "ChemicalSpecies", "MolarFlowRate" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.SystemKinetics), global::Rochester.Physics.Communication.SystemKinetics.Parser, new[]{ "Time", "Kinetics" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.ReactorKinetics), global::Rochester.Physics.Communication.ReactorKinetics.Parser, new[]{ "Temperature", "Pressure", "Label", "Id", "MoleFraction", "MolarFlowRate" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Rochester.Physics.Communication.SystemKinetics), global::Rochester.Physics.Communication.SystemKinetics.Parser, new[]{ "Time", "ChemicalSpecies", "Kinetics" }, null, null, null)
           }));
     }
     #endregion
@@ -69,7 +69,6 @@ namespace Rochester.Physics.Communication {
       label_ = other.label_;
       id_ = other.id_;
       moleFraction_ = other.moleFraction_.Clone();
-      chemicalSpecies_ = other.chemicalSpecies_.Clone();
       molarFlowRate_ = other.molarFlowRate_.Clone();
     }
 
@@ -132,20 +131,10 @@ namespace Rochester.Physics.Communication {
       get { return moleFraction_; }
     }
 
-    /// <summary>Field number for the "chemical_species" field.</summary>
-    public const int ChemicalSpeciesFieldNumber = 6;
-    private static readonly pb::FieldCodec<string> _repeated_chemicalSpecies_codec
-        = pb::FieldCodec.ForString(50);
-    private readonly pbc::RepeatedField<string> chemicalSpecies_ = new pbc::RepeatedField<string>();
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<string> ChemicalSpecies {
-      get { return chemicalSpecies_; }
-    }
-
     /// <summary>Field number for the "molar_flow_rate" field.</summary>
-    public const int MolarFlowRateFieldNumber = 7;
+    public const int MolarFlowRateFieldNumber = 6;
     private static readonly pb::FieldCodec<float> _repeated_molarFlowRate_codec
-        = pb::FieldCodec.ForFloat(58);
+        = pb::FieldCodec.ForFloat(50);
     private readonly pbc::RepeatedField<float> molarFlowRate_ = new pbc::RepeatedField<float>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<float> MolarFlowRate {
@@ -170,7 +159,6 @@ namespace Rochester.Physics.Communication {
       if (Label != other.Label) return false;
       if (Id != other.Id) return false;
       if(!moleFraction_.Equals(other.moleFraction_)) return false;
-      if(!chemicalSpecies_.Equals(other.chemicalSpecies_)) return false;
       if(!molarFlowRate_.Equals(other.molarFlowRate_)) return false;
       return true;
     }
@@ -183,7 +171,6 @@ namespace Rochester.Physics.Communication {
       if (Label.Length != 0) hash ^= Label.GetHashCode();
       if (Id != 0) hash ^= Id.GetHashCode();
       hash ^= moleFraction_.GetHashCode();
-      hash ^= chemicalSpecies_.GetHashCode();
       hash ^= molarFlowRate_.GetHashCode();
       return hash;
     }
@@ -212,7 +199,6 @@ namespace Rochester.Physics.Communication {
         output.WriteInt32(Id);
       }
       moleFraction_.WriteTo(output, _repeated_moleFraction_codec);
-      chemicalSpecies_.WriteTo(output, _repeated_chemicalSpecies_codec);
       molarFlowRate_.WriteTo(output, _repeated_molarFlowRate_codec);
     }
 
@@ -232,7 +218,6 @@ namespace Rochester.Physics.Communication {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
       }
       size += moleFraction_.CalculateSize(_repeated_moleFraction_codec);
-      size += chemicalSpecies_.CalculateSize(_repeated_chemicalSpecies_codec);
       size += molarFlowRate_.CalculateSize(_repeated_molarFlowRate_codec);
       return size;
     }
@@ -255,7 +240,6 @@ namespace Rochester.Physics.Communication {
         Id = other.Id;
       }
       moleFraction_.Add(other.moleFraction_);
-      chemicalSpecies_.Add(other.chemicalSpecies_);
       molarFlowRate_.Add(other.molarFlowRate_);
     }
 
@@ -288,12 +272,8 @@ namespace Rochester.Physics.Communication {
             moleFraction_.AddEntriesFrom(input, _repeated_moleFraction_codec);
             break;
           }
-          case 50: {
-            chemicalSpecies_.AddEntriesFrom(input, _repeated_chemicalSpecies_codec);
-            break;
-          }
-          case 58:
-          case 61: {
+          case 50:
+          case 53: {
             molarFlowRate_.AddEntriesFrom(input, _repeated_molarFlowRate_codec);
             break;
           }
@@ -328,6 +308,7 @@ namespace Rochester.Physics.Communication {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public SystemKinetics(SystemKinetics other) : this() {
       time_ = other.time_;
+      chemicalSpecies_ = other.chemicalSpecies_.Clone();
       kinetics_ = other.kinetics_.Clone();
     }
 
@@ -350,10 +331,20 @@ namespace Rochester.Physics.Communication {
       }
     }
 
+    /// <summary>Field number for the "chemical_species" field.</summary>
+    public const int ChemicalSpeciesFieldNumber = 2;
+    private static readonly pb::FieldCodec<string> _repeated_chemicalSpecies_codec
+        = pb::FieldCodec.ForString(18);
+    private readonly pbc::RepeatedField<string> chemicalSpecies_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<string> ChemicalSpecies {
+      get { return chemicalSpecies_; }
+    }
+
     /// <summary>Field number for the "kinetics" field.</summary>
-    public const int KineticsFieldNumber = 2;
+    public const int KineticsFieldNumber = 3;
     private static readonly pb::FieldCodec<global::Rochester.Physics.Communication.ReactorKinetics> _repeated_kinetics_codec
-        = pb::FieldCodec.ForMessage(18, global::Rochester.Physics.Communication.ReactorKinetics.Parser);
+        = pb::FieldCodec.ForMessage(26, global::Rochester.Physics.Communication.ReactorKinetics.Parser);
     private readonly pbc::RepeatedField<global::Rochester.Physics.Communication.ReactorKinetics> kinetics_ = new pbc::RepeatedField<global::Rochester.Physics.Communication.ReactorKinetics>();
     /// <summary>
     ///repeats for all components(reactors and pipes) in the system
@@ -377,6 +368,7 @@ namespace Rochester.Physics.Communication {
         return true;
       }
       if (Time != other.Time) return false;
+      if(!chemicalSpecies_.Equals(other.chemicalSpecies_)) return false;
       if(!kinetics_.Equals(other.kinetics_)) return false;
       return true;
     }
@@ -385,6 +377,7 @@ namespace Rochester.Physics.Communication {
     public override int GetHashCode() {
       int hash = 1;
       if (Time != 0L) hash ^= Time.GetHashCode();
+      hash ^= chemicalSpecies_.GetHashCode();
       hash ^= kinetics_.GetHashCode();
       return hash;
     }
@@ -400,6 +393,7 @@ namespace Rochester.Physics.Communication {
         output.WriteRawTag(8);
         output.WriteInt64(Time);
       }
+      chemicalSpecies_.WriteTo(output, _repeated_chemicalSpecies_codec);
       kinetics_.WriteTo(output, _repeated_kinetics_codec);
     }
 
@@ -409,6 +403,7 @@ namespace Rochester.Physics.Communication {
       if (Time != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(Time);
       }
+      size += chemicalSpecies_.CalculateSize(_repeated_chemicalSpecies_codec);
       size += kinetics_.CalculateSize(_repeated_kinetics_codec);
       return size;
     }
@@ -421,6 +416,7 @@ namespace Rochester.Physics.Communication {
       if (other.Time != 0L) {
         Time = other.Time;
       }
+      chemicalSpecies_.Add(other.chemicalSpecies_);
       kinetics_.Add(other.kinetics_);
     }
 
@@ -437,6 +433,10 @@ namespace Rochester.Physics.Communication {
             break;
           }
           case 18: {
+            chemicalSpecies_.AddEntriesFrom(input, _repeated_chemicalSpecies_codec);
+            break;
+          }
+          case 26: {
             kinetics_.AddEntriesFrom(input, _repeated_kinetics_codec);
             break;
           }

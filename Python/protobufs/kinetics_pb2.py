@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='kinetics.proto',
   package='reactors',
   syntax='proto3',
-  serialized_pb=_b('\n\x0ekinetics.proto\x12\x08reactors\"\x9d\x01\n\x0fReactorKinetics\x12\x13\n\x0btemperature\x18\x01 \x01(\x02\x12\x10\n\x08pressure\x18\x02 \x01(\x02\x12\r\n\x05label\x18\x03 \x01(\t\x12\n\n\x02id\x18\x04 \x01(\x05\x12\x15\n\rmole_fraction\x18\x05 \x03(\x02\x12\x18\n\x10\x63hemical_species\x18\x06 \x03(\t\x12\x17\n\x0fmolar_flow_rate\x18\x07 \x03(\x02\"K\n\x0eSystemKinetics\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12+\n\x08kinetics\x18\x02 \x03(\x0b\x32\x19.reactors.ReactorKineticsB\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
+  serialized_pb=_b('\n\x0ekinetics.proto\x12\x08reactors\"\x83\x01\n\x0fReactorKinetics\x12\x13\n\x0btemperature\x18\x01 \x01(\x02\x12\x10\n\x08pressure\x18\x02 \x01(\x02\x12\r\n\x05label\x18\x03 \x01(\t\x12\n\n\x02id\x18\x04 \x01(\x05\x12\x15\n\rmole_fraction\x18\x05 \x03(\x02\x12\x17\n\x0fmolar_flow_rate\x18\x06 \x03(\x02\"e\n\x0eSystemKinetics\x12\x0c\n\x04time\x18\x01 \x01(\x03\x12\x18\n\x10\x63hemical_species\x18\x02 \x03(\t\x12+\n\x08kinetics\x18\x03 \x03(\x0b\x32\x19.reactors.ReactorKineticsB\"\xaa\x02\x1fRochester.Physics.Communicationb\x06proto3')
 )
 
 
@@ -68,15 +68,8 @@ _REACTORKINETICS = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='chemical_species', full_name='reactors.ReactorKinetics.chemical_species', index=5,
-      number=6, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='molar_flow_rate', full_name='reactors.ReactorKinetics.molar_flow_rate', index=6,
-      number=7, type=2, cpp_type=6, label=3,
+      name='molar_flow_rate', full_name='reactors.ReactorKinetics.molar_flow_rate', index=5,
+      number=6, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -94,7 +87,7 @@ _REACTORKINETICS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=29,
-  serialized_end=186,
+  serialized_end=160,
 )
 
 
@@ -113,8 +106,15 @@ _SYSTEMKINETICS = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='kinetics', full_name='reactors.SystemKinetics.kinetics', index=1,
-      number=2, type=11, cpp_type=10, label=3,
+      name='chemical_species', full_name='reactors.SystemKinetics.chemical_species', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='kinetics', full_name='reactors.SystemKinetics.kinetics', index=2,
+      number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -131,7 +131,7 @@ _SYSTEMKINETICS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=188,
+  serialized_start=162,
   serialized_end=263,
 )
 

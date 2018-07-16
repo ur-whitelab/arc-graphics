@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Rochester.ARTable.Particles;
 using System.Linq;
+using Rochester.ARTable.Structures;
 
 namespace Rochester.ARTable.Communication
 {
@@ -32,6 +33,8 @@ namespace Rochester.ARTable.Communication
         private string temperatureText;
         private GameObject timeValue;
         private string timeText;
+
+        private GameObject chemical_species;
 
         private GameObject backend;
 
@@ -253,6 +256,7 @@ namespace Rochester.ARTable.Communication
             }
             return managedObjects[label];
         }
+        
         private void synchronizeGraph(Graph system)
         {
             foreach(var key in system.Nodes.Keys)
@@ -457,17 +461,26 @@ namespace Rochester.ARTable.Communication
             int count;
             float sum;
             float system_time = (float)kinetics.Time / (float) 3.25;//divide by 3.25 to go from FPS to accelerated seconds
+            string[] chemical_species_list = kinetics.ChemicalSpecies.ToArray<string>();
+            
+            for (int i = 0; i < chemical_species_list.Length; i++)
+            {
+                string chem_spec_str = "Backend/ColorKey/Species" + (i+1) + "Text";
+                chemical_species = GameObject.Find(chem_spec_str);
+                chemical_species.GetComponent<Text>().text = System.String.Format(chemical_species_list[i]);
+            }
+
             timeValue = GameObject.Find("Backend/ColorKey/TimeValue");
             timeValue.GetComponent<Text>().text = System.String.Format("{0:0.00} s", system_time);
             foreach(var rxr in kinetics.Kinetics)
             {
+                var reactor = new Reactor();
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
                 currentObjs.TryGetValue( rxr.Id, out existing);
                 if(existing)
                 {
                     rend = existing.GetComponent<MeshRenderer>();
-                    rend.material.shader = Shader.Find("Custom/WedgeCircle");
                     count = 0;
                     sum = 0;
                     foreach (var molefrac in rxr.MoleFraction)
@@ -476,22 +489,24 @@ namespace Rochester.ARTable.Communication
                         sum += molefrac;
                         //test
                     }
-                    if(sum > 0)
+                    if(sum > 0 && sum <= 1.0)
                     {
-                        rend.material.SetInt("_NumWedges", value:count);
+                        reactor.set_numwedges(rend, count);
                         for (int i = 0; i < count; i++)
                         {
-                        rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: (rxr.MoleFraction[i]));
+                        reactor.set_molefrac(i, rend, rxr.MoleFraction[i]);
+                        reactor.set_flowrate(i, rend, rxr.MolarFlowRate[i]);
                         }
                     }
                     else
                     {
-                        rend.material.SetInt("_NumWedges", value:5);
+                        reactor.set_numwedges(rend, 5);
                         for (int i = 0; i < count; i++)
                         {
-                            rend.material.SetFloat("_Fraction" + (i + 1).ToString(), value: ((float)0));
+                            reactor.set_molefrac(i, rend, (float)0);
+                            reactor.set_flowrate(i, rend, (float)0);
                         }
-                        rend.material.SetFloat("_Fraction5", value: ((float)1));
+                        reactor.set_flowrate(5, rend, (float)1);
                     }
                 }
                 else

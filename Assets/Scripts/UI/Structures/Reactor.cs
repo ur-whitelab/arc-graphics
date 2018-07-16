@@ -20,11 +20,18 @@ namespace Rochester.ARTable.Structures
             Renderer rend = this.GetComponent<Renderer>();
             rend.material.shader = Shader.Find("Custom/WedgeCircle");
             rend.material.SetInt("_NumWedges", 5); //default to 4 species, in quarters
+            // "_Fraction#" for the mole fractions.
             rend.material.SetFloat("_Fraction1", 0.0f);
             rend.material.SetFloat("_Fraction2", 0.0f);
             rend.material.SetFloat("_Fraction3", 0.0f);
             rend.material.SetFloat("_Fraction4", 0.0f);
             rend.material.SetFloat("_Fraction5", 1.0f);
+            // "_FlowRate#" for the molar flow rates.
+            rend.material.SetFloat("_FlowRate1", 0.0f);
+            rend.material.SetFloat("_FlowRate2", 0.0f);
+            rend.material.SetFloat("_FlowRate3", 0.0f);
+            rend.material.SetFloat("_FlowRate4", 0.0f);
+            rend.material.SetFloat("_FlowRate5", 0.0f);
             GameObject temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
             temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text;//default to currently-displayed temperature -- should actually only need this?
@@ -33,6 +40,21 @@ namespace Rochester.ARTable.Structures
         public void set_temp(int temp)
         {
             temperature = temp;
+        }
+
+        public void set_molefrac(int i, Renderer rend, float mole_frac)
+        {
+            rend.material.SetFloat("_Fraction" + (i+1).ToString(), value: mole_frac);
+        }
+
+        public void set_flowrate (int i, Renderer rend, float flow_rate)
+        {
+            rend.material.SetFloat("_FlowRate" + (i+1).ToString(), value: flow_rate);
+        }
+
+        public void set_numwedges(Renderer rend, int num)
+        {
+            rend.material.SetInt("_NumWedges", value: num);
         }
 
         // Update is called once per frame
@@ -48,16 +70,19 @@ namespace Rochester.ARTable.Structures
             float prev_frac = 1;
             float next_frac = 1;
             float offset = Mathf.PI;//need to add half a circle to rendre in right place
-            float[] flow_rates = new float[num_wedges];//to store the raw numbers for flow rates
+            float[] flow_rates = new float[num_wedges];//to store the raw numbers for molar flow rate
             float flow_rate_sum = (float) 0.0;
+            float[] mole_frac = new float[num_wedges];
             for(int i =0; i < num_wedges; i++){
-                flow_rates[i] = rend.material.GetFloat("_Fraction" + (i + 1).ToString());
+                mole_frac[i] = rend.material.GetFloat("_Fraction" + (i + 1).ToString());
+                
+                flow_rates[i] = rend.material.GetFloat("_FlowRate" + (i+1).ToString());
                 flow_rate_sum += flow_rates[i];
             }
             for(int i = 0; i < num_wedges; i++)
             {
                 offset = Mathf.PI;
-                frac = flow_rates[i] / flow_rate_sum;
+                frac = mole_frac[i];
                 sum += frac/(float)2.0;//get this center
                 if(prev_frac *100 < 3.0 && frac * 100 < 3.0)
                 {
@@ -65,7 +90,7 @@ namespace Rochester.ARTable.Structures
                 }
                 if(i < num_wedges - 1)
                 {
-                    next_frac = flow_rates[i+1] / flow_rate_sum;
+                    next_frac = mole_frac[i+1];
                 }
                 if(frac * 100 < 3.0 && next_frac * 100 < 3.0)
                 {
