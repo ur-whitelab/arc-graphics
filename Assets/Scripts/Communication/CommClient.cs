@@ -256,7 +256,7 @@ namespace Rochester.ARTable.Communication
             }
             return managedObjects[label];
         }
-        
+
         private void synchronizeGraph(Graph system)
         {
             foreach(var key in system.Nodes.Keys)
@@ -462,7 +462,7 @@ namespace Rochester.ARTable.Communication
             float sum;
             float system_time = (float)kinetics.Time / (float) 3.25;//divide by 3.25 to go from FPS to accelerated seconds
             string[] chemical_species_list = kinetics.ChemicalSpecies.ToArray<string>();
-            
+
             for (int i = 0; i < chemical_species_list.Length; i++)
             {
                 string chem_spec_str = "Backend/ColorKey/Species" + (i+1) + "Text";
@@ -474,12 +474,12 @@ namespace Rochester.ARTable.Communication
             timeValue.GetComponent<Text>().text = System.String.Format("{0:0.00} s", system_time);
             foreach(var rxr in kinetics.Kinetics)
             {
-                var reactor = new Reactor();
                 var currentObjs = managedObjects["reactor"];
                 GameObject existing;
                 currentObjs.TryGetValue( rxr.Id, out existing);
                 if(existing)
                 {
+                    Reactor reactor = existing.GetComponent<Reactor>();
                     rend = existing.GetComponent<MeshRenderer>();
                     count = 0;
                     sum = 0;
