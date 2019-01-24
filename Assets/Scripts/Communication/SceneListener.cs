@@ -74,9 +74,16 @@ namespace Rochester.ARTable.Communication
         {
             bool SwitchToDetection = false;
             SwitchToDetection|= Input.GetKeyDown("k");
+            bool SwitchToTarget = false;
+            SwitchToTarget |= Input.GetKeyDown("t");
             if (SwitchToDetection)
             {
                 OpenScene("detection");
+            }
+
+            if (SwitchToTarget)
+            {
+                OpenScene("target");
             }
             //get scene we need to go to
             if (SceneResponseTask.Task.IsCompleted)

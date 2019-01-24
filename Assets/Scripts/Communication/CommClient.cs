@@ -27,7 +27,7 @@ namespace Rochester.ARTable.Communication
         private NetMQPoller VisionPoller, SimulationPoller, ScreenshotPoller;
         private TaskCompletionSource<byte[]> VisionResponseTask, SimulationResponseTask;
         private TaskCompletionSource<string> ScreenshotResponseTask;//, ScreenshotStopResponseTask ;
-        new private CameraControls camera;
+        new public CameraControls camera;
 
         private GameObject temperatureValue;
         private string temperatureText;
@@ -85,6 +85,16 @@ namespace Rochester.ARTable.Communication
                 calibrating = false;
                 backend.transform.Find("ColorKey").gameObject.SetActive(true);
             }
+
+            if (scene.name == "target")
+            {
+                backend.transform.Find("ColorKey").gameObject.SetActive(false);
+            }
+            else
+            {
+                backend.transform.Find("ColorKey").gameObject.SetActive(true);
+            }
+
             //clear objects if we had any
             if (scene.name != "default")
             {
