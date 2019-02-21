@@ -9,7 +9,8 @@ namespace Rochester.ARTable.Structures
     {
         private Dictionary<int, Transform> fraction_dict;
         private float r;
-        private int temperature;
+        private float temperature;
+        private float volume;
 
         // Use this for initialization
         void Start()
@@ -32,14 +33,22 @@ namespace Rochester.ARTable.Structures
             rend.material.SetFloat("_FlowRate3", 0.0f);
             rend.material.SetFloat("_FlowRate4", 0.0f);
             rend.material.SetFloat("_FlowRate5", 0.0f);
+
             GameObject temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
+            GameObject volumeValue = GameObject.Find("Backend/ColorKey/VolumeValue");
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
-            temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text;//default to currently-displayed temperature -- should actually only need this?
+            temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text + volumeValue.GetComponent<Text>().text;
+
         }
 
-        public void set_temp(int temp)
+        public void set_temp(float new_temp) //Called in CommClient.cs to set the new temp (and new vol, see below) from the dial to reactor object
         {
-            temperature = temp;
+            temperature = new_temp;
+        }
+
+        public void set_vol(float new_vol)
+        {
+            volume = new_vol;
         }
 
         public void set_molefrac(int i, Renderer rend, float mole_frac)
@@ -61,9 +70,11 @@ namespace Rochester.ARTable.Structures
         void Update()
         {
             Renderer rend = this.GetComponent<Renderer>();
-            float temp = rend.material.GetFloat("_Temperature");//get the temp anyway in case we got it wrong the first time...
+            float temperature = this.temperature;
+            float volume = this.volume;
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
-            temp_canvas.GetComponent<Text>().text = "" + (int)temp + " K";
+            temp_canvas.GetComponent<Text>().text = "" + (int)temperature + " K | " + (int)volume + " L";
+
             int num_wedges = rend.material.GetInt("_NumWedges");
             float frac = 0;
             float sum = 0;
@@ -73,9 +84,10 @@ namespace Rochester.ARTable.Structures
             float[] flow_rates = new float[num_wedges];//to store the raw numbers for molar flow rate
             float flow_rate_sum = (float) 0.0;
             float[] mole_frac = new float[num_wedges];
-            for(int i =0; i < num_wedges; i++){
+            for(int i =0; i < num_wedges; i++)
+            {
                 mole_frac[i] = rend.material.GetFloat("_Fraction" + (i + 1).ToString());
-                
+
                 flow_rates[i] = rend.material.GetFloat("_FlowRate" + (i+1).ToString());
                 flow_rate_sum += flow_rates[i];
             }

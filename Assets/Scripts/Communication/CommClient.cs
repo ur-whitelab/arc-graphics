@@ -33,6 +33,8 @@ namespace Rochester.ARTable.Communication
         private string temperatureText;
         private GameObject timeValue;
         private string timeText;
+        private GameObject volumeValue;
+        private string volumeText;
 
         private GameObject chemical_species;
 
@@ -117,6 +119,7 @@ namespace Rochester.ARTable.Communication
         {
             //these are the fixed text objects that display the next-placed reactor's temperature and pressure
             temperatureValue = GameObject.Find("TemperatureValue");
+            volumeValue = GameObject.Find("VolumeValue");
             //build prefab and edge list dicts
             prefabs = new Dictionary<string, GameObject>();
             managedObjects = new Dictionary<string, Dictionary<int, GameObject>>();
@@ -260,7 +263,7 @@ namespace Rochester.ARTable.Communication
         }
 
         private Dictionary<int, GameObject> getManagedObjects(string label){
-            if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+            if (label == "cstr" || label == "pfr" || label == "pbr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
             {
                 label = "reactor";
             }
@@ -274,14 +277,17 @@ namespace Rochester.ARTable.Communication
                 var o = system.Nodes[key];
 
                 string label = o.Label;
-                if (label == "conditions" && GameObject.Find("Backend/ColorKey/TemperatureValue") != null)//temperature and pressure updates are passed as a special 'node'
+                if (label == "conditions" && GameObject.Find("Backend/ColorKey/TemperatureValue") != null && GameObject.Find("Backend/ColorKey/VolumeValue") != null)//temperature and pressure updates are passed as a special 'node'
                 {
                     temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
                     temperatureValue.GetComponent<Text>().text = "" + o.Weight[0] + " K";
+
+                    volumeValue = GameObject.Find("Backend/ColorKey/VolumeValue");
+                    volumeValue.GetComponent<Text>().text = "" + o.Weight[1] + " L";
                 }
                 else
                 {
-                    if (label == "cstr" || label == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                    if (label == "cstr" || label == "pfr" || label == "pbr")//Unity display doesn't care about reactor type, all use the "reactor" prefab.
                     {
                         label = "reactor";
                     }
@@ -291,11 +297,12 @@ namespace Rochester.ARTable.Communication
                     Vector2 viewPos = camera.UnitToWorld(objectPos);
                     if (!currentObjs.TryGetValue(o.Id, out existing) && !o.Delete)
                     {
-                        var placed = (GameObject)GameObject.Instantiate(prefabs[label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
+                        GameObject placed = Instantiate(prefabs[label], new Vector2(viewPos.x, viewPos.y), new Quaternion());
                         if(label == "reactor")
                         {
-                            Renderer rend = placed.GetComponent<MeshRenderer>();
-                            rend.material.SetFloat("_Temperature", value: float.Parse(temperatureValue.GetComponent<Text>().text.Split(" "[0])[0]));
+                            Reactor rxr = (Reactor) placed.GetComponent(typeof(Reactor));
+                            rxr.set_temp(float.Parse(temperatureValue.GetComponent<Text>().text.Split(" "[0])[0]));
+                            rxr.set_vol(float.Parse(volumeValue.GetComponent<Text>().text.Split(" "[0])[0]));
                         }
                         currentObjs[o.Id] = placed;
                     }
@@ -322,11 +329,11 @@ namespace Rochester.ARTable.Communication
                 string labelA = edge.LabelA;//index of node A type
                 int IdB = edge.IdB;//second node
                 string labelB = edge.LabelB;//index of node B type
-                if (labelA == "cstr" || labelA == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                if (labelA == "cstr" || labelA == "pfr" || labelA == "pbr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
                 {
                     labelA = "reactor";
                 }
-                if (labelB == "cstr" || labelB == "pfr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                if (labelB == "cstr" || labelB == "pfr" || labelB == "pbr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
                 {
                     labelB = "reactor";
                 }
