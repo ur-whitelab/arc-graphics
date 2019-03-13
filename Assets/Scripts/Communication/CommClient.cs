@@ -12,6 +12,7 @@ using UnityEngine.UI;
 using Rochester.ARTable.Particles;
 using System.Linq;
 using Rochester.ARTable.Structures;
+using System.IO;
 
 namespace Rochester.ARTable.Communication
 {
@@ -39,6 +40,8 @@ namespace Rochester.ARTable.Communication
         private GameObject chemical_species;
 
         private GameObject backend;
+        private int screenShotCount;
+        private string dirname;
 
 
         [Tooltip("Follows ZeroMQ syntax")]
@@ -117,6 +120,7 @@ namespace Rochester.ARTable.Communication
         // Use this for initialization
         void Start()
         {
+            screenShotCount = 0;
             //these are the fixed text objects that display the next-placed reactor's temperature and pressure
             temperatureValue = GameObject.Find("TemperatureValue");
             volumeValue = GameObject.Find("VolumeValue");
@@ -186,6 +190,22 @@ namespace Rochester.ARTable.Communication
                 {
                     backend.transform.Find("ColorKey").gameObject.SetActive(true);
                 }
+            }
+            int group_number = 1;
+            if(Input.GetKeyDown("p"))
+            {
+                if(screenShotCount == 0)
+                {
+                    while(Directory.Exists("screenshots/group_" + group_number))
+                    {
+                        group_number++;//get latest group to go
+                    }
+                    dirname = "Screenshots/group_" + group_number;
+                    Debug.Log("dirname is " + dirname);
+                    var folder = Directory.CreateDirectory(dirname);
+                }
+                screenShotCount++;
+                UnityEngine.ScreenCapture.CaptureScreenshot(dirname + "/configuration_" + screenShotCount + ".jpg");
             }
             if(Input.GetKeyDown(KeyCode.Backspace))
             {
@@ -275,7 +295,7 @@ namespace Rochester.ARTable.Communication
             foreach(var key in system.Nodes.Keys)
             {
                 var o = system.Nodes[key];
-
+                bool rxr_is_batch = false;
                 string label = o.Label;
                 if (label == "conditions" && GameObject.Find("Backend/ColorKey/TemperatureValue") != null && GameObject.Find("Backend/ColorKey/VolumeValue") != null)//temperature and pressure updates are passed as a special 'node'
                 {
@@ -289,6 +309,10 @@ namespace Rochester.ARTable.Communication
                 {
                     if (label == "cstr" || label == "pfr" || label == "pbr")//Unity display doesn't care about reactor type, all use the "reactor" prefab.
                     {
+                        if (label == "pbr")
+                        {
+                            rxr_is_batch = true;
+                        }
                         label = "reactor";
                     }
                     var currentObjs = getManagedObjects(o.Label);
@@ -303,6 +327,7 @@ namespace Rochester.ARTable.Communication
                             Reactor rxr = (Reactor) placed.GetComponent(typeof(Reactor));
                             rxr.set_temp(float.Parse(temperatureValue.GetComponent<Text>().text.Split(" "[0])[0]));
                             rxr.set_vol(float.Parse(volumeValue.GetComponent<Text>().text.Split(" "[0])[0]));
+                            rxr.set_batch_status(rxr_is_batch);
                         }
                         currentObjs[o.Id] = placed;
                     }

@@ -11,12 +11,15 @@ namespace Rochester.ARTable.Structures
         private float r;
         private float temperature;
         private float volume;
+        private bool is_batch;
+        private string fraction_label;
 
         // Use this for initialization
         void Start()
         {
             fraction_dict = new Dictionary<int, Transform>();
             r = (float)6.25;//just an eyeballed distance to outer edge of the circle
+            is_batch = false;
             //update color proportions
             Renderer rend = this.GetComponent<Renderer>();
             rend.material.shader = Shader.Find("Custom/WedgeCircle");
@@ -39,6 +42,21 @@ namespace Rochester.ARTable.Structures
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
             temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text + volumeValue.GetComponent<Text>().text;
 
+        }
+
+        public void set_batch_status(bool value)
+        {
+            this.is_batch = value;
+            Debug.Log("set_batch_status has been called and is_batch is now " + this.is_batch);
+            if(this.is_batch)
+            {
+                this.fraction_label = "mol%";
+            }
+            else
+            {
+                this.fraction_label = "mol/s";
+            }
+            Debug.Log("Fraction label has been set to " + this.fraction_label);
         }
 
         public void set_temp(float new_temp) //Called in CommClient.cs to set the new temp (and new vol, see below) from the dial to reactor object
@@ -72,6 +90,8 @@ namespace Rochester.ARTable.Structures
             Renderer rend = this.GetComponent<Renderer>();
             float temperature = this.temperature;
             float volume = this.volume;
+            bool is_batch = this.is_batch;
+            string fraction_label = this.fraction_label;
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
             temp_canvas.GetComponent<Text>().text = "" + (int)temperature + " K | " + (int)volume + " L";
 
@@ -115,7 +135,7 @@ namespace Rochester.ARTable.Structures
                     fraction_dict.Add(i, new_text);//keep track of it -- need both transform and its text for positioning...
                     if(frac != 1.0 && frac != 0.0){
                         new_text.SetPositionAndRotation(new Vector3(this.transform.position.x + r * Mathf.Cos(sum * 2 * Mathf.PI + offset ), this.transform.position.y + r * Mathf.Sin(sum * 2 * Mathf.PI + offset ), 0), Quaternion.identity);
-                        new_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F2") + "mol/s";
+                        new_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F2") + fraction_label;
                     }
                     else{
                         new_text.GetComponent<Text>().text = "";
@@ -129,7 +149,7 @@ namespace Rochester.ARTable.Structures
                         existing_text.GetComponent<Text>().text = "";
                     }
                     else{
-                        existing_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F2") + "mol/s";
+                        existing_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F2") + fraction_label;
                     }
 
                 }
