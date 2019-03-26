@@ -19,7 +19,7 @@ namespace Rochester.ARTable.Structures
         private Graph system;//the system of connected reactors
 
         private WebCamTexture cameraTexture;
-        private Texture2D cameraImage = new Texture2D(cameraTexture.width, cameraTexture.height);
+        private Texture2D cameraImage;
         private byte[] rawImageBytes;
         private TFGraph tensorFlowGraph;//the TensorFlow graph model
         private TFSession tensorFlowSession;//the TensorFlow session for executing the graph
@@ -39,13 +39,14 @@ namespace Rochester.ARTable.Structures
             }
 #endif
             tensorFlowGraph = new TFGraph();
-            tensorFlowGraph.Import(model);
-            tensorFlowSession = new TFSession(m_graph);
+            //tensorFlowGraph.Import(model);
+            tensorFlowSession = new TFSession(tensorFlowGraph);
 
             //set up camera texture
             if(cameraTexture == null)
             {
-                cameraTexture = new WebCamTexture();    
+                cameraTexture = new WebCamTexture();
+                cameraImage = new Texture2D(cameraTexture.width, cameraTexture.height);
             }
             boundingBoxes = new List<Vector4>();
         }
@@ -67,15 +68,17 @@ namespace Rochester.ARTable.Structures
             //nothing yet
             return new List<Vector4>();
         }
+
+
         // Update is called once per frame
         void Update()
         {
             //wait for frame to be done
-            yield return new WaitForEndOfFrame();       
+            //yield return new WaitForEndOfFrame();       
             //get camera's view
-            cameraView.SetPixels(cameraTexture.GetPixels());
-            cameraView.Apply();
-            rawImageBytes = cameraView.EncodeToJPG(); // can also do EncodeToPNG()
+            cameraImage.SetPixels(cameraTexture.GetPixels());
+            cameraImage.Apply();
+            rawImageBytes = cameraImage.EncodeToJPG(); // can also do EncodeToPNG()
             //call model on camera's view
             boundingBoxes = getBoundingBoxes(tensorFlowGraph, rawImageBytes);
             foreach(Vector4 bbox in boundingBoxes)//get all bounding boxes//TODO: write this
