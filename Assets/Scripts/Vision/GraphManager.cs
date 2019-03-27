@@ -21,32 +21,33 @@ namespace Rochester.Physics.Communication{
         private int edgesAdded;
         // Use this for initialization
         void Start () {
+            system = new Graph();
             edgesAdded = 0; //no edges when starting
         }
         //add nodes to the graph
         public void AddNode (int id, string label) {
-            system.Nodes.Add(node, null);
-            o = system.Nodes[id];
+            system.Nodes.Add(id, new Node());
+            Node o = system.Nodes[id];
             o.Label = label;
         }
         //add connections between nodes
-        public void ConnectNodes (int source, string sourceLabel, int target, string targetLabel) {
+        public void ConnectNodes (Node A, Node B){
             edgesAdded += 1;
-            system.Edges.Add(edgesAdded, null);
-            system.Edges[edgesAdded].idA = source;
-            system.Edges[edgesAdded].labelA = sourceLabel;
-            system.Edges[edgesAdded].idB = target;
-            system.Edges[edgesAdded].labelB = target;
+            system.Edges.Add(edgesAdded, new Edge());
+            system.Edges[edgesAdded].idA = A.Id;
+            system.Edges[edgesAdded].labelA = A.Label;
+            system.Edges[edgesAdded].idB = B.Id;
+            system.Edges[edgesAdded].labelB = B.Label;
         }
         //delete nodes from the graph
-        public void DeleteNode (int node) {
+        public void DeleteNode (int nodeId) {
             //remove the node from graph
-            if (system.ContainsKey(node)){
-                system.Nodes.Remove(node);
+            if (system.Nodes.ContainsKey(nodeId)){
+                system.Nodes.Remove(nodeId);
             }
             //remove edges that contain that node
-            foreach(var key in system.Edges){
-                if (key.idA == node || key.idB == node){
+            foreach(var key in system.Edges.Keys){
+                if (system.Edges[key].idA == nodeId || system.Edges[key].idB == nodeId){
                     system.Edges.Remove(key);
                     edgesAdded -= 1;
                 }
