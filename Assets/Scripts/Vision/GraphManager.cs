@@ -34,10 +34,10 @@ namespace Rochester.Physics.Communication{
         public void ConnectNodes (Node A, Node B){
             edgesAdded += 1;
             system.Edges.Add(edgesAdded, new Edge());
-            system.Edges[edgesAdded].idA = A.Id;
-            system.Edges[edgesAdded].labelA = A.Label;
-            system.Edges[edgesAdded].idB = B.Id;
-            system.Edges[edgesAdded].labelB = B.Label;
+            system.Edges[edgesAdded].IdA = A.Id;
+            system.Edges[edgesAdded].LabelA = A.Label;
+            system.Edges[edgesAdded].IdB = B.Id;
+            system.Edges[edgesAdded].LabelB = B.Label;
         }
         //delete nodes from the graph
         public void DeleteNode (int nodeId) {
@@ -47,7 +47,7 @@ namespace Rochester.Physics.Communication{
             }
             //remove edges that contain that node
             foreach(var key in system.Edges.Keys){
-                if (system.Edges[key].idA == nodeId || system.Edges[key].idB == nodeId){
+                if (system.Edges[key].IdA == nodeId || system.Edges[key].IdB == nodeId){
                     system.Edges.Remove(key);
                     edgesAdded -= 1;
                 }

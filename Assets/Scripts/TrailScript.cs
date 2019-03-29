@@ -15,36 +15,70 @@ public class TrailScript : MonoBehaviour
     //public GameObject camera;
     public List<GameObject> Points = new List<GameObject>();
     private Camera camera;
-
+    private float lineWidth;
+    private Vector3 lineStartPoint;
+    private Vector3 lineEndPoint;
+    private Vector3[] points;
     // Use this for initialization
     void Start()
     {
         camera = Camera.main;
+        lineWidth = 0.05f;
+        lineStartPoint = new Vector3(0, 0, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        LineRenderer line = this.GetComponent<LineRenderer>();
         if (Input.GetMouseButton(0) || Input.touchCount > 0)
         {
-            Debug.Log("Touched");
             Touch touch = Input.GetTouch(0);
-            Vector2 scaledFirstTouch = touch.position;
-            Vector2 cameraDims = new Vector2(camera.pixelWidth, camera.pixelHeight);
-            Vector2 unitaryFirstTouch = scaledFirstTouch / cameraDims;
-            Debug.Log("Touched Unitary Position " + unitaryFirstTouch.x + "," + unitaryFirstTouch.y);
+            Debug.Log("Touched Position " + touch.position.x + "," + touch.position.y);
             RaycastHit hit;
-            Ray ray = camera.ViewportPointToRay(new Vector3(unitaryFirstTouch.x, unitaryFirstTouch.y, 0));
-            if(Physics.Raycast(ray.origin, ray.direction, out hit))
+            Ray ray = camera.ScreenPointToRay(touch.position);
+            Debug.Log("Touched");
+            Vector3 targetPoint = new Vector3(touch.position.x, touch.position.y, camera.nearClipPlane);
+            if (touch.phase == TouchPhase.Began)
             {
-                if(hit.collider.name == "coil_1")
+                if (Physics.Raycast(ray.origin, ray.direction, out hit))
                 {
-                    Debug.Log("Hit a raycast on coil_1!");
+                    if (hit.collider.name == "pfr")
+                    {
+                        Debug.Log("Hit a raycast on pfr!");
+                        lineStartPoint = hit.collider.transform.position;
+                        
+                        this.points = new Vector3[] { lineStartPoint, lineStartPoint };//put first point as first clicked object's center
+                        line.positionCount = this.points.Length;
+                        line.SetPositions(this.points);
+                        line.startWidth = lineWidth;
+                        line.endWidth = lineWidth;
+                    }
+                    else
+                    {
+                        Debug.Log("no raycast hit");
+                    }
                 }
-                else
+            }
+            else if(touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
+            {
+                if (Physics.Raycast(ray.origin, ray.direction, out hit))
                 {
-                    Debug.Log("no raycast hit");
+                    if (hit.collider.name == "pfr")//TODO: add other reactors
+                    {
+                        Debug.Log("Hit a raycast on pfr!");
+                        lineEndPoint = hit.collider.transform.position;
+
+                        this.points = new Vector3[] { lineStartPoint, lineEndPoint };//put first point as first clicked object's center
+                        line.positionCount = this.points.Length;
+                        line.SetPositions(this.points);
+                        line.startWidth = lineWidth;
+                        line.endWidth = lineWidth;
+                    }
+                    else
+                    {
+                        Debug.Log("no raycast hit");
+                    }
                 }
             }
             //Vector3 camPos = camera.transform.position;
