@@ -15,12 +15,10 @@ public class TouchManager : MonoBehaviour
 
     public GameObject gameObject;
     //public GameObject camera;
-    public List<GameObject> Points = new List<GameObject>();
     private Camera camera;
     private float lineWidth;
     private Vector3 lineStartPoint;
     private Vector3 lineEndPoint;
-    private List<Vector3> points;
     //private Graph system;
     private GraphManager system;
     private int firstNodeId;
@@ -31,7 +29,6 @@ public class TouchManager : MonoBehaviour
     {
         camera = Camera.main;
         lineWidth = 0.05f;
-        points = new List<Vector3>();
         system = new GraphManager();
     }
 
@@ -39,40 +36,120 @@ public class TouchManager : MonoBehaviour
     void Update()
     {
         LineRenderer line = this.GetComponent<LineRenderer>();
-        if (Input.GetMouseButton(0) || Input.touchCount > 0)
+        if (Input.touchCount > 0)
         {
-            Touch touch;
-            if (Input.touches.Length > 0)
+            foreach (Touch touch in Input.touches)
             {
-                touch = Input.GetTouch(0);
                 RaycastHit hit;
                 Ray ray = camera.ScreenPointToRay(touch.position);
-                Vector3 targetPoint = new Vector3(touch.position.x, touch.position.y, camera.nearClipPlane);
-                if (touch.phase == TouchPhase.Began)
+                Color color;
+                switch (touch.phase)
                 {
-                    if (Physics.Raycast(ray.origin, ray.direction, out hit))
-                    {
-                        if (hit.collider.name == "pfr")
+                    case TouchPhase.Began:
+                        color = Color.green;
+                        Debug.DrawRay(ray.origin, ray.direction * 20, color, 100.0f);
+                        if (Physics.Raycast(ray.origin, ray.direction, out hit))
                         {
-                            Debug.Log("Hit a raycast on pfr!");
-                            lineStartPoint = hit.collider.transform.position;
-                            points.Add(lineStartPoint);//append the start point
-                            Debug.Log("in Began phase, line start point is " + lineStartPoint);
-                            Reactor thisRxr = hit.collider.GetComponent< Reactor >();
-                            firstNodeId = thisRxr.Id;
-                            if (!system.idExists(firstNodeId))
+                            if (hit.collider.name == "pfr")
                             {
-                                system.AddNode(firstNodeId, hit.collider.name);
+                                lineStartPoint = hit.collider.transform.position;
+                                Debug.Log("in Began phase, line start point is " + lineStartPoint);
+                                Reactor thisRxr = hit.collider.GetComponent<Reactor>();
+                                firstNodeId = thisRxr.Id;
+                                if (!system.idExists(firstNodeId))
+                                {
+                                    system.AddNode(firstNodeId, hit.collider.name);
+                                }
                             }
                         }
-                        else
+                        break;
+                    case TouchPhase.Moved:
+                        if (Physics.Raycast(ray.origin, ray.direction, out hit))
                         {
-                            Debug.Log("no pfr hit");
+                            if (hit.collider.name == "pfr")
+                            {
+                                if(lineStartPoint == Vector3.zero)
+                                {
+                                    lineStartPoint = hit.collider.transform.position;
+                                }
+                                else
+                                {
+                                    lineEndPoint = hit.collider.transform.position;
+                                }
+                                Reactor thisRxr = hit.collider.GetComponent<Reactor>();
+                                if(firstNodeId == -1)
+                                {
+                                    firstNodeId = thisRxr.Id;
+                                }
+                                if (!system.idExists(firstNodeId) && firstNodeId != -1)
+                                {
+                                    system.AddNode(firstNodeId, hit.collider.name);
+                                }
+                            }
                         }
-                    }
+                        break;
+                    case TouchPhase.Stationary:
+                        if (Physics.Raycast(ray.origin, ray.direction, out hit))
+                        {
+                            if (hit.collider.name == "pfr")
+                            {
+                                if (lineStartPoint == Vector3.zero)
+                                {
+                                    lineStartPoint = hit.collider.transform.position;
+                                }
+                                else
+                                {
+                                    lineEndPoint = hit.collider.transform.position;
+                                }
+                                Reactor thisRxr = hit.collider.GetComponent<Reactor>();
+                                if (firstNodeId == -1)
+                                {
+                                    firstNodeId = thisRxr.Id;
+                                }
+                                if (!system.idExists(firstNodeId) && firstNodeId != -1)
+                                {
+                                    system.AddNode(firstNodeId, hit.collider.name);
+                                }
+                            }
+                        }
+                        break;
+                    case TouchPhase.Ended:
+                        color = Color.red;
+                        Debug.DrawRay(ray.origin, ray.direction * 20, Color.cyan, 100.0f);
+                        if (Physics.Raycast(ray.origin, ray.direction, out hit))
+                        {
+                            if (hit.collider.name == "pfr")//TODO: add other reactors
+                            {
+                                lineEndPoint = hit.collider.transform.position;
+                                Reactor thisRxr = hit.collider.GetComponent<Reactor>();
+                                secondNodeId = thisRxr.Id;
+                                if (!system.idExists(secondNodeId))
+                                {
+                                    system.AddNode(secondNodeId, hit.collider.name);
+                                }
+                                if (firstNodeId != secondNodeId && firstNodeId != -1)
+                                {
+                                    system.ConnectById(firstNodeId, secondNodeId);
+                                }
+                                Debug.Log("In Ended phase, line points are: " + lineStartPoint + ", " + lineEndPoint);
+                            }
+                        }
+                        //Even if we didn't get a raycast hit, draw a line between the last two rxrs we swiped through...
+                        if (lineStartPoint != Vector3.zero)
+                        {
+                            line.positionCount = 2;
+                            Vector3[] input = new Vector3[] { lineStartPoint, lineEndPoint };
+                            line.SetPositions(input);
+                            line.startWidth = lineWidth;
+                            line.endWidth = lineWidth;
+                        }
+                        //reset
+                        lineStartPoint = Vector3.zero;
+                        firstNodeId = -1;
+                        break;
                 }
-                else if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
-                {/*
+                /*if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
+                {
                     Debug.Log("Touch phase: " + touch.phase);
                     if (Physics.Raycast(ray.origin, ray.direction, out hit))
                     {
@@ -90,44 +167,8 @@ public class TouchManager : MonoBehaviour
                         {
                             Debug.Log("no raycast hit");
                         }
-                    }*/
-                }
-                else if (touch.phase == TouchPhase.Ended)
-                {
-                    if (Physics.Raycast(ray.origin, ray.direction, out hit))
-                    {
-                        if (hit.collider.name == "pfr")//TODO: add other reactors
-                        {
-                            Debug.Log("Hit a raycast on pfr!");
-                            lineEndPoint = hit.collider.transform.position;
-                            while(points.Count >= 2)
-                            {
-                                points.RemoveAt(0);//remove oldest point(s)
-                            }
-                            points.Add(lineEndPoint);
-                            Reactor thisRxr = hit.collider.GetComponent<Reactor>();
-                            secondNodeId = thisRxr.Id;
-                            if (!system.idExists(secondNodeId))
-                            {
-                                system.AddNode(secondNodeId, hit.collider.name);
-                            }
-                            if(firstNodeId != secondNodeId)
-                            {
-                                system.ConnectById(firstNodeId, secondNodeId);
-                            }
-                            Debug.Log("In Ended phase, line points are: " + lineStartPoint + ", " + lineEndPoint);
-                            line.positionCount = 2;
-                            Vector3[] input = new Vector3[] { this.points[0], this.points[1] };
-                            line.SetPositions(input);
-                            line.startWidth = lineWidth;
-                            line.endWidth = lineWidth;
-                        }
-                        else
-                        {
-                            Debug.Log("no raycast hit");
-                        }
                     }
-                }
+                }*/
                 //Vector3 camPos = camera.transform.position;
                 //Vector3 camDirection = camera.transform.forward;
                 //Quaternion camRotation = camera.transform.rotation;
@@ -137,7 +178,7 @@ public class TouchManager : MonoBehaviour
                 Vector3 spawnPos = camPos + (camDirection * spawnDistance);
                 GameObject cur = Instantiate(gameObject, spawnPos, camRotation);
                 cur.transform.SetParent(this.transform);*/
-            }
+            }   
         }
     }
 }
