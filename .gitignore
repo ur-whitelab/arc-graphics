@@ -58,5 +58,5 @@ ProjectSettings/**
 *_history
 
 #our packages repo is too large. have to manually install them
-/packages/**
-/packages
+#/packages/**
+#/packages
