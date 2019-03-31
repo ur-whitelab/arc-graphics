@@ -13,10 +13,15 @@ namespace Rochester.ARTable.Structures
         private float volume;
         private bool is_batch;
         private string fraction_label;
+        public int Id;
+        private bool selected;
+        private Renderer[] renderers;
 
         // Use this for initialization
         void Start()
         {
+            selected = false;
+            /*
             fraction_dict = new Dictionary<int, Transform>();
             r = (float)6.25;//just an eyeballed distance to outer edge of the circle
             is_batch = false;
@@ -41,7 +46,28 @@ namespace Rochester.ARTable.Structures
             GameObject volumeValue = GameObject.Find("Backend/ColorKey/VolumeValue");
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
             temp_canvas.GetComponent<Text>().text = temperatureValue.GetComponent<Text>().text + volumeValue.GetComponent<Text>().text;
+            */
+        }
 
+        public void toggleHighlight()
+        {
+            //highlight this reactor, or de-highlight it.
+            selected = !selected;
+            renderers = this.GetComponentsInChildren<Renderer>();
+            if (selected)
+            {
+                foreach (Renderer rend in renderers)
+                {
+                    rend.material.color = Color.green;
+                }
+            }
+            else  //not selected
+            {
+                foreach (Renderer rend in renderers)
+                {
+                    rend.material.color = Color.gray;
+                }
+            }
         }
 
         public void set_batch_status(bool value)
@@ -87,6 +113,7 @@ namespace Rochester.ARTable.Structures
         // Update is called once per frame
         void Update()
         {
+            /*
             Renderer rend = this.GetComponent<Renderer>();
             float temperature = this.temperature;
             float volume = this.volume;
@@ -165,6 +192,7 @@ namespace Rochester.ARTable.Structures
                     fraction_dict.Remove(i);
                 }
             }
+        */
         }
     }
 }

@@ -122,6 +122,7 @@ public class TouchManager : MonoBehaviour
                             {
                                 lineEndPoint = hit.collider.transform.position;
                                 Reactor thisRxr = hit.collider.GetComponent<Reactor>();
+                                thisRxr.toggleHighlight();
                                 secondNodeId = thisRxr.Id;
                                 if (!system.idExists(secondNodeId))
                                 {
