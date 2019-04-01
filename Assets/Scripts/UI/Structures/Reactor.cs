@@ -49,6 +49,11 @@ namespace Rochester.ARTable.Structures
             */
         }
 
+        public bool getSelected()
+        {
+            return (selected);
+        }
+
         public void toggleHighlight()
         {
             //highlight this reactor, or de-highlight it.

@@ -23,6 +23,7 @@ public class TouchManager : MonoBehaviour
     private GraphManager system;
     private int firstNodeId;
     private int secondNodeId;
+    private Reactor selectedReactor;
 
     // Use this for initialization
     void Start()
@@ -30,6 +31,8 @@ public class TouchManager : MonoBehaviour
         camera = Camera.main;
         lineWidth = 0.05f;
         system = new GraphManager();
+        selectedReactor = null;
+        firstNodeId = -1;
     }
 
     // Update is called once per frame
@@ -54,8 +57,8 @@ public class TouchManager : MonoBehaviour
                             {
                                 lineStartPoint = hit.collider.transform.position;
                                 Debug.Log("in Began phase, line start point is " + lineStartPoint);
-                                Reactor thisRxr = hit.collider.GetComponent<Reactor>();
-                                firstNodeId = thisRxr.Id;
+                                Reactor hitRxr = hit.collider.GetComponent<Reactor>();
+                                firstNodeId = hitRxr.Id;
                                 if (!system.idExists(firstNodeId))
                                 {
                                     system.AddNode(firstNodeId, hit.collider.name);
@@ -76,10 +79,10 @@ public class TouchManager : MonoBehaviour
                                 {
                                     lineEndPoint = hit.collider.transform.position;
                                 }
-                                Reactor thisRxr = hit.collider.GetComponent<Reactor>();
+                                Reactor hitRxr = hit.collider.GetComponent<Reactor>();
                                 if(firstNodeId == -1)
                                 {
-                                    firstNodeId = thisRxr.Id;
+                                    firstNodeId = hitRxr.Id;
                                 }
                                 if (!system.idExists(firstNodeId) && firstNodeId != -1)
                                 {
@@ -101,10 +104,10 @@ public class TouchManager : MonoBehaviour
                                 {
                                     lineEndPoint = hit.collider.transform.position;
                                 }
-                                Reactor thisRxr = hit.collider.GetComponent<Reactor>();
+                                Reactor hitRxr = hit.collider.GetComponent<Reactor>();
                                 if (firstNodeId == -1)
                                 {
-                                    firstNodeId = thisRxr.Id;
+                                    firstNodeId = hitRxr.Id;
                                 }
                                 if (!system.idExists(firstNodeId) && firstNodeId != -1)
                                 {
@@ -116,14 +119,13 @@ public class TouchManager : MonoBehaviour
                     case TouchPhase.Ended:
                         color = Color.red;
                         Debug.DrawRay(ray.origin, ray.direction * 20, Color.cyan, 100.0f);
-                        if (Physics.Raycast(ray.origin, ray.direction, out hit))
+                        if (Physics.Raycast(ray.origin, ray.direction, out hit))//TODO: this logic  will break if we put a game plane underneath everything
                         {
                             if (hit.collider.name == "pfr")//TODO: add other reactors
                             {
                                 lineEndPoint = hit.collider.transform.position;
-                                Reactor thisRxr = hit.collider.GetComponent<Reactor>();
-                                thisRxr.toggleHighlight();
-                                secondNodeId = thisRxr.Id;
+                                Reactor hitRxr = hit.collider.GetComponent<Reactor>();
+                                secondNodeId = hitRxr.Id;
                                 if (!system.idExists(secondNodeId))
                                 {
                                     system.AddNode(secondNodeId, hit.collider.name);
@@ -132,10 +134,32 @@ public class TouchManager : MonoBehaviour
                                 {
                                     system.ConnectById(firstNodeId, secondNodeId);
                                 }
+                                if(firstNodeId == -1 || firstNodeId == secondNodeId)
+                                {
+                                    hitRxr.toggleHighlight();//if not dragging, toggle tapped rxr
+                                    if(selectedReactor != null && hitRxr != selectedReactor && selectedReactor.getSelected())
+                                    {
+                                        selectedReactor.toggleHighlight();
+                                    }
+                                    selectedReactor = hitRxr;
+                                }
+                                else if(selectedReactor != null && selectedReactor.getSelected())
+                                {
+                                    selectedReactor.toggleHighlight();//if dragging, toggle previously selected rxr
+                                }
                                 Debug.Log("In Ended phase, line points are: " + lineStartPoint + ", " + lineEndPoint);
                             }
                         }
+                        else//didn't hit a reactor, so turn off selected one if it was on
+                        {
+                            if (selectedReactor != null && selectedReactor.getSelected())
+                            {
+                                selectedReactor.toggleHighlight();
+                            }
+                        }
+
                         //Even if we didn't get a raycast hit, draw a line between the last two rxrs we swiped through...
+
                         if (lineStartPoint != Vector3.zero)
                         {
                             line.positionCount = 2;
@@ -143,6 +167,12 @@ public class TouchManager : MonoBehaviour
                             line.SetPositions(input);
                             line.startWidth = lineWidth;
                             line.endWidth = lineWidth;
+                        }
+                        else
+                        {
+                            line.positionCount = 2;
+                            line.SetPositions(new Vector3[] { Vector3.zero, Vector3.zero });
+
                         }
                         //reset
                         lineStartPoint = Vector3.zero;

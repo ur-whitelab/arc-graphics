@@ -16,28 +16,33 @@ using System.IO;
 
 namespace Rochester.Physics.Communication{
     public class GraphManager : MonoBehaviour {
-        private Graph system;//the system of connected reactors
+        private Graph system = new Graph();//the system of connected reactors
         private Dictionary<int, List<int>> edgeList; //to keep track of system edges
         private int edgesAdded;
         // Use this for initialization
         void Start () {
-            system = new Graph();
             edgesAdded = 0; //no edges when starting
         }
         //add nodes to the graph
         public void AddNode (int id, string label) {
-            system.Nodes.Add(id, new Node());
-            Node o = system.Nodes[id];
+            Node o = new Node();
             o.Label = label;
+            o.Id = id;
+            system.Nodes.Add(id, o);
         }
         //add connections between nodes
-        public void ConnectNodes (Node A, Node B){
+        private void ConnectNodes (Node A, Node B){
             edgesAdded += 1;
             system.Edges.Add(edgesAdded, new Edge());
             system.Edges[edgesAdded].IdA = A.Id;
             system.Edges[edgesAdded].LabelA = A.Label;
             system.Edges[edgesAdded].IdB = B.Id;
             system.Edges[edgesAdded].LabelB = B.Label;
+        }
+
+        public void ConnectById(int idA, int idB)
+        {
+            ConnectNodes(system.Nodes[idA], system.Nodes[idB]);
         }
         //delete nodes from the graph
         public void DeleteNode (int nodeId) {
@@ -52,6 +57,11 @@ namespace Rochester.Physics.Communication{
                     edgesAdded -= 1;
                 }
             }
+        }
+
+        public bool idExists(int nodeId)
+        {
+            return (system.Nodes.ContainsKey(nodeId));
         }
 
         public Graph GetGraph () {
