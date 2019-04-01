@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using GoogleARCore;
 using Rochester.Physics.Communication;
+using UnityEngine.UI;
 #if UNITY_EDITOR
 // Set up touch input propagation while using Instant Preview in the editor.
 using Input = GoogleARCore.InstantPreviewInput;
@@ -24,6 +25,7 @@ public class TouchManager : MonoBehaviour
     private int firstNodeId;
     private int secondNodeId;
     private Reactor selectedReactor;
+    public Canvas sliderCanvas;
 
     // Use this for initialization
     void Start()
@@ -33,6 +35,7 @@ public class TouchManager : MonoBehaviour
         system = new GraphManager();
         selectedReactor = null;
         firstNodeId = -1;
+        sliderCanvas.gameObject.SetActive(false);//no sliders at the start
     }
 
     // Update is called once per frame
@@ -119,7 +122,9 @@ public class TouchManager : MonoBehaviour
                     case TouchPhase.Ended:
                         color = Color.red;
                         Debug.DrawRay(ray.origin, ray.direction * 20, Color.cyan, 100.0f);
-                        if (Physics.Raycast(ray.origin, ray.direction, out hit))//TODO: this logic  will break if we put a game plane underneath everything
+                        if (Physics.Raycast(ray.origin, ray.direction, out hit))
+                        //TODO: Add to this if statement a branch to NOT turn off our rxr if we're touching the sliders.
+                        //TODO: this logic  will break if we put a game plane underneath everything
                         {
                             if (hit.collider.name == "pfr")//TODO: add other reactors
                             {
@@ -177,39 +182,31 @@ public class TouchManager : MonoBehaviour
                         //reset
                         lineStartPoint = Vector3.zero;
                         firstNodeId = -1;
-                        break;
-                }
-                /*if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
-                {
-                    Debug.Log("Touch phase: " + touch.phase);
-                    if (Physics.Raycast(ray.origin, ray.direction, out hit))
-                    {
-                        if (hit.collider.name == "pfr")//TODO: add other reactors
+                        if (selectedReactor != null && selectedReactor.getSelected())//if we have selected a reactor, display sliders for it
                         {
-                            Debug.Log("Hit a raycast on pfr!");
-                            //lineEndPoint = hit.collider.transform.position;
-                            //this.points = new Vector3[] { lineStartPoint, lineEndPoint };//put first point as first clicked object's center
-                            line.positionCount = this.points.Length;
-                            line.SetPositions(this.points);
-                            line.startWidth = lineWidth;
-                            line.endWidth = lineWidth;
+                            sliderCanvas.gameObject.SetActive(true);
+                            foreach (Slider slider in sliderCanvas.GetComponentsInChildren<Slider>())
+                            {
+                                if (slider.gameObject.name == "VolumeSlider")
+                                {
+                                    slider.value = selectedReactor.get_vol();
+                                    slider.GetComponentInChildren<Text>().text = "" + (int)slider.value + " L";
+                                }
+                                else if (slider.gameObject.name == "TemperatureSlider")
+                                {
+                                    slider.value = selectedReactor.get_temp();
+                                    slider.GetComponentInChildren<Text>().text = "" + (int)slider.value + " K";
+                                }
+                            }
                         }
                         else
                         {
-                            Debug.Log("no raycast hit");
+                            sliderCanvas.gameObject.SetActive(false);
                         }
-                    }
-                }*/
-                //Vector3 camPos = camera.transform.position;
-                //Vector3 camDirection = camera.transform.forward;
-                //Quaternion camRotation = camera.transform.rotation;
-                //float spawnDistance = 2;
-                /*
-                Debug.Log("Touched" + camPos.x + " " + camPos.y + " " + camPos.z);
-                Vector3 spawnPos = camPos + (camDirection * spawnDistance);
-                GameObject cur = Instantiate(gameObject, spawnPos, camRotation);
-                cur.transform.SetParent(this.transform);*/
+                        break;
+                }
             }   
         }
+        
     }
 }

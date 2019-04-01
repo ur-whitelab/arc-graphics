@@ -9,8 +9,8 @@ namespace Rochester.ARTable.Structures
     {
         private Dictionary<int, Transform> fraction_dict;
         private float r;
-        private float temperature;
-        private float volume;
+        public float temperature;
+        public float volume;
         private bool is_batch;
         private string fraction_label;
         public int Id;
@@ -95,9 +95,19 @@ namespace Rochester.ARTable.Structures
             temperature = new_temp;
         }
 
+        public float get_temp()
+        {
+            return (temperature);
+        }
+
         public void set_vol(float new_vol)
         {
             volume = new_vol;
+        }
+
+        public float get_vol()
+        {
+            return (volume);
         }
 
         public void set_molefrac(int i, Renderer rend, float mole_frac)
