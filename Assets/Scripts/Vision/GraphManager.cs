@@ -31,13 +31,30 @@ namespace Rochester.Physics.Communication{
             system.Nodes.Add(id, o);
         }
         //add connections between nodes
-        private void ConnectNodes (Node A, Node B){
+        private void ConnectNodes (Node A, Node B){//TODO: add removal of edges that already exist.
             edgesAdded += 1;
-            system.Edges.Add(edgesAdded, new Edge());
-            system.Edges[edgesAdded].IdA = A.Id;
-            system.Edges[edgesAdded].LabelA = A.Label;
-            system.Edges[edgesAdded].IdB = B.Id;
-            system.Edges[edgesAdded].LabelB = B.Label;
+            Edge edge = new Edge();
+            edge.IdA = A.Id;
+            edge.LabelA = A.Label;
+            edge.IdB = B.Id;
+            edge.LabelB = B.Label;
+            system.Edges.Add(edgesAdded, edge);
+        }
+
+        public bool CheckConnectedById(int idA, int idB)
+        {
+            //checks if two graph nodes are connected by their ID values.
+            if(system.Nodes.ContainsKey(idA) && system.Nodes.ContainsKey(idB))
+            {
+                for(int i = 0; i < system.edgesAdded; i++)
+                {
+                    if((system.Edges[i].IdA == idA && system.Edges[i].IdB == idB) || system.Edges[i].IdB == idA && system.Edges[i].IdA == idB)
+                    {
+                        return(true);
+                    }
+                }
+            }    
+            return(false);
         }
 
         public void ConnectById(int idA, int idB)
