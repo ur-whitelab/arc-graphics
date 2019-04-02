@@ -111,12 +111,20 @@ public class TouchManager : MonoBehaviour
                                 if (firstNodeId == -1)
                                 {
                                     firstNodeId = hitRxr.Id;
+                                    if (!system.idExists(firstNodeId))
+                                    {
+                                        system.AddNode(firstNodeId, hit.collider.name);
+                                    }
                                 }
-                                if (!system.idExists(firstNodeId) && firstNodeId != -1)
+                                else //we have a first reactor, so put the second one in
                                 {
-                                    system.AddNode(firstNodeId, hit.collider.name);
+                                    secondNodeId = hitRxr.Id;
+                                    if (!system.idExists(secondNodeId))
+                                    {
+                                        system.AddNode(secondNodeId, hit.collider.name);
+                                    }
                                 }
-                            }
+                            }   
                         }
                         break;
                     case TouchPhase.Ended:
@@ -130,15 +138,12 @@ public class TouchManager : MonoBehaviour
                             {
                                 lineEndPoint = hit.collider.transform.position;
                                 Reactor hitRxr = hit.collider.GetComponent<Reactor>();
-                                secondNodeId = hitRxr.Id;
+                                secondNodeId = hitRxr.Id;//TODO: refactor this logic so connection in graph structure also happens by just drag-over
                                 if (!system.idExists(secondNodeId))
                                 {
                                     system.AddNode(secondNodeId, hit.collider.name);
                                 }
-                                if (firstNodeId != secondNodeId && firstNodeId != -1)
-                                {
-                                    system.ConnectById(firstNodeId, secondNodeId);
-                                }
+                                
                                 if(firstNodeId == -1 || firstNodeId == secondNodeId)
                                 {
                                     hitRxr.toggleHighlight();//if not dragging, toggle tapped rxr
@@ -162,8 +167,22 @@ public class TouchManager : MonoBehaviour
                                 selectedReactor.toggleHighlight();
                             }
                         }
+                        //update connections
+                        if (firstNodeId != secondNodeId && firstNodeId != -1)
+                        {
+                            //connect the reactors in our graph
+                            system.ConnectById(firstNodeId, secondNodeId);
+                            //attach a linerenderer to the end reactor
+                            LineRenderer attachedLine = hitRxr.gameComponent.AddComponent<LineRenderer>() as LineRenderer;
+                            //set the lineRenderer's points and connect them visually
+                            attachedLine.positionCount = 2;
+                            Vector3[] input = new Vector3[] { lineStartPoint, lineEndPoint };
+                            attachedLine.SetPositions(input);
+                            line.startWidth = lineWidth;
+                            line.endWidth = lineWidth;
+                        }
 
-                        //Even if we didn't get a raycast hit, draw a line between the last two rxrs we swiped through...
+                        //TODO: delete connection between reactors by re-drawing the connection.
 
                         if (lineStartPoint != Vector3.zero)
                         {
