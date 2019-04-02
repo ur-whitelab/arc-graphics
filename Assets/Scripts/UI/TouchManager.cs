@@ -25,6 +25,7 @@ public class TouchManager : MonoBehaviour
     private int firstNodeId;
     private int secondNodeId;
     private Reactor selectedReactor;
+    private Reactor lastHitReactor;
     public Canvas sliderCanvas;
 
     // Use this for initialization
@@ -56,11 +57,12 @@ public class TouchManager : MonoBehaviour
                         Debug.DrawRay(ray.origin, ray.direction * 20, color, 100.0f);
                         if (Physics.Raycast(ray.origin, ray.direction, out hit))
                         {
-                            if (hit.collider.name == "pfr")
+                            if (hit.collider.name == "pfr" || hit.collider.name == "cstr" || hit.collider.name == "pbr")
                             {
                                 lineStartPoint = hit.collider.transform.position;
                                 Debug.Log("in Began phase, line start point is " + lineStartPoint);
                                 Reactor hitRxr = hit.collider.GetComponent<Reactor>();
+                                lastHitReactor = hitRxr;
                                 firstNodeId = hitRxr.Id;
                                 if (!system.idExists(firstNodeId))
                                 {
@@ -72,7 +74,7 @@ public class TouchManager : MonoBehaviour
                     case TouchPhase.Moved:
                         if (Physics.Raycast(ray.origin, ray.direction, out hit))
                         {
-                            if (hit.collider.name == "pfr")
+                            if (hit.collider.name == "pfr" || hit.collider.name == "cstr" || hit.collider.name == "pbr")
                             {
                                 if(lineStartPoint == Vector3.zero)
                                 {
@@ -83,6 +85,7 @@ public class TouchManager : MonoBehaviour
                                     lineEndPoint = hit.collider.transform.position;
                                 }
                                 Reactor hitRxr = hit.collider.GetComponent<Reactor>();
+                                lastHitReactor = hitRxr;
                                 if(firstNodeId == -1)
                                 {
                                     firstNodeId = hitRxr.Id;
@@ -97,7 +100,7 @@ public class TouchManager : MonoBehaviour
                     case TouchPhase.Stationary:
                         if (Physics.Raycast(ray.origin, ray.direction, out hit))
                         {
-                            if (hit.collider.name == "pfr")
+                            if (hit.collider.name == "pfr" || hit.collider.name == "cstr" || hit.collider.name == "pbr")
                             {
                                 if (lineStartPoint == Vector3.zero)
                                 {
@@ -108,6 +111,7 @@ public class TouchManager : MonoBehaviour
                                     lineEndPoint = hit.collider.transform.position;
                                 }
                                 Reactor hitRxr = hit.collider.GetComponent<Reactor>();
+                                lastHitReactor = hitRxr;
                                 if (firstNodeId == -1)
                                 {
                                     firstNodeId = hitRxr.Id;
@@ -134,10 +138,11 @@ public class TouchManager : MonoBehaviour
                         //TODO: Add to this if statement a branch to NOT turn off our rxr if we're touching the sliders.
                         //TODO: this logic  will break if we put a game plane underneath everything
                         {
-                            if (hit.collider.name == "pfr")//TODO: add other reactors
+                            if (hit.collider.name == "pfr" || hit.collider.name == "cstr" || hit.collider.name == "pbr")//TODO: add other reactors
                             {
                                 lineEndPoint = hit.collider.transform.position;
                                 Reactor hitRxr = hit.collider.GetComponent<Reactor>();
+                                lastHitReactor = hitRxr;
                                 secondNodeId = hitRxr.Id;//TODO: refactor this logic so connection in graph structure also happens by just drag-over
                                 if (!system.idExists(secondNodeId))
                                 {
@@ -173,13 +178,31 @@ public class TouchManager : MonoBehaviour
                             //connect the reactors in our graph
                             system.ConnectById(firstNodeId, secondNodeId);
                             //attach a linerenderer to the end reactor
-                            LineRenderer attachedLine = hitRxr.gameComponent.AddComponent<LineRenderer>() as LineRenderer;
-                            //set the lineRenderer's points and connect them visually
-                            attachedLine.positionCount = 2;
-                            Vector3[] input = new Vector3[] { lineStartPoint, lineEndPoint };
-                            attachedLine.SetPositions(input);
-                            line.startWidth = lineWidth;
-                            line.endWidth = lineWidth;
+                            LineRenderer attachedLine = lastHitReactor.gameObject.AddComponent<LineRenderer>() as LineRenderer;
+                            if(attachedLine != null)
+                            {
+                                //set the lineRenderer's points and connect them visually
+                                attachedLine.positionCount = 2;
+                                Vector3[] input = new Vector3[] { lineStartPoint, lineEndPoint };
+                                attachedLine.SetPositions(input);
+                                attachedLine.startColor = attachedLine.endColor = Color.red;
+                                attachedLine.startWidth = lineWidth;
+                                attachedLine.endWidth = lineWidth;
+                            }
+                            else//failed to attach, must already have one
+                            {
+                                attachedLine = lastHitReactor.gameObject.GetComponent<LineRenderer>();//get it
+                                /*List<Vector3> oldpoints = new List<Vector3>();
+                                for (int i = 0; i < attachedLine.positionCount; i++)
+                                {
+                                    oldpoints.Add(attachedLine.GetPosition(i));//fill a list with old positions.
+                                }
+                                oldpoints.Add(lastHitReactor.transform.position);*/
+                                attachedLine.positionCount++;//append a point
+                                attachedLine.SetPosition(attachedLine.positionCount - 1, lastHitReactor.transform.position);//append endpoint to it.
+                                
+                            }
+                            
                         }
 
                         //TODO: delete connection between reactors by re-drawing the connection.

@@ -46,7 +46,7 @@ namespace Rochester.Physics.Communication{
             //checks if two graph nodes are connected by their ID values.
             if(system.Nodes.ContainsKey(idA) && system.Nodes.ContainsKey(idB))
             {
-                for(int i = 0; i < system.edgesAdded; i++)
+                for(int i = 0; i < edgesAdded; i++)
                 {
                     if((system.Edges[i].IdA == idA && system.Edges[i].IdB == idB) || system.Edges[i].IdB == idA && system.Edges[i].IdA == idB)
                     {
