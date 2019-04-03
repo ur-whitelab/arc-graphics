@@ -7,8 +7,8 @@ using UnityEngine.UI;
 #if UNITY_EDITOR
 // Set up touch input propagation while using Instant Preview in the editor.
 using Input = GoogleARCore.InstantPreviewInput;
-using Rochester.ARTable.Structures;
 #endif
+using Rochester.ARTable.Structures;
 
 
 public class TouchManager : MonoBehaviour

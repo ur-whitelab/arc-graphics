@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using GoogleARCore;
 using Rochester.Physics.Communication;
 using TensorFlow;
 using UnityEngine;
@@ -18,7 +20,8 @@ namespace Rochester.ARTable.Structures
         public int ModelImageHeight = 416;
         public int ModelImageWidth = 416;
         public float ConfidenceCutoff = 0.8f;
-        public string ModelPath;
+        public int BoxNumber = 3;
+        public TextAsset Model;
         
 
         private Dictionary<string, string> tracking;//dict of tracked objects.
@@ -28,30 +31,24 @@ namespace Rochester.ARTable.Structures
         private Texture2D cameraImage;
         private byte[] rawImageBytes;
         private TFGraph tensorFlowGraph;//the TensorFlow graph model
-        private TFSession tensorFlowSession;//the TensorFlow session for executing the graph
-        
+        private TFSession tensorFlowSession;//the TensorFlow session for executing the graph        
         // Use this for initialization
         void Start()
         {
             //load model, c/o https://github.com/Unity-Technologies/ml-agents/blob/cb0bfa0382650dee2071eb415147d795721297b1/UnitySDK/Assets/ML-Agents/Scripts/InferenceBrain/TFSharpInferenceEngine.cs
 #if UNITY_ANDROID && !UNITY_EDITOR
             // This needs to ba called only once and will raise an exception if called multiple times 
-            try{
-                TensorFlowSharp.Android.NativeBinding.Init();
+            try{ 
+                // using TensorFlowSharp;
+                // TensorFlowSharp.Android.NativeBinding.Init();
             }
             catch{
 
             }
 #endif
-            tensorFlowGraph = new TFGraph();
-            TextAsset graphModel = Resources.Load(ModelPath) as TextAsset;
-            tensorFlowGraph.Import(graphModel.bytes);
-
-            //set up camera texture
-            if(cameraTexture == null)
-            {
-                cameraTexture = new WebCamTexture(); 
-            }
+            tensorFlowGraph = new TFGraph();            
+            tensorFlowGraph.Import(Model.bytes);
+        
         }
 
         Dictionary<string, string> Track(int id_num, int temperature, int volume){
@@ -69,7 +66,7 @@ namespace Rochester.ARTable.Structures
             return new Vector3();
         }
 
-      List<KeyValuePair<string, Vector4>> getBoundingBoxes(TFGraph graph, byte[] rawImage)
+      List<KeyValuePair<string, Vector4>> getBoundingBoxes(TFGraph graph, TFTensor img, int height, int width)
         {
             //returns a list of reactor types paired with coordinates obtained from TF
             //use our TF model to get bounding boxes
@@ -78,12 +75,14 @@ namespace Rochester.ARTable.Structures
           tensorFlowSession = new TFSession(graph);
           var runner = tensorFlowSession.GetRunner();
           //translate raw image bytes into tensor for input
-          TFTensor imageTensor = TFTensor.CreateString(rawImage);
           //give input tensors to TF graph
-          runner.AddInput (graph ["input/jpeg"] [0], imageTensor);//might be "image:0"? not sure
-          runner.Fetch (graph ["output/boxes"] [0]);//get bounding boxes tensor
-          runner.Fetch (graph ["output/confidences"] [0]);//get label confidences tensor
-          var output = runner.Run(); //run the model
+          runner.AddInput (graph ["input/yuv"] [0], img);
+          runner.AddInput(graph["input/box-number"][0], BoxNumber);
+            runner.AddInput(graph["input/width"][0], width);
+            runner.AddInput(graph["input/height"][0], height);
+            runner.Fetch (graph ["output/boxes"] [0]);//get bounding boxes tensor
+          runner.Fetch (graph ["output/confidences"] [0]);//get label confidences tensor            
+            var output = runner.Run(); //run the model
           TFTensor boxesResult = output[0]; //store outputs
           var boxesValues = (float [,])boxesResult.GetValue();
           TFTensor confidencesResult = output[1];
@@ -127,6 +126,11 @@ namespace Rochester.ARTable.Structures
           return(retval);
         }
 
+        [MonoPInvokeCallback(typeof(TFTensor.Deallocator))]
+        internal static void EmptyDeallocator(IntPtr data, IntPtr len, IntPtr closure)
+        {
+            // presumably AR Core takes care of this. 
+        }
 
         // Update is called once per frame
         void Update()
@@ -134,20 +138,26 @@ namespace Rochester.ARTable.Structures
             //wait for frame to be done before calling TF model
             // yield return new WaitForEndOfFrame();       
             //get camera's view
-            cameraImage.SetPixels(cameraTexture.GetPixels());
-            cameraImage.Apply();
-            rawImageBytes = cameraImage.EncodeToJPG(); // can also do EncodeToPNG()
-            //call model on camera's view
-            var boundingBoxes = getBoundingBoxes(tensorFlowGraph, rawImageBytes);
-            string detectedKey;
-            Vector3 detectedLocation;
-            foreach(var bbox in boundingBoxes)//get all bounding boxes
+            using (var image = Frame.CameraImage.AcquireCameraImageBytes())
             {
-                detectedKey = bbox.Key;
-                detectedLocation = coordinatesFromBox(bbox.Value);//go from 2D bbox image coordinates to 3D game space coordinates
-                Debug.Log(detectedKey + detectedLocation);
-            }
-            
+                if (!image.IsAvailable)
+                {
+                    return;
+                }
+                // TODO Check data type -> (?)
+                TFTensor img_tensor = new TFTensor(TFDataType.Int16, new long[] { image.Height, image.Width }, image.Y, new UIntPtr((uint) (image.YRowStride * image.Height)), EmptyDeallocator, IntPtr.Zero);
+
+                //call model on camera's view
+                var boundingBoxes = getBoundingBoxes(tensorFlowGraph, img_tensor, image.Height, image.Width);
+                string detectedKey;
+                Vector3 detectedLocation;
+                foreach (var bbox in boundingBoxes)//get all bounding boxes
+                {
+                    detectedKey = bbox.Key;
+                    detectedLocation = coordinatesFromBox(bbox.Value);//go from 2D bbox image coordinates to 3D game space coordinates
+                    Debug.Log(detectedKey + detectedLocation);
+                }
+            }                        
         }
     }
 }
