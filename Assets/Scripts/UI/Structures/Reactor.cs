@@ -47,7 +47,7 @@ namespace Rochester.ARTable.Structures
         public void set_batch_status(bool value)
         {
             this.is_batch = value;
-            Debug.Log("set_batch_status has been called and is_batch is now " + this.is_batch);
+            //Debug.Log("set_batch_status has been called and is_batch is now " + this.is_batch);
             if(this.is_batch)
             {
                 this.fraction_label = "mol%";
@@ -135,7 +135,7 @@ namespace Rochester.ARTable.Structures
                     fraction_dict.Add(i, new_text);//keep track of it -- need both transform and its text for positioning...
                     if(frac != 1.0 && frac != 0.0){
                         new_text.SetPositionAndRotation(new Vector3(this.transform.position.x + r * Mathf.Cos(sum * 2 * Mathf.PI + offset ), this.transform.position.y + r * Mathf.Sin(sum * 2 * Mathf.PI + offset ), 0), Quaternion.identity);
-                        new_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F2") + fraction_label;
+                        new_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F3") + fraction_label;
                     }
                     else{
                         new_text.GetComponent<Text>().text = "";
@@ -149,7 +149,7 @@ namespace Rochester.ARTable.Structures
                         existing_text.GetComponent<Text>().text = "";
                     }
                     else{
-                        existing_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F2") + fraction_label;
+                        existing_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F3") + fraction_label;
                     }
 
                 }

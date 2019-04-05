@@ -179,7 +179,7 @@ namespace Rochester.ARTable.Communication
         // Update is called once per frame
         void Update()
         {
-            if(Input.GetKeyDown("l"))
+            /* if(Input.GetKeyDown("l"))
             {
                 training = !training;
                 if (training)
@@ -190,21 +190,27 @@ namespace Rochester.ARTable.Communication
                 {
                     backend.transform.Find("ColorKey").gameObject.SetActive(true);
                 }
-            }
+            }*/
             int group_number = 1;
             if(Input.GetKeyDown("p"))
             {
+                if(!Directory.Exists(Application.dataPath + "/Screenshots"))
+                {
+                    Debug.Log("Did not find a screenshots directory. Creating one...");
+                    Directory.CreateDirectory(Application.dataPath + "/Screenshots");
+                }
                 if(screenShotCount == 0)
                 {
-                    while(Directory.Exists("screenshots/group_" + group_number))
+                    while(Directory.Exists(Application.dataPath + "/Screenshots/group_" + group_number))
                     {
                         group_number++;//get latest group to go
                     }
-                    dirname = "Screenshots/group_" + group_number;
+                    dirname = Application.dataPath + "/Screenshots/group_" + group_number;
                     Debug.Log("dirname is " + dirname);
                     var folder = Directory.CreateDirectory(dirname);
                 }
                 screenShotCount++;
+                Debug.Log("saving a screenshot to " + dirname + "/configuration_" + screenShotCount + ".jpg");
                 UnityEngine.ScreenCapture.CaptureScreenshot(dirname + "/configuration_" + screenShotCount + ".jpg");
             }
             if(Input.GetKeyDown(KeyCode.Backspace))
@@ -509,7 +515,7 @@ namespace Rochester.ARTable.Communication
             {
                 string chem_spec_str = "Backend/ColorKey/Species" + (i+1) + "Text";
                 chemical_species = GameObject.Find(chem_spec_str);
-                chemical_species.GetComponent<Text>().text = System.String.Format(chemical_species_list[i]);
+                //chemical_species.GetComponent<Text>().text = System.String.Format(chemical_species_list[i]);
             }
 
             timeValue = GameObject.Find("Backend/ColorKey/TimeValue");
