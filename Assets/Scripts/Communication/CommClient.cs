@@ -303,6 +303,7 @@ namespace Rochester.ARTable.Communication
                 var o = system.Nodes[key];
                 bool rxr_is_batch = false;
                 string label = o.Label;
+                string incomingLabel = o.Label;
                 if (label == "conditions" && GameObject.Find("Backend/ColorKey/TemperatureValue") != null && GameObject.Find("Backend/ColorKey/VolumeValue") != null)//temperature and pressure updates are passed as a special 'node'
                 {
                     temperatureValue = GameObject.Find("Backend/ColorKey/TemperatureValue");
@@ -331,9 +332,10 @@ namespace Rochester.ARTable.Communication
                         if(label == "reactor")
                         {
                             Reactor rxr = (Reactor) placed.GetComponent(typeof(Reactor));
+                            rxr.set_batch_status(rxr_is_batch);
                             rxr.set_temp(float.Parse(temperatureValue.GetComponent<Text>().text.Split(" "[0])[0]));
                             rxr.set_vol(float.Parse(volumeValue.GetComponent<Text>().text.Split(" "[0])[0]));
-                            rxr.set_batch_status(rxr_is_batch);
+                            rxr.set_label(incomingLabel);
                         }
                         currentObjs[o.Id] = placed;
                     }

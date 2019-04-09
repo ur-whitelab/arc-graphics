@@ -13,6 +13,8 @@ namespace Rochester.ARTable.Structures
         private float volume;
         private bool is_batch;
         private string fraction_label;
+        private string reactorLabel;
+        private float frac_factor;
 
         // Use this for initialization
         void Start()
@@ -51,10 +53,12 @@ namespace Rochester.ARTable.Structures
             if(this.is_batch)
             {
                 this.fraction_label = "mol%";
+                this.frac_factor = 100.0f;
             }
             else
             {
                 this.fraction_label = "mol/s";
+                this.frac_factor = 1.0f;
             }
             Debug.Log("Fraction label has been set to " + this.fraction_label);
         }
@@ -67,6 +71,15 @@ namespace Rochester.ARTable.Structures
         public void set_vol(float new_vol)
         {
             volume = new_vol;
+        }
+
+        public void set_label(string label)
+        {
+            if(label == "pbr")
+            {
+                label = "batch";
+            }
+            reactorLabel = label.ToUpper();//all caps for display purposes
         }
 
         public void set_molefrac(int i, Renderer rend, float mole_frac)
@@ -90,10 +103,13 @@ namespace Rochester.ARTable.Structures
             Renderer rend = this.GetComponent<Renderer>();
             float temperature = this.temperature;
             float volume = this.volume;
+            float frac_factor = this.frac_factor;
             bool is_batch = this.is_batch;
             string fraction_label = this.fraction_label;
             Transform temp_canvas = this.gameObject.transform.GetChild(1).GetChild(0);
             temp_canvas.GetComponent<Text>().text = "" + (int)temperature + " K | " + (int)volume + " L";
+            Transform labelCanvas = this.gameObject.transform.GetChild(2).GetChild(0);
+            labelCanvas.GetComponent<Text>().text = reactorLabel;//set it
 
             int num_wedges = rend.material.GetInt("_NumWedges");
             float frac = 0;
@@ -107,7 +123,6 @@ namespace Rochester.ARTable.Structures
             for(int i =0; i < num_wedges; i++)
             {
                 mole_frac[i] = rend.material.GetFloat("_Fraction" + (i + 1).ToString());
-
                 flow_rates[i] = rend.material.GetFloat("_FlowRate" + (i+1).ToString());
                 flow_rate_sum += flow_rates[i];
             }
@@ -135,7 +150,7 @@ namespace Rochester.ARTable.Structures
                     fraction_dict.Add(i, new_text);//keep track of it -- need both transform and its text for positioning...
                     if(frac != 1.0 && frac != 0.0){
                         new_text.SetPositionAndRotation(new Vector3(this.transform.position.x + r * Mathf.Cos(sum * 2 * Mathf.PI + offset ), this.transform.position.y + r * Mathf.Sin(sum * 2 * Mathf.PI + offset ), 0), Quaternion.identity);
-                        new_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F3") + fraction_label;
+                        new_text.GetComponent<Text>().text = "" + (flow_rates[i] * frac_factor).ToString("F3") + fraction_label;
                     }
                     else{
                         new_text.GetComponent<Text>().text = "";
@@ -149,7 +164,7 @@ namespace Rochester.ARTable.Structures
                         existing_text.GetComponent<Text>().text = "";
                     }
                     else{
-                        existing_text.GetComponent<Text>().text = "" + (flow_rates[i]).ToString("F3") + fraction_label;
+                        existing_text.GetComponent<Text>().text = "" + (flow_rates[i] * frac_factor).ToString("F3") + fraction_label;
                     }
 
                 }
