@@ -360,11 +360,15 @@ namespace Rochester.ARTable.Communication
                 string labelA = edge.LabelA;//index of node A type
                 int IdB = edge.IdB;//second node
                 string labelB = edge.LabelB;//index of node B type
-                if (labelA == "cstr" || labelA == "pfr" || labelA == "pbr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                if(labelA == "pbr" || labelB == "pbr")
+                {
+                    continue;
+                }
+                if (labelA == "cstr" || labelA == "pfr");// || labelA == "pbr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
                 {
                     labelA = "reactor";
                 }
-                if (labelB == "cstr" || labelB == "pfr" || labelB == "pbr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
+                if (labelB == "cstr" || labelB == "pfr");// || labelB == "pbr")//Unity display doesn't care about reactor type, both use the "reactor" prefab.
                 {
                     labelB = "reactor";
                 }
